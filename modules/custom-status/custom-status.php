@@ -1472,6 +1472,10 @@ class EF_Custom_Status extends EF_Module {
 		if ( is_int( $post ) )
 			$post = get_post( $post );
 
+		// This might not be a valid post at all.
+	        if ( ! is_object( $post ) || ! isset( $post->post_type ) )
+	            return $permalink;
+
 		//Should we be doing anything at all?
 		if( !in_array( $post->post_type, $this->get_post_types_for_module( $this->module ) ) )
 			return $permalink;
