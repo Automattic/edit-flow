@@ -848,7 +848,7 @@ class EF_Calendar extends EF_Module {
 						 ?>
 					</ul>
 					<?php if ( $this->hidden ): ?>
-						<a class="show-more" href="#"><?php esc_html_e( sprintf( __( 'Show %d more', 'edit-flow' ), $this->hidden ) ); ?></a>
+						<a class="show-more" href="#"><?php printf( esc_html__( 'Show %d more', 'edit-flow' ), $this->hidden ); ?></a>
 					<?php endif; ?>
 
 					<?php if( current_user_can( $this->create_post_cap ) ) :
@@ -857,7 +857,7 @@ class EF_Calendar extends EF_Module {
 
 						<form method="POST" class="post-insert-dialog">
 							<?php /* translators: %1$s = post type name, %2$s = date */ ?>
-							<h1><?php esc_html_e( sprintf( __( 'Schedule a %1$s for %2$s', 'edit-flow' ), $this->get_quick_create_post_type_name(), $date_formatted ) ); ?></h1>
+							<h1><?php printf( esc_html__( 'Schedule a %1$s for %2$s', 'edit-flow' ), $this->get_quick_create_post_type_name(), $date_formatted ); ?></h1>
 							<?php /* translators: %s = post type name */ ?>
 							<input type="text" class="post-insert-dialog-post-title" name="post-insert-dialog-post-title" placeholder="<?php echo esc_attr( sprintf( _x( '%s Title', 'post type name', 'edit-flow' ), $this->get_quick_create_post_type_name() ) ); ?>">
 							<input type="hidden" class="post-insert-dialog-post-date" name="post-insert-dialog-post-title" value="<?php echo esc_attr( $week_single_date ); ?>">
