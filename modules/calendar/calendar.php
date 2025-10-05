@@ -1446,7 +1446,7 @@ class EF_Calendar extends EF_Module {
 
 		$regenerate_url = add_query_arg( 'action', 'ef_calendar_regenerate_calendar_feed_secret', admin_url( 'index.php' ) );
 		$regenerate_url = wp_nonce_url( $regenerate_url, 'ef-regenerate-ics-key' );
-		echo '&nbsp;&nbsp;&nbsp;<a href="' . esc_url( $regenerate_url ) . '">' . esc_html_e( 'Regenerate calendar feed secret', 'edit-flow' ) . '</a>';
+		echo '&nbsp;&nbsp;&nbsp;<a href="' . esc_url( $regenerate_url ) . '">' . esc_html__( 'Regenerate calendar feed secret', 'edit-flow' ) . '</a>';
 
 		// If our secret key doesn't exist, create a new one
 		if ( empty( $this->module->options->ics_secret_key ) )
