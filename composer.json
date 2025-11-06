@@ -16,16 +16,13 @@
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
     "exussum12/coverage-checker": "^1.0.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.0",
     "yoast/phpunit-polyfills": "^2.0"
   },
   "scripts": {
-    "cs": [
-      "@php ./vendor/bin/phpcs -p -s -v -n . --standard=\"phpcs.xml.dist\" --extensions=php --ignore=\"/vendor/*,/node_modules/*,/tests/*\""
-    ],
-    "cbf": [
-      "@php ./vendor/bin/phpcbf -p -s -v -n . --standard=\"phpcs.xml.dist\" --extensions=php --ignore=\"/vendor/*,/node_modules/*,/tests/*\""
-    ],
+    "cs": "@php ./vendor/bin/phpcs",
+    "cs-fix": "@php ./vendor/bin/phpcbf",
     "integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow ./vendor/bin/phpunit",
     "integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit'"
   },
