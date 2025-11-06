@@ -4,6 +4,7 @@
 node_modules
 wordpress
 vendor
+composer.lock
 
 # Test files
 .phpunit.result.cache
