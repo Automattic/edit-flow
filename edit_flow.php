@@ -5,7 +5,7 @@
  * Description: Remixing the WordPress admin for better editorial workflow options.
  * Author: Daniel Bachhuber, Scott Bressler, Mohammad Jangda, Automattic, and others
  * Version: 0.10.0
- * Requires at least: 6.0
+ * Requires at least: 6.4
  * Requires PHP: 8.0
  * License: GPL-3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
