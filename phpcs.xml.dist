@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <ruleset name="Custom ruleset for Edit Flow">
 
+	<config name="minimum_supported_wp_version" value="6.4"/>
+
 	<rule ref="WordPress-Extra"/>
 	<rule ref="WordPress-VIP-Go">
 		<!-- These disallow anonymous functions as action callbacks -->
