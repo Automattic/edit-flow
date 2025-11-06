@@ -19,7 +19,7 @@ jobs:
         include:
           # Check lowest supported WP version, with the lowest supported PHP.
           - php: '8.0'
-            wp: '6.0'
+            wp: '6.4'
             allowed_failure: false
           # Check latest WP with the highest supported PHP.
           - php: 'latest'
