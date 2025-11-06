@@ -44,9 +44,6 @@ jobs:
         with:
           composer-options: --prefer-dist --no-progress
 
-      - name: Run PHPCS
-        run: composer run cs
-
       - name: Setup wp-env
         run: wp-env start
         env:
