@@ -132,7 +132,7 @@ const ComboBox = ( {
 					return (
 						<div>
 							<div className="ef-combobox-input-wrapper">
-								<BaseControl label={ inputLabel }>
+								<BaseControl label={ inputLabel } __nextHasNoMarginBottom={ true }>
 									<input
 										className={ classnames(
 											{ 'is-open': isOpen },
