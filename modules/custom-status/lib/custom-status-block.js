@@ -2,7 +2,7 @@ import './editor.scss';
 import './style.scss';
 
 const { __ } = wp.i18n;
-const { PluginPostStatusInfo } = wp.editPost;
+const { PluginPostStatusInfo } = wp.editor;
 const { registerPlugin } = wp.plugins;
 const { subscribe, dispatch, select, withSelect, withDispatch } = wp.data;
 const { compose } = wp.compose;
@@ -101,7 +101,14 @@ const EditFlowCustomPostStati = ( { onUpdate, status } ) => (
 		</h4>
 
 		{ status !== 'publish' ? (
-			<SelectControl label="" value={ status } options={ statuses } onChange={ onUpdate } />
+			<SelectControl
+				label=""
+				value={ status }
+				options={ statuses }
+				onChange={ onUpdate }
+				__next40pxDefaultSize={ true }
+				__nextHasNoMarginBottom={ true }
+			/>
 		) : null }
 
 		<small className="edit-flow-extended-post-status-note">

@@ -84,6 +84,8 @@ class CalendarFilters extends React.Component {
 														value: newValue,
 													} )
 												}
+												__next40pxDefaultSize={ true }
+												__nextHasNoMarginBottom={ true }
 											/>
 										</div>
 									);
