@@ -43,6 +43,10 @@ const pageEvents = [];
 // The Jest timeout is increased because these tests are a bit slow
 jest.setTimeout( PUPPETEER_TIMEOUT || 100000 );
 
+// Increase default navigation timeout for slower CI environments
+// WordPress 6.8 can be slower to load, especially during user switching
+page.setDefaultNavigationTimeout( 60000 ); // 60 seconds
+
 async function setupBrowser() {
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
