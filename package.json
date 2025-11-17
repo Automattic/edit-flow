@@ -1,6 +1,6 @@
 {
   "name": "edit-flow",
-  "version": "2.0.0",
+  "version": "0.10.0",
   "description": "Edit Flow",
   "main": "dist/index.js",
   "directories": {
@@ -10,8 +10,8 @@
     "build": "webpack --mode production",
     "dev": "webpack --watch",
     "wp-env": "wp-env",
-    "lint-js": "eslint --quiet blocks modules",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint-js": "eslint --quiet modules",
+    "test": "npm run test-jest && npm run test-e2e",
     "test-jest": "jest -c jest.config.js",
     "test-e2e": "wp-scripts test-e2e --config tests/e2e/jest.config.js",
     "test-e2e:interactive": "wp-scripts test-e2e --config tests/e2e/jest.config.js -- --puppeteer-interactive",
@@ -22,7 +22,7 @@
     "url": "git+https://github.com/Automattic/Edit-Flow.git"
   },
   "author": "Automattic",
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/Automattic/Edit-Flow/issues"
   },

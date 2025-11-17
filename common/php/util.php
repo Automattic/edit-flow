@@ -1,6 +1,6 @@
 <?php
 
-if( ! function_exists( 'ef_draft_or_post_title' ) ) :
+if ( ! function_exists( 'ef_draft_or_post_title' ) ) :
 	/**
 	 * Copy of core's _draft_or_post_title without the filters
 	 *
@@ -40,20 +40,22 @@ if ( ! function_exists( '_ef_wp_link_page' ) ) {
 
 		if ( 1 == $i ) {
 			$url = get_permalink();
+		// phpcs:ignore Universal.ControlStructures.DisallowLonelyIf.Found
 		} else {
 			// Check for all custom post statuses, not just draft & pending
-			if ( '' == get_option('permalink_structure') || in_array($post->post_status, array_merge( $custom_statuses, array( 'pending' ) ) ) )
+			if ( '' == get_option( 'permalink_structure' ) || in_array( $post->post_status, array_merge( $custom_statuses, array( 'pending' ) ) ) ) {
 				$url = add_query_arg( 'page', $i, get_permalink() );
-			elseif ( 'page' == get_option('show_on_front') && get_option('page_on_front') == $post->ID )
-				$url = trailingslashit(get_permalink()) . user_trailingslashit("$wp_rewrite->pagination_base/" . $i, 'single_paged');
-			else
-				$url = trailingslashit(get_permalink()) . user_trailingslashit($i, 'single_paged');
+			} else if ( 'page' == get_option( 'show_on_front' ) && get_option( 'page_on_front' ) == $post->ID ) {
+				$url = trailingslashit( get_permalink() ) . user_trailingslashit( "$wp_rewrite->pagination_base/" . $i, 'single_paged' );
+			} else {
+				$url = trailingslashit( get_permalink() ) . user_trailingslashit( $i, 'single_paged' );
+			}
 		}
 
 		if ( is_preview() ) {
 
-			// Check for all custom post statuses, no just the draft
-			if ( ( ! in_array($post->post_status, $custom_statuses ) ) && isset( $_GET['preview_id'], $_GET['preview_nonce'] ) ) {
+			// Check for all custom post statuses, not just the draft
+			if ( ( ! in_array( $post->post_status, $custom_statuses ) ) && isset( $_GET['preview_id'], $_GET['preview_nonce'] ) ) {
 				$query_args['preview_id'] = wp_unslash( $_GET['preview_id'] );
 				$query_args['preview_nonce'] = wp_unslash( $_GET['preview_nonce'] );
 			}

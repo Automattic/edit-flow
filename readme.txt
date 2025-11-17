@@ -2,7 +2,7 @@
 Contributors: batmoo, danielbachhuber, sbressler, automattic
 Donate link: http://editflow.org/contribute/
 Tags: edit flow, workflow, editorial, newsroom, management, journalism, post status, custom status, notifications, email, comments, editorial comments, usergroups, calendars, editorial calendar, story budget
-Requires at least: 6.0
+Requires at least: 6.4
 Requires PHP: 8.0
 Tested up to: 6.5
 Stable tag: 0.9.9
@@ -34,6 +34,33 @@ If the automatic process above fails, follow these simple steps to do a manual i
 1. Extract the contents of the zip file into your `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Write and enjoy the merits of a structured editorial workflow!
+
+== Development ==
+
+This plugin uses `wp-env` for development and is required to run the tests written for the plugin. `wp-env` requires Docker so please ensure you have that installed on your system first. To install `wp-env`, use the following command:
+
+```
+npm -g i @wordpress/env
+```
+
+Read more about `wp-env` [here](https://www.npmjs.com/package/@wordpress/env).
+
+This plugin also uses Composer to manage PHP dependencies. Composer can be downloaded [here](https://getcomposer.org/download/).
+
+= Getting started =
+
+1. Clone the plugin repo: `git clone git@github.com:Automattic/Edit-Flow.git`
+2. Changed to cloned directory: `cd /path/to/repo`
+3. Install PHP dependencies: `composer install`
+4. Install NPM dependencies: `npm install`
+5. Start dev environment: `wp-env start`
+
+= Running tests =
+
+Ensure that the dev environment has already been started with `wp-env start`.
+
+1. Integration test: `composer run integration`
+2. Multi-site integration test: `composer run integration-ms`
 
 == Frequently Asked Questions ==
 

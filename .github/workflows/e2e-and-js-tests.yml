@@ -35,8 +35,5 @@ jobs:
       - name: Run Lint JS
         run: npm run lint-js
 
-      - name: Run Jest tests
-        run: npm run test-jest
-
-      - name: Run E2E tests
-        run: npm run test-e2e
+      - name: Run tests
+        run: npm run test

@@ -233,8 +233,16 @@ editorialCommentReply = {
 			er = r.responseText.replace( /<.[^<>]*?>/g, '' );
 		}
 
+		let message = '';
+		try {
+			er = JSON.parse( er );
+			message = er.message ?? er;
+		} catch ( parseErr ) {
+			message = er;
+		}
+
 		if ( er ) {
-			jQuery( '#ef-replysubmit .error' ).html( er ).show();
+			jQuery( '#ef-replysubmit .error' ).html( message ).show();
 		}
 	},
 };

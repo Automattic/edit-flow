@@ -5,21 +5,21 @@
 
 class EF_Dashboard_Notepad_Widget {
 
+	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 	const notepad_post_type = 'dashboard-note';
 
 	public $edit_cap = 'edit_others_posts';
 
-	function __construct() {
+	public function __construct() {
 		// Silence is golden
 	}
 
 	public function init() {
 
 		register_post_type( self::notepad_post_type, array(
-				'rewrite' => false,
-				'label' => __( 'Dashboard Note', 'edit-flow' )
-			)
-		);
+			'rewrite' => false,
+			'label' => __( 'Dashboard Note', 'edit-flow' ),
+		));
 
 		$this->edit_cap = apply_filters( 'ef_dashboard_notepad_edit_cap', $this->edit_cap );
 
@@ -41,7 +41,7 @@ class EF_Dashboard_Notepad_Widget {
 		check_admin_referer( 'dashboard-notepad' );
 
 		if ( ! current_user_can( $this->edit_cap ) ) {
-			wp_die( EditFlow()->dashboard->messages['invalid-permissions'] );
+			wp_die( esc_html( EditFlow()->dashboard->messages['invalid-permissions'] ) );
 		}
 
 		$note_data = array(
@@ -68,19 +68,22 @@ class EF_Dashboard_Notepad_Widget {
 	public function notepad_widget() {
 
 		$args = array(
-				'posts_per_page'   => 1,
-				'post_status'      => 'draft',
-				'post_type'        => self::notepad_post_type,
-			);
+			'posts_per_page'   => 1,
+			'post_status'      => 'draft',
+			'post_type'        => self::notepad_post_type,
+		);
+
 		$posts = get_posts( $args );
 		$current_note = ( ! empty( $posts[0]->post_content ) ) ? $posts[0]->post_content : '';
 		$current_id = ( ! empty( $posts[0]->ID ) ) ? $posts[0]->ID : 0;
 		$current_post = ( ! empty( $posts[0] ) ) ? $posts[0] : false;
 
-		if ( $current_post )
+		if ( $current_post ) {
+			// translators: %1$s is the author name, %2$s is the date the note was last updated
 			$last_updated = '<span id="dashboard-notepad-last-updated">' . sprintf( __( '%1$s last updated on %2$s', 'edit-flow' ), get_user_by( 'id', $current_post->post_author )->display_name, get_the_modified_time( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $current_post ) ) . '</span>';
-		else
+		} else {
 			$last_updated = '';
+		}
 
 		if ( current_user_can( $this->edit_cap ) ) {
 			echo '<form method="post" id="dashboard-notepad">';
@@ -90,7 +93,7 @@ class EF_Dashboard_Notepad_Widget {
 			echo esc_textarea( trim( $current_note ) );
 			echo '</textarea>';
 			echo '<p class="submit">';
-			echo $last_updated;
+			echo wp_kses_post( $last_updated );
 			echo '<span id="dashboard-notepad-submit-buttons">';
 			submit_button( __( 'Update Note', 'edit-flow' ), 'primary', 'update-note', false );
 			echo '</span>';
@@ -102,9 +105,8 @@ class EF_Dashboard_Notepad_Widget {
 			echo '<textarea style="width:100%" rows="10" name="note" disabled="disabled">';
 			echo esc_textarea( trim( $current_note ) );
 			echo '</textarea>';
-			echo $last_updated;
+			echo wp_kses_post( $last_updated );
 			echo '</form>';
 		}
 	}
-
 }
