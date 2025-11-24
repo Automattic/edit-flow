@@ -19,7 +19,7 @@ test.describe('Calendar', () => {
 
 	test('calendar filters are functional', async ({ admin, page }) => {
 		await admin.visitAdminPage('index.php', 'page=calendar');
-		await page.waitForSelector('.ef-calendar-header');
+		await page.locator('.ef-calendar-header').waitFor();
 
 		// Test status filter
 		const statusSelect = page.locator('[name="post_status"]');
@@ -34,23 +34,23 @@ test.describe('Calendar', () => {
 		await expect(weeksSelect).toHaveValue('4');
 
 		// Apply filters
-		await page.click('.ef-calendar-filters-buttons button[type="submit"]');
-		await page.waitForSelector('.ef-calendar-header');
+		await page.locator('.ef-calendar-filters-buttons button[type="submit"]').click();
+		await page.locator('.ef-calendar-header').waitFor();
 
 		// Verify filters persisted
 		await expect(statusSelect).toHaveValue('draft');
 		await expect(weeksSelect).toHaveValue('4');
 
 		// Test reset
-		await page.click('.ef-calendar-filters-buttons a[name="ef-calendar-reset-filters"]');
-		await page.waitForSelector('.ef-calendar-header');
+		await page.locator('.ef-calendar-filters-buttons a[name="ef-calendar-reset-filters"]').click();
+		await page.locator('.ef-calendar-header').waitFor();
 
 		// Verify filters are cleared
 		await expect(statusSelect).toHaveValue('');
 		await expect(weeksSelect).toHaveValue('6'); // Default value
 	});
 
-	test('draft post appears on calendar', async ({ admin, editor, page }) => {
+	test('draft post appears on calendar', async ({ admin, editor, page, requestUtils }) => {
 		const postTitle = `Draft Post ${Date.now()}`;
 
 		// Create a draft post
@@ -60,10 +60,13 @@ test.describe('Calendar', () => {
 
 		// Navigate to calendar
 		await admin.visitAdminPage('index.php', 'page=calendar');
-		await page.waitForSelector('.ef-calendar-header');
+		await page.locator('.ef-calendar-header').waitFor();
 
 		// Verify the draft post appears on the calendar
 		const postOnCalendar = page.locator(`.item-headline.post-title strong:has-text("${postTitle}")`);
 		await expect(postOnCalendar).toBeVisible({ timeout: 10000 });
+
+		// Cleanup
+		await requestUtils.deleteAllPosts();
 	});
 });

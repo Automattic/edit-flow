@@ -18,7 +18,7 @@ test.describe('Editorial Comments', () => {
 		await page.reload({ waitUntil: 'domcontentloaded' });
 
 		// Wait for editorial comments section to be ready
-		await page.waitForSelector('#ef-comment_respond');
+		await page.locator('#ef-comment_respond').waitFor();
 
 		const COMMENT_TEXT = 'Hello';
 
@@ -32,7 +32,7 @@ test.describe('Editorial Comments', () => {
 		await page.locator('.ef-replysave').click();
 
 		// Wait for comment to appear and verify
-		await page.waitForSelector('#ef-comments .comment-content');
+		await page.locator('#ef-comments .comment-content').waitFor();
 		const commentText = await page.locator('#ef-comments .comment-content p').first().textContent();
 
 		expect(commentText).toBe(COMMENT_TEXT);
