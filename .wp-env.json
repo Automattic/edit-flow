@@ -2,7 +2,7 @@
   "plugins": [
     "."
   ],
-  "phpVersion": "8.0",
+  "phpVersion": "8.2",
   "config": {
     "WP_DEBUG": true,
     "WP_DEBUG_LOG": true,
