@@ -23,8 +23,8 @@
   "scripts": {
     "cs": "@php ./vendor/bin/phpcs",
     "cs-fix": "@php ./vendor/bin/phpcbf",
-    "integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow ./vendor/bin/phpunit",
-    "integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit'"
+    "integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit",
+    "integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit'"
   },
   "config": {
     "allow-plugins": {
