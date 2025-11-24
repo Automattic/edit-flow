@@ -119,10 +119,10 @@ const schedulePost = async() => {
 
     await new Promise( r => setTimeout( r, 1000 ) );
 
-    // Calculate future date (14 days from now)
+    // Calculate future date (3 days from now to stay within calendar view)
     const today = new Date();
     const futureDate = new Date();
-    futureDate.setDate( today.getDate() + 14 );
+    futureDate.setDate( today.getDate() + 3 );
     const futureDay = futureDate.getDate();
 
     // Click the day button in the calendar picker
@@ -148,6 +148,9 @@ const schedulePost = async() => {
 
     // Wait for success notice
     await page.waitForSelector( '.components-snackbar, .components-snackbar-list', { timeout: 10000 } );
+
+    // Wait longer to ensure the post is fully saved before navigating away
+    await new Promise( r => setTimeout( r, 2000 ) );
 }
 
 const ensureSidebarOpened = async() => {
