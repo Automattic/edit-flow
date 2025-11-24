@@ -109,6 +109,12 @@ describe("Calendar Body", () => {
         await page.waitForSelector('.ef-calendar-header');
 
         const scheduledPost = (await page.$x('//strong[text()="Scheduled Post"]'))[0];
+
+        // Check if the post was found before proceeding
+        if (!scheduledPost) {
+            throw new Error('Scheduled post not found on calendar - scheduling may have failed');
+        }
+
         const scheduledPostParent = await scheduledPost.evaluateHandle((node) => node.closest('.day-item'));
         const scheduledPostDay = await scheduledPost.evaluateHandle((node) => node.closest('.post-list'));
 
