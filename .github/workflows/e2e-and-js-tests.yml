@@ -32,10 +32,8 @@ jobs:
       - name: Build Edit Flow
         run: |
           npm ci
+          npx playwright install --with-deps chromium
           npm run build
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
 
       - name: Install WordPress with wp-env
         run: npm run wp-env start
