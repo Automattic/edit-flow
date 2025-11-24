@@ -42,7 +42,7 @@
     "@wordpress/jest-console": "^7.29.0",
     "@wordpress/jest-preset-default": "^11.29.0",
     "@wordpress/jest-puppeteer-axe": "^6.29.0",
-    "@wordpress/scripts": "^27.9.0",
+    "@wordpress/scripts": "^31.0.0",
     "@wordpress/url": "^3.59.0",
     "babel-eslint": "10.0.3",
     "babel-jest": "^29.7.0",
