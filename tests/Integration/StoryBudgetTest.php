@@ -9,9 +9,9 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class StoryBudgetTest extends WP_UnitTestCase {
+class StoryBudgetTest extends TestCase {
 
 	protected static $admin_user_id;
 

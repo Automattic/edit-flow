@@ -10,9 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\EditFlow\Tests\Integration;
 
 use EF_Notifications;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class NotificationsTest extends WP_UnitTestCase {
+class NotificationsTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $ef_notifications;

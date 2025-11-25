@@ -10,9 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\EditFlow\Tests\Integration;
 
 use EF_Dashboard_Notepad_Widget;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class DashboardNotepadTest extends WP_UnitTestCase {
+class DashboardNotepadTest extends TestCase {
 
 	function test_register_dashboard_note_post_type() {
 		//As part of the Edit Flow initialziation process

@@ -10,9 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\EditFlow\Tests\Integration;
 
 use EF_Editorial_Metadata;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class EditorialMetadataTest extends WP_UnitTestCase {
+class EditorialMetadataTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $EF_Editorial_Metadata;

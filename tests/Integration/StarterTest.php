@@ -9,9 +9,9 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class StarterTest extends WP_UnitTestCase {
+class StarterTest extends TestCase {
 
 	/**
 	 * Run a simple test to ensure that the tests are running

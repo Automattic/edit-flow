@@ -9,11 +9,11 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use WP_UnitTestCase;
 use WPAjaxDieContinueException;
 use WPAjaxDieStopException;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-abstract class AjaxTestCase extends WP_UnitTestCase {
+abstract class AjaxTestCase extends TestCase {
 
 	/**
 	 * Last AJAX response.  This is set via echo -or- wp_die.

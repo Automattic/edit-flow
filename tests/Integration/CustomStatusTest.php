@@ -11,9 +11,9 @@ namespace Automattic\EditFlow\Tests\Integration;
 
 use EF_Custom_Status;
 use WP_REST_Request;
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class CustomStatusTest extends WP_UnitTestCase {
+class CustomStatusTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $ef_custom_status;

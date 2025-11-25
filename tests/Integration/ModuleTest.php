@@ -10,10 +10,10 @@ declare( strict_types=1 );
 namespace Automattic\EditFlow\Tests\Integration;
 
 use EF_Module;
-use WP_UnitTestCase;
 use WP_User;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class ModuleTest extends WP_UnitTestCase {
+class ModuleTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $EditFlowModule;

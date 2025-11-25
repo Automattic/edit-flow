@@ -9,9 +9,9 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use WP_UnitTestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
 
-class CalendarTest extends WP_UnitTestCase {
+class CalendarTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $EF_Calendar;
