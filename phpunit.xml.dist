@@ -1,17 +1,42 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
 	bootstrap="tests/bootstrap.php"
-	backupGlobals="false"
-	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
+	cacheResultFile=".phpunit.cache/test-results"
+	executionOrder="depends,defects"
+	forceCoversAnnotation="false"
+	beStrictAboutCoversAnnotation="false"
+	beStrictAboutOutputDuringTests="true"
+	beStrictAboutTodoAnnotatedTests="true"
 	convertDeprecationsToExceptions="true"
-	cacheResult="false"
-	>
+	colors="true"
+	failOnRisky="true"
+	failOnWarning="true"
+	verbose="true"
+	testdox="true">
+
+	<php>
+		<env name="EF_TESTSUITE" value=""/>
+	</php>
+
 	<testsuites>
-		<testsuite name="WP_Tests">
-			<directory prefix="test-" suffix=".php">./tests/</directory>
+		<testsuite name="unit">
+			<directory suffix="Test.php">tests/Unit</directory>
+		</testsuite>
+		<testsuite name="integration">
+			<directory prefix="test-" suffix=".php">tests/Integration</directory>
 		</testsuite>
 	</testsuites>
+
+	<coverage cacheDirectory=".phpunit.cache/code-coverage" processUncoveredFiles="true">
+		<include>
+			<directory suffix=".php">.</directory>
+		</include>
+		<exclude>
+			<directory>tests</directory>
+			<directory>vendor</directory>
+			<directory>node_modules</directory>
+		</exclude>
+	</coverage>
 </phpunit>

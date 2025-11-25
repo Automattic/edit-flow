@@ -1,6 +1,6 @@
 <?php
 
-require_once 'testcase-edit-flow-ajax.php';
+require_once __DIR__ . '/testcase-edit-flow-ajax.php';
 
 /**
  * @runTestsInSeparateProcesses
