@@ -10,7 +10,7 @@
     "source": "https://github.com/Automattic/edit-flow"
   },
   "require": {
-    "composer/installers": "~1.0",
+    "composer/installers": "~2.3",
     "php": ">=8.0"
   },
   "require-dev": {
