@@ -1,6 +1,19 @@
 <?php
+/**
+ * Module class integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-class WP_Test_Edit_Flow_Class_Module extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use EF_Module;
+use WP_UnitTestCase;
+use WP_User;
+
+class ModuleTest extends WP_UnitTestCase {
 
 	protected static $admin_user_id;
 	protected static $EditFlowModule;
@@ -61,7 +74,7 @@ class WP_Test_Edit_Flow_Class_Module extends WP_UnitTestCase {
 		$post_id = $this->factory->post->create(
 			array(
 				'post_author' => self::$admin_user_id,
-			) 
+			)
 		);
 
 		$_REQUEST['post'] = $post_id;

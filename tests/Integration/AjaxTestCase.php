@@ -1,9 +1,19 @@
 <?php
 /**
- * Edit Flow Ajax test cases
+ * Edit Flow Ajax test case base class.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
  */
 
-abstract class WP_Edit_Flow_Ajax_UnitTestCase extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use WP_UnitTestCase;
+use WPAjaxDieContinueException;
+use WPAjaxDieStopException;
+
+abstract class AjaxTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Last AJAX response.  This is set via echo -or- wp_die.

@@ -72,5 +72,5 @@ if ( $is_integration ) {
 	WPIntegration\bootstrap_it();
 
 	// Load the custom AJAX test case.
-	require __DIR__ . '/Integration/testcase-edit-flow-ajax.php';
+	require __DIR__ . '/Integration/AjaxTestCase.php';
 }

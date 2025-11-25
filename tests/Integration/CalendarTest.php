@@ -1,6 +1,17 @@
 <?php
+/**
+ * Calendar integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-class WP_Test_Edit_Flow_Calendar extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use WP_UnitTestCase;
+
+class CalendarTest extends WP_UnitTestCase {
 
 	protected static $admin_user_id;
 	protected static $EF_Calendar;
@@ -27,11 +38,11 @@ class WP_Test_Edit_Flow_Calendar extends WP_UnitTestCase {
 	public function test_calendar_custom_statuses() {
 		global $edit_flow;
 
-        $statuses = array_map( 
+        $statuses = array_map(
             function( $status ) {
                 return $status->name;
-            }, 
-            $edit_flow->calendar->get_calendar_post_stati() 
+            },
+            $edit_flow->calendar->get_calendar_post_stati()
         );
 
 		$this->assertContains( 'future', $statuses );
@@ -52,16 +63,16 @@ class WP_Test_Edit_Flow_Calendar extends WP_UnitTestCase {
 				'position'    => 6,
 			),
         );
-        
+
         $edit_flow->custom_status->add_custom_status( $new_custom_status['term'], $new_custom_status['args'] );
 
-        $statuses = array_map( 
+        $statuses = array_map(
             function( $status ) {
                 return $status->name;
-            }, 
-            $edit_flow->calendar->get_calendar_post_stati() 
+            },
+            $edit_flow->calendar->get_calendar_post_stati()
         );
-        
+
         $this->assertContains( 'future', $statuses );
 	}
 }

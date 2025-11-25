@@ -6,7 +6,6 @@ composer.lock
 
 # Test files
 .phpunit.cache/
-.phpunit.result.cache
 artifacts/
 
 # Local wp-env overrides

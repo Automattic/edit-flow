@@ -1,6 +1,18 @@
 <?php
+/**
+ * Notifications integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-class WP_Test_Edit_Flow_Notifications extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use EF_Notifications;
+use WP_UnitTestCase;
+
+class NotificationsTest extends WP_UnitTestCase {
 
 	protected static $admin_user_id;
 	protected static $ef_notifications;

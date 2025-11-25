@@ -1,12 +1,22 @@
 <?php
+/**
+ * Custom Status AJAX integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-require_once __DIR__ . '/testcase-edit-flow-ajax.php';
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use WP_User;
+use WPAjaxDieContinueException;
 
 /**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
-class WP_Test_Edit_Flow_Custom_Status_Ajax extends WP_Edit_Flow_Ajax_UnitTestCase {
+class CustomStatusAjaxTest extends AjaxTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -34,7 +44,7 @@ class WP_Test_Edit_Flow_Custom_Status_Ajax extends WP_Edit_Flow_Ajax_UnitTestCas
 				'post_title'    => rand_str(),
 				'post_date'     => $future_date,
 				'post_date_gmt' => $future_date,
-			) 
+			)
 		);
 
 		// Set up the $_POST request
