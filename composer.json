@@ -18,7 +18,7 @@
     "exussum12/coverage-checker": "^1.0.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.0",
-    "yoast/phpunit-polyfills": "^2.0"
+    "yoast/phpunit-polyfills": "^4.0"
   },
   "scripts": {
     "cs": "@php ./vendor/bin/phpcs",
