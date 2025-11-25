@@ -7,6 +7,9 @@ on:
       - develop
       - main
 
+# Disable all permissions by default; grant minimal permissions per job
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,6 +20,8 @@ jobs:
     name: WP ${{ matrix.wp == 'master' && 'latest' || matrix.wp }} and PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allowed_failure }}
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
@@ -34,6 +39,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
 
       - name: Install wordpress environment
         run: npm -g install @wordpress/env
