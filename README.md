@@ -55,8 +55,17 @@ This plugin also uses Composer to manage PHP dependencies. Composer can be downl
 
 Ensure that the dev environment has already been started with `wp-env start`.
 
+**PHP Integration Tests:**
 1. Integration test: `composer run integration`
 2. Multi-site integration test: `composer run integration-ms`
+
+**E2E Tests (Playwright):**
+1. Run E2E tests: `npm run test-e2e`
+2. Run with visible browser: `npm run test-e2e:headed`
+3. Debug mode: `npm run test-e2e:debug`
+
+**JavaScript Tests:**
+1. Run Jest tests: `npm run test-jest`
 
 ## Frequently Asked Questions
 
