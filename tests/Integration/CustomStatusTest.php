@@ -1,6 +1,19 @@
 <?php
+/**
+ * Custom Status integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-class WP_Test_Edit_Flow_Custom_Status extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use EF_Custom_Status;
+use WP_REST_Request;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
+class CustomStatusTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $ef_custom_status;

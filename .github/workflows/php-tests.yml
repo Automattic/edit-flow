@@ -62,7 +62,7 @@ jobs:
           WP_ENV_CORE: WordPress/WordPress#${{ matrix.wp }}
 
       - name: Run PHPUnit tests (single site)
-        run: composer integration
+        run: composer test:integration
 
       - name: Run PHPUnit tests (multisite)
-        run: composer integration-ms
+        run: composer test:integration-ms

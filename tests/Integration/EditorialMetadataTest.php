@@ -1,6 +1,18 @@
 <?php
+/**
+ * Editorial Metadata integration tests.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
 
-class WP_Test_Edit_Flow_Editorial_Metadata extends WP_UnitTestCase {
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use EF_Editorial_Metadata;
+use Yoast\WPTestUtils\WPIntegration\TestCase;
+
+class EditorialMetadataTest extends TestCase {
 
 	protected static $admin_user_id;
 	protected static $EF_Editorial_Metadata;

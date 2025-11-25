@@ -5,7 +5,7 @@ vendor
 composer.lock
 
 # Test files
-.phpunit.result.cache
+.phpunit.cache/
 artifacts/
 
 # Local wp-env overrides

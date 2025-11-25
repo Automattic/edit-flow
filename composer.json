@@ -18,13 +18,13 @@
     "exussum12/coverage-checker": "^1.0.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.0",
-    "yoast/phpunit-polyfills": "^2.0"
+    "yoast/wp-test-utils": "^1.2"
   },
   "scripts": {
     "cs": "@php ./vendor/bin/phpcs",
     "cs-fix": "@php ./vendor/bin/phpcbf",
-    "integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit",
-    "integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit'"
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit --testsuite integration",
+    "test:integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit --testsuite integration'"
   },
   "config": {
     "allow-plugins": {
