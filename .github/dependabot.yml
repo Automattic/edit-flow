@@ -14,8 +14,7 @@ updates:
         patterns: ["*"]
     labels:
       - "dependencies"
-      - "github-actions"
-    assignees:
+    reviewers:
       - "Automattic/vip-plugins"
     commit-message:
       prefix: "Actions"
@@ -40,7 +39,7 @@ updates:
           - "yoast/*"
     labels:
       - "dependencies"
-    assignees:
+    reviewers:
       - "Automattic/vip-plugins"
     commit-message:
       prefix: "Composer"
@@ -63,8 +62,7 @@ updates:
           - "@types/*"
     labels:
       - "dependencies"
-      - "npm"
-    assignees:
+    reviewers:
       - "Automattic/vip-plugins"
     commit-message:
       prefix: "npm"
