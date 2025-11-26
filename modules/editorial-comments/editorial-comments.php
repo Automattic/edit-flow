@@ -300,7 +300,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 
 			// Verify nonce
 			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'comment' ) ) {
-				die( esc_html__( "Nonce check failed. Please ensure you're supposed to be adding editorial comments.", 'edit-flow' ) );
+				wp_die( esc_html__( "Nonce check failed. Please ensure you're supposed to be adding editorial comments.", 'edit-flow' ) );
 			}
 
 			// Get user info
@@ -315,13 +315,13 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			// Only allow the comment if user can edit post
 			// @TODO: allow contributers to add comments as well (?)
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				die( esc_html__( 'Sorry, you don\'t have the privileges to add editorial comments. Please talk to your Administrator.', 'edit-flow' ) );
+				wp_die( esc_html__( 'Sorry, you don\'t have the privileges to add editorial comments. Please talk to your Administrator.', 'edit-flow' ) );
 			}
 
 			// Verify that comment was actually entered
 			$comment_content = isset( $_POST['content'] ) ? trim( $_POST['content'] ) : '';
 			if ( ! $comment_content ) {
-				die( esc_html__( 'Please enter a comment.', 'edit-flow' ) );
+				wp_die( esc_html__( 'Please enter a comment.', 'edit-flow' ) );
 			}
 
 			// Check that we have a post_id and user logged in
@@ -405,7 +405,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				$response->send();
 
 			} else {
-				die( esc_html__( 'There was a problem of some sort. Try again or contact your administrator.', 'edit-flow' ) );
+				wp_die( esc_html__( 'There was a problem of some sort. Try again or contact your administrator.', 'edit-flow' ) );
 			}
 		}
 
