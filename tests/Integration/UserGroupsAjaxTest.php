@@ -227,4 +227,39 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
 	}
+
+	/**
+	 * Test: Inline save usergroup fails with slug conflict
+	 *
+	 * A name may be unique, but could generate a slug that conflicts with an existing group.
+	 *
+	 * @covers EF_User_Groups::handle_ajax_inline_save_usergroup
+	 */
+	public function test_inline_save_usergroup_slug_conflict(): void {
+		global $edit_flow;
+
+		// Create admin user
+		$admin_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_user_id );
+
+		// Create two usergroups with names that have different display but same slug
+		$usergroup1 = $edit_flow->user_groups->add_usergroup( array(
+			'name'        => 'Test Group',
+			'description' => 'First group',
+		) );
+
+		$usergroup2 = $edit_flow->user_groups->add_usergroup( array(
+			'name'        => 'Another Group',
+			'description' => 'Second group',
+		) );
+
+		// Try to update usergroup2 with a name that would create the same slug as usergroup1
+		// "Test  Group" (with extra space) is different name but sanitize_title() creates "test-group"
+		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['usergroup_id'] = $usergroup2->term_id;
+		$_POST['name'] = 'Test  Group'; // Different name, same slug when sanitized
+
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'inline_save_usergroup' );
+	}
 }

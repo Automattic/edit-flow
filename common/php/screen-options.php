@@ -162,7 +162,7 @@ if ( ! class_exists( 'wsScreenOptions10' ) ) :
 		 */
 		public function ajax_save_callback() {
 			if ( empty( $_POST['action'] ) ) {
-				die( '0' );
+				wp_die( '0' );
 			}
 
 			//The 'action' argument is in the form "save_settings-panel_id"
@@ -180,9 +180,9 @@ if ( ! class_exists( 'wsScreenOptions10' ) ) :
 			$panel = $this->registered_panels[ $id ];
 			if ( is_callable( $panel['save_callback'] ) ) {
 				call_user_func( $panel['save_callback'], $_POST );
-				die( '1' );
+				wp_die( '1' );
 			} else {
-				die( '0' );
+				wp_die( '0' );
 			}
 		}
 

@@ -383,7 +383,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			}
 
 			$this->print_ajax_response( 'success', $this->module->messages['post-date-updated'] );
-			wp_die();
 		}
 
 		/**
