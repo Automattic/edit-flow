@@ -333,7 +333,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			);
 			$redirect_url = $this->get_link( $args );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -417,7 +417,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			);
 			$redirect_url = $this->get_link( $args );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -447,7 +447,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 
 			$redirect_url = $this->get_link( array( 'message' => 'usergroup-deleted' ) );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**

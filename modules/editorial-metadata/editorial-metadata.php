@@ -1129,7 +1129,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				'message' => 'term-added',
 			), get_admin_url( null, 'admin.php' ) );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -1223,7 +1223,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				'message' => 'term-updated',
 			), get_admin_url( null, 'admin.php' ) );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -1264,7 +1264,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 
 			$redirect_url = $this->get_link( array( 'message' => 'term-visibility-changed' ) );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -1413,7 +1413,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				'message' => 'term-deleted',
 			), get_admin_url( null, 'admin.php' ) );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**

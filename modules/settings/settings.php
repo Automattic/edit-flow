@@ -431,7 +431,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			// Redirect back to the settings page that was submitted without any previous messages
 			$goback = add_query_arg( 'message', 'settings-updated', remove_query_arg( array( 'message' ), wp_get_referer() ) );
 			wp_safe_redirect( $goback );
-			exit;
+			wp_die();
 		}
 	}
 

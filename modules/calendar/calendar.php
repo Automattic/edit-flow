@@ -303,7 +303,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			// Redirect after we're complete
 			$redirect_to = menu_page_url( $this->module->slug, false );
 			wp_redirect( $redirect_to );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -383,7 +383,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			}
 
 			$this->print_ajax_response( 'success', $this->module->messages['post-date-updated'] );
-			exit;
 		}
 
 		/**
@@ -591,7 +590,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			EditFlow()->update_module_option( $this->module->name, 'ics_secret_key', wp_generate_password() );
 
 			wp_safe_redirect( add_query_arg( 'message', 'key-regenerated', menu_page_url( $this->module->settings_slug, false ) ) );
-			exit;
+			wp_die();
 		}
 
 		/**
