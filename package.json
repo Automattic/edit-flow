@@ -33,7 +33,7 @@
     "@babel/preset-env": "^7.24.5",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^15.0.7",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@wordpress/components": "^30.9.0",
     "@wordpress/e2e-test-utils-playwright": "^1.36.0",
