@@ -1275,16 +1275,16 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 		public function handle_ajax_inline_save_term() {
 
 			if ( ! isset( $_POST['inline_edit'] ) || ! wp_verify_nonce( $_POST['inline_edit'], 'editorial-metadata-inline-edit-nonce' ) ) {
-				die( esc_html( $this->module->messages['nonce-failed'] ) );
+				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
-				die( esc_html( $this->module->messages['invalid-permissions'] ) );
+				wp_die( esc_html( $this->module->messages['invalid-permissions'] ) );
 			}
 
 			$term_id = isset( $_POST['term_id'] ) ? (int) $_POST['term_id'] : 0;
 			if ( ! $existing_term = $this->get_editorial_metadata_term_by( 'id', $term_id ) ) {
-				die( esc_html( $this->module->messages['term-missing'] ) );
+				wp_die( esc_html( $this->module->messages['term-missing'] ) );
 			}
 
 			$metadata_name = isset( $_POST['name'] ) ? sanitize_text_field( trim( $_POST['name'] ) ) : '';
@@ -1296,40 +1296,40 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// Check if name field was filled in
 			if ( empty( $metadata_name ) ) {
 				$change_error = new WP_Error( 'invalid', _esc_html__( 'Please enter a name for the editorial metadata', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check that the name isn't numeric
 			if ( is_numeric( $metadata_name ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Please enter a valid, non-numeric name for the editorial metadata.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check that the term name doesn't exceed 200 chars
 			if ( strlen( $metadata_name ) > 200 ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name cannot exceed 200 characters. Please try a shorter name.' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to make sure the status doesn't already exist as another term because otherwise we'd get a fatal error
 			$term_exists = term_exists( sanitize_title( $metadata_name ) );
 			if ( $term_exists && $term_exists != $term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html____( 'Metadata name conflicts with existing term. Please choose another.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to ensure a term with the same name doesn't exist,
 			$search_term = $this->get_editorial_metadata_term_by( 'name', $metadata_name );
 			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name already in use. Please choose another.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// or that the term name doesn't map to an existing term's slug
 			$search_term = $this->get_editorial_metadata_term_by( 'slug', sanitize_title( $metadata_name ) );
 			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Prepare the term name and description for saving
@@ -1343,11 +1343,11 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				$wp_list_table = new EF_Editorial_Metadata_List_Table();
 				$wp_list_table->prepare_items();
 				echo wp_kses_post( $wp_list_table->single_row( $return ) );
-				die();
+				wp_die();
 			} else {
 				/* Translators: 1: the name of the term that could not be found */
 				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the term: <strong>%s</strong>', 'edit-flow' ), $metadata_name ) );
-				die( wp_kses( $change_error->get_error_message() ) );
+				wp_die( wp_kses( $change_error->get_error_message() ) );
 			}
 		}
 

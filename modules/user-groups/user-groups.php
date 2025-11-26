@@ -458,16 +458,16 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 		public function handle_ajax_inline_save_usergroup() {
 
 			if ( ! isset( $_POST['inline_edit'] ) || ! wp_verify_nonce( $_POST['inline_edit'], 'usergroups-inline-edit-nonce' ) ) {
-				die( esc_html( $this->module->messages['nonce-failed'] ) );
+				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
 			if ( ! current_user_can( $this->manage_usergroups_cap ) ) {
-				die( esc_html( $this->module->messages['invalid-permissions'] ) );
+				wp_die( esc_html( $this->module->messages['invalid-permissions'] ) );
 			}
 
 			$usergroup_id = isset( $_POST['usergroup_id'] ) ? (int) $_POST['usergroup_id'] : 0;
 			if ( ! $existing_term = $this->get_usergroup_by( 'id', $usergroup_id ) ) {
-				die( esc_html( $this->module->messages['usergroup-missing'] ) );
+				wp_die( esc_html( $this->module->messages['usergroup-missing'] ) );
 			}
 
 			$name = isset( $_POST['name'] ) ? sanitize_text_field( trim( $_POST['name'] ) ) : '';
@@ -479,24 +479,24 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			// Check if name field was filled in
 			if ( empty( $name ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Please enter a name for the user group.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 			// Check that the name doesn't exceed 40 chars
 			if ( strlen( $name ) > 40 ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'User group name cannot exceed 40 characters. Please try a shorter name.' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 			// Check to ensure a term with the same name doesn't exist
 			$search_term = $this->get_usergroup_by( 'name', $name );
 			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name already in use. Please choose another.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 			// Check to ensure a term with the same slug doesn't exist
 			$search_term = $this->get_usergroup_by( 'slug', sanitize_title( $name ) );
 			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Prepare the term name and description for saving
@@ -510,11 +510,11 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				$wp_list_table = new EF_Usergroups_List_Table();
 				$wp_list_table->prepare_items();
 				echo wp_kses_post( $wp_list_table->single_row( $return ) );
-				die();
+				wp_die();
 			} else {
 				// translators: %s is the name of the user group
 				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the user group: <strong>%s</strong>', 'edit-flow' ), $name ) );
-				die( wp_kses( $change_error->get_error_message(), 'strong' ) );
+				wp_die( wp_kses( $change_error->get_error_message(), 'strong' ) );
 			}
 		}
 

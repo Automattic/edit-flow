@@ -412,7 +412,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 
 			// Verify nonce.
 			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'save_user_usergroups' ) ) {
-				die( esc_html__( 'Nonce check failed. Please ensure you can add users or user groups to a post.', 'edit-flow' ) );
+				wp_die( esc_html__( 'Nonce check failed. Please ensure you can add users or user groups to a post.', 'edit-flow' ) );
 			}
 
 			$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
@@ -420,7 +420,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 
 			$valid_post = ! is_null( $post ) && ! wp_is_post_revision( $post_id ) && ! wp_is_post_autosave( $post_id );
 			if ( ! isset( $_POST['ef_notifications_name'] ) || ! $valid_post || ! current_user_can( $this->edit_post_subscriptions_cap ) ) {
-				die();
+				wp_die();
 			}
 
 			$user_group_ids = [];
@@ -469,7 +469,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				$this->save_post_following_usergroups( $post, $user_group_ids );
 			}
 
-			die();
+			wp_die();
 		}
 
 		/**

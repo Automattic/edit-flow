@@ -99,7 +99,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			}
 
 			if ( ! isset( $_POST['module_action'], $_POST['slug'] ) ) {
-				die( '-1' );
+				wp_die( '-1' );
 			}
 
 			$module_action = sanitize_key( $_POST['module_action'] );
@@ -108,7 +108,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			$module = $edit_flow->get_module_by( 'slug', $slug );
 
 			if ( ! $module ) {
-				die( '-1' );
+				wp_die( '-1' );
 			}
 
 			if ( 'enable' == $module_action ) {
@@ -118,9 +118,9 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			}
 
 			if ( $return ) {
-				die( '1' );
+				wp_die( '1' );
 			} else {
-				die( '-1' );
+				wp_die( '-1' );
 			}
 		}
 

@@ -1092,11 +1092,11 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			global $edit_flow;
 
 			if ( ! isset( $_POST['inline_edit'] ) || ! wp_verify_nonce( $_POST['inline_edit'], 'custom-status-inline-edit-nonce' ) ) {
-				die( esc_html( $this->module->messages['nonce-failed'] ) );
+				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
-				die( esc_html( $this->module->messages['invalid-permissions'] ) );
+				wp_die( esc_html( $this->module->messages['invalid-permissions'] ) );
 			}
 
 			$term_id            = isset( $_POST['status_id'] ) ? (int) $_POST['status_id'] : 0;
@@ -1107,38 +1107,38 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// Check if name field was filled in
 			if ( empty( $status_name ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Please enter a name for the status.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check that the name isn't numeric
 			if ( is_numeric( $status_name ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check that the status name doesn't exceed 20 chars
 			if ( strlen( $status_name ) > 20 ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to make sure the name is not restricted
 			if ( $edit_flow->custom_status->is_restricted_status( strtolower( $status_name ) ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Status name is restricted. Please chose another name.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to make sure the status doesn't already exist
 			if ( $this->get_custom_status_by( 'slug', $status_slug ) && ( $this->get_custom_status_by( 'id', $term_id )->slug != $status_slug ) ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Status already exists. Please choose another name.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to make sure the status doesn't already exist as another term because otherwise we'd get a fatal error
 			$term_exists = term_exists( sanitize_title( $status_name ), self::taxonomy_key );
 			if ( $term_exists && isset( $term_exists['term_id'] ) && $term_exists['term_id'] != $term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' ) );
-				die( esc_html( $change_error->get_error_message() ) );
+				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// get status_name & status_description
@@ -1153,11 +1153,11 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				$wp_list_table = new EF_Custom_Status_List_Table();
 				$wp_list_table->prepare_items();
 				echo wp_kses_post( $wp_list_table->single_row( $return ) );
-				die();
+				wp_die();
 			} else {
 				/* translators: 1: the status's name */
 				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the status: <strong>%s</strong>', 'edit-flow' ), $status_name ) );
-				die( wp_kses( $change_error->get_error_message(), 'strong' ) );
+				wp_die( wp_kses( $change_error->get_error_message(), 'strong' ) );
 			}
 		}
 

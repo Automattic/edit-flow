@@ -395,12 +395,12 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			// Only do .ics subscriptions when the option is active
 			if ( 'on' != $this->module->options->ics_subscription ) {
-				die(); // @todo return accepted response value.
+				wp_die(); // @todo return accepted response value.
 			}
 
 			// Confirm all of the arguments are present
 			if ( ! isset( $_GET['user'], $_GET['user_key'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				die(); // @todo return an error response
+				wp_die(); // @todo return an error response
 			}
 
 			// Confirm this is a valid request
@@ -408,7 +408,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$user_key = sanitize_user( $_GET['user_key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$ics_secret_key = $this->module->options->ics_secret_key;
 			if ( ! $ics_secret_key || md5( $user . $ics_secret_key ) !== $user_key ) {
-				die( esc_html( $this->module->messages['nonce-failed'] ) );
+				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
 			// Set up the post data to be printed
@@ -497,7 +497,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					}
 				}
 			}
-			die();
+			wp_die();
 		}
 
 		/**
