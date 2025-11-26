@@ -1,7 +1,7 @@
 === Edit Flow ===
 Contributors: batmoo, danielbachhuber, sbressler, automattic
 Donate link: http://editflow.org/contribute/
-Tags: edit flow, workflow, editorial, newsroom, management, journalism, post status, custom status, notifications, email, comments, editorial comments, usergroups, calendars, editorial calendar, story budget
+Tags: workflow, editorial, editorial calendar, custom status, newsroom
 Requires at least: 6.4
 Requires PHP: 8.0
 Tested up to: 6.5
