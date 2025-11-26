@@ -854,7 +854,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// Redirect if successful
 			$redirect_url = $this->get_link( [ 'message' => 'status-added' ] );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -939,7 +939,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 
 			$redirect_url = $this->get_link( [ 'message' => 'status-updated' ] );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**
@@ -973,7 +973,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				// @todo How do we want to handle users who click the link from "Add New Status"
 				$redirect_url = $this->get_link( [ 'message' => 'default-status-changed' ] );
 				wp_redirect( $redirect_url );
-				exit;
+				wp_die();
 			} else {
 				wp_die( esc_html__( 'Status doesn&#39;t exist.', 'edit-flow' ) );
 			}
@@ -1021,7 +1021,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 
 			$redirect_url = $this->get_link( [ 'message' => 'status-deleted' ] );
 			wp_redirect( $redirect_url );
-			exit;
+			wp_die();
 		}
 
 		/**

@@ -368,7 +368,7 @@ if ( ! class_exists( 'EF_Module' ) ) {
 					'message' => $message,
 				)
 			);
-			exit;
+			wp_die();
 		}
 
 		/**

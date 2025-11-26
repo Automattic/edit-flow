@@ -212,7 +212,7 @@ class EF_Story_Budget extends EF_Module {
 
 		$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
 		wp_redirect( menu_page_url( $this->module->slug, false ) );
-		exit;
+		wp_die();
 	}
 
 	/**

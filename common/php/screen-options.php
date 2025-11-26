@@ -175,7 +175,7 @@ if ( ! class_exists( 'wsScreenOptions10' ) ) :
 
 			//Hand the request to the registered callback, if any
 			if ( ! isset( $this->registered_panels[ $id ] ) ) {
-				exit( '0' );
+				wp_die( '0' );
 			}
 			$panel = $this->registered_panels[ $id ];
 			if ( is_callable( $panel['save_callback'] ) ) {
