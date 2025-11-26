@@ -69,7 +69,7 @@
     "@wordpress/babel-plugin-import-jsx-pragma": "^5.36.0",
     "@wordpress/data": "^10.36.0",
     "classnames": "^2.5.1",
-    "downshift": "^9.0.6",
+    "downshift": "^9.0.10",
     "install": "^0.13.0",
     "match-sorter": "^6.3.4",
     "prop-types": "^15.8.1"
