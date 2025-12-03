@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/Automattic/Edit-Flow#readme",
   "devDependencies": {
-    "@automattic/eslint-plugin-wpvip": "0.11.0",
+    "@automattic/eslint-plugin-wpvip": "0.13.1",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@playwright/test": "^1.57.0",
