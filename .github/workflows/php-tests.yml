@@ -31,10 +31,14 @@ jobs:
           - php: '8.0'
             wp: '6.4'
             allowed_failure: false
-          # Check latest WP with the highest supported PHP.
+          # Check current stable WP (6.9) with latest PHP.
+          - php: 'latest'
+            wp: '6.9'
+            allowed_failure: false
+          # Check upcoming WP with latest PHP.
           - php: 'latest'
             wp: 'master'
-            allowed_failure: false
+            allowed_failure: true
 
     steps:
       - name: Checkout code

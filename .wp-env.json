@@ -14,7 +14,7 @@
   "env": {
     "tests": {
       "phpVersion": "8.4",
-      "core": "WordPress/WordPress#6.8"
+      "core": "WordPress/WordPress#6.9"
     }
   }
 }
