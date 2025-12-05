@@ -45,7 +45,7 @@
     "@wordpress/scripts": "^31.1.0",
     "@wordpress/url": "^4.36.0",
     "babel-eslint": "10.1.0",
-    "babel-jest": "^29.7.0",
+    "babel-jest": "^30.2.0",
     "babel-loader": "^10.0.0",
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-transform-react-jsx": "^6.24.1",
