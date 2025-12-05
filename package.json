@@ -22,7 +22,7 @@
     "url": "git+https://github.com/Automattic/Edit-Flow.git"
   },
   "author": "Automattic",
-  "license": "GPL-3.0-or-later",
+  "license": "GPL-2.0-or-later",
   "bugs": {
     "url": "https://github.com/Automattic/Edit-Flow/issues"
   },

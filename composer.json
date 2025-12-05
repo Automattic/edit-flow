@@ -3,7 +3,7 @@
   "description": "WordPress plugin to accelerate your editorial workflow.",
   "homepage": "http://editflow.org/",
   "type": "wordpress-plugin",
-  "license": "GPL-3.0+",
+  "license": "GPL-2.0-or-later",
   "support": {
     "issues": "https://github.com/Automattic/edit-flow/issues",
     "forum": "https://wordpress.org/support/plugin/edit-flow",
