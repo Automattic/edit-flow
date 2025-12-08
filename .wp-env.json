@@ -3,6 +3,8 @@
     "."
   ],
   "phpVersion": "8.2",
+  "port": 8881,
+  "testsPort": 8882,
   "config": {
     "WP_DEBUG": true,
     "WP_DEBUG_LOG": true,
