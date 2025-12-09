@@ -1102,12 +1102,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				case 'taxonomy':
 					return '<input type="text" class="metadata-edit-' . esc_attr( $type ) . '" value="' . esc_attr( $value ) . '" />';
 				break;
-				case 'taxonomy hierarchical':
-					return wp_dropdown_categories( array(
-						'echo' => 0,
-						'hide_empty' => 0,
-					) );
-				break;
 			}
 		}
 
@@ -1181,27 +1175,28 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				} else {
 					$value = '';
 				}
-				 //Used when editing editorial metadata and post meta
-				if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-					$type = 'taxonomy hierarchical';
-				} else {
-					$type = 'taxonomy';
-				}
-
 				$information_fields[ $key ] = array(
 					'label' => $taxonomy->label,
 					'value' => $value,
-					'type' => $type,
 				);
 
-				if ( 'page' == $post->post_type ) {
-					$ed_cap = 'edit_page';
+				// Only allow non-hierarchical taxonomies to be edited in the calendar.
+				// Hierarchical taxonomies (like categories) cause performance issues and
+				// the single-select UI removes all but one category when saved.
+				if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
+					$information_fields[ $key ]['type'] = 'taxonomy hierarchical';
 				} else {
-					$ed_cap = 'edit_post';
-				}
+					$information_fields[ $key ]['type'] = 'taxonomy';
 
-				if ( current_user_can( $ed_cap, $post->ID ) ) {
-					$information_fields[ $key ]['editable'] = true;
+					if ( 'page' == $post->post_type ) {
+						$ed_cap = 'edit_page';
+					} else {
+						$ed_cap = 'edit_post';
+					}
+
+					if ( current_user_can( $ed_cap, $post->ID ) ) {
+						$information_fields[ $key ]['editable'] = true;
+					}
 				}
 			}
 
@@ -1698,7 +1693,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			} else {
 				switch ( $_POST['metadata_type'] ) {
 					case 'taxonomy':
-					case 'taxonomy hierarchical':
 						$response = wp_set_post_terms( $post->ID, $incoming_metadata_value, $metadata_term );
 						break;
 					default:
