@@ -23,7 +23,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		public $max_visible_posts_per_date = 4; // total number of posts to be shown per square before 'more' link
 
 		private $post_date_cache = array();
-		private static $post_li_html_cache_key = 'ef_calendar_post_li_html';
 		private int $max_weeks;
 		private string $create_post_cap;
 
@@ -119,9 +118,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			//Update metadata
 			add_action( 'wp_ajax_ef_calendar_update_metadata', array( $this, 'handle_ajax_update_metadata' ) );
-
-			// Clear li cache for a post when post cache is cleared
-			add_action( 'clean_post_cache', array( $this, 'action_clean_li_html_cache' ) );
 
 			// Action to regenerate the calendar feed sekret
 			add_action( 'admin_init', array( $this, 'handle_regenerate_calendar_feed_secret' ) );
@@ -916,18 +912,8 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		 */
 		public function generate_post_li_html( $post, $post_date, $num = 0 ) {
 
-			$can_modify = ( $this->current_user_can_modify_post( $post ) ) ? 'can_modify' : 'read_only';
-			$cache_key = $post->ID . $can_modify . '_' . get_current_user_id();
-			$cache_val = wp_cache_get( $cache_key, self::$post_li_html_cache_key );
-			// Because $num is pertinent to the display of the post LI, need to make sure that's what's in cache
-			if ( is_array( $cache_val ) && $cache_val['num'] == $num ) {
-				$this->hidden = $cache_val['hidden'];
-				return $cache_val['post_li_html'];
-			}
-
 			ob_start();
 			$post_id = $post->ID;
-			$edit_post_link = get_edit_post_link( $post_id );
 			$status_object = get_post_status_object( get_post_status( $post_id ) );
 
 			$post_classes = array(
@@ -974,13 +960,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			$post_li_html = ob_get_contents();
 			ob_end_clean();
-
-			$post_li_cache = array(
-				'num' => $num,
-				'post_li_html' => $post_li_html,
-				'hidden' => $this->hidden,
-			);
-			wp_cache_set( $cache_key, $post_li_cache, self::$post_li_html_cache_key );
 
 			return $post_li_html;
 		} // generate_post_li_html()
@@ -1773,15 +1752,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					return false;
 				break;
 			}
-		}
-
-		/**
-		 * When a post is updated, clean the <li> html post cache for it
-		 */
-		public function action_clean_li_html_cache( $post_id ) {
-
-			wp_cache_delete( $post_id . 'can_modify', self::$post_li_html_cache_key );
-			wp_cache_delete( $post_id . 'read_only', self::$post_li_html_cache_key );
 		}
 
 		/**
