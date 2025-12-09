@@ -8,6 +8,6 @@ test.describe('Edit Flow', () => {
 		await admin.visitAdminPage('admin.php', 'page=ef-settings');
 
 		const heading = page.locator('.edit-flow-admin h1');
-		await expect(heading).toHaveText('Edit Flow');
+		await expect(heading).toHaveText('Edit Flow: Features');
 	});
 });

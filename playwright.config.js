@@ -6,11 +6,11 @@ module.exports = defineConfig({
 	testDir: './tests/e2e',
 	use: {
 		...baseConfig.use,
-		baseURL: process.env.WP_BASE_URL || 'http://localhost:8882',
+		baseURL: process.env.WP_BASE_URL || 'http://localhost:8889',
 	},
 	webServer: {
 		...baseConfig.webServer,
-		port: 8882,
+		port: parseInt( process.env.WP_BASE_URL?.match( /:(\d+)$/ )?.[1] || '8889', 10 ),
 	},
 	projects: [
 		{
