@@ -839,7 +839,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 						$td_classes = apply_filters( 'ef_calendar_table_td_classes', $td_classes, $week_single_date );
 						?>
-				<td class="<?php echo esc_attr( implode( ' ', $td_classes ) ); ?>" id="<?php echo esc_attr( $week_single_date ); ?>">
+				<td class="<?php echo esc_attr( implode( ' ', $td_classes ) ); ?>" id="date-<?php echo esc_attr( $week_single_date ); ?>">
 					<button class='schedule-new-post-button'>+</button>
 						<?php if ( date( 'Y-m-d', current_time( 'timestamp' ) ) == $week_single_date ) : ?>
 						<div class="day-unit-today"><?php esc_html_e( 'Today', 'edit-flow' ); ?></div>
