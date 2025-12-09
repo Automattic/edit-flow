@@ -1062,6 +1062,12 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 
 			foreach ( (array) $ids as $usergroup_id ) {
 				$usergroup = $this->get_usergroup_by( 'id', $usergroup_id );
+
+				// Skip if user is already in this group.
+				if ( in_array( $user_id, $usergroup->user_ids, true ) ) {
+					continue;
+				}
+
 				$usergroup->user_ids[] = $user_id;
 				$retval = $this->update_usergroup( $usergroup_id, null, $usergroup->user_ids );
 				if ( is_wp_error( $retval ) ) {
