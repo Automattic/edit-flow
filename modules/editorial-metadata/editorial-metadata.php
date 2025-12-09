@@ -1659,7 +1659,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			</div>
 			<?php wp_nonce_field( 'editorial-metadata-add-nonce' ); ?>
 			<input type="hidden" id="form-action" name="form-action" value="add-term" />
-			<p class="submit"><?php submit_button( __( 'Add New Metadata Term', 'edit-flow' ), 'primary', 'submit', false ); ?><a class="cancel-settings-link" href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php _e( 'Back to Edit Flow', 'edit-flow' ); ?></a></p>
+			<?php submit_button( __( 'Add New Metadata Term', 'edit-flow' ) ); ?>
 			</form>
 		<?php endif; ?>
 			</div>

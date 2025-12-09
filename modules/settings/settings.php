@@ -55,6 +55,9 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			add_menu_page( $this->module->title, $this->module->title, 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ), $this->module->module_url . $ef_logo );
 
+			// Add "Features" as the first submenu item (replaces the duplicate "Edit Flow" item)
+			add_submenu_page( $this->module->settings_slug, __( 'Features', 'edit-flow' ), __( 'Features', 'edit-flow' ), 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ) );
+
 			foreach ( $edit_flow->modules as $mod_name => $mod_data ) {
 				if ( isset( $mod_data->options->enabled ) && 'on' == $mod_data->options->enabled
 				&& $mod_data->configure_page_cb && $mod_name != $this->module->name ) {
@@ -159,8 +162,24 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 * @since 0.10.0
 		 */
 		public function register_settings() {
-			add_settings_section( $this->module->options_group_name . '_general', false, '__return_false', $this->module->options_group_name );
-			add_settings_field( 'vip_features', __( 'Turn on WordPress VIP features', 'edit-flow' ), array( $this, 'settings_vip_features_option' ), $this->module->options_group_name, $this->module->options_group_name . '_general' );
+			add_settings_section(
+				$this->module->options_group_name . '_general',
+				__( 'WordPress VIP', 'edit-flow' ),
+				array( $this, 'settings_vip_section_description' ),
+				$this->module->options_group_name
+			);
+			add_settings_field( 'vip_features', __( 'Enable VIP features', 'edit-flow' ), array( $this, 'settings_vip_features_option' ), $this->module->options_group_name, $this->module->options_group_name . '_general' );
+		}
+
+		/**
+		 * Print the description for the VIP features section.
+		 *
+		 * @since 0.10.0
+		 */
+		public function settings_vip_section_description() {
+			echo '<p>';
+			esc_html_e( 'WordPress VIP features provide enhanced editorial workflow capabilities optimised for enterprise environments.', 'edit-flow' );
+			echo '</p>';
 		}
 
 		/**
@@ -168,57 +187,71 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 * phpcs:disable:WordPress.Security.NonceVerification.Missing
 		 */
 		public function print_default_header( $current_module ) {
-			// If there's been a message, let's display it
+			// Register admin notices for standard WordPress display
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for message display
 			if ( isset( $_GET['message'] ) ) {
-				$message = $_GET['message'];
-			} else if ( isset( $_REQUEST['message'] ) ) {
-				$message = $_REQUEST['message'];
-			} else if ( isset( $_POST['message'] ) ) {
-				$message = $_POST['message'];
+				$message = sanitize_key( $_GET['message'] );
+			} elseif ( isset( $_REQUEST['message'] ) ) {
+				$message = sanitize_key( $_REQUEST['message'] );
+			} elseif ( isset( $_POST['message'] ) ) {
+				$message = sanitize_key( $_POST['message'] );
 			} else {
 				$message = false;
 			}
 			if ( $message && isset( $current_module->messages[ $message ] ) ) {
-				$display_text = '<span class="edit-flow-updated-message edit-flow-message">' . esc_html( $current_module->messages[ $message ] ) . '</span>';
+				add_settings_error(
+					'edit-flow',
+					'edit-flow-' . $message,
+					$current_module->messages[ $message ],
+					'success'
+				);
 			}
 
-			// If there's been an error, let's display it
+			// If there's been an error, register it as an admin notice
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for error display
 			if ( isset( $_GET['error'] ) ) {
-				$error = $_GET['error'];
-			} else if ( isset( $_REQUEST['error'] ) ) {
-				$error = $_REQUEST['error'];
-			} else if ( isset( $_POST['error'] ) ) {
-				$error = $_POST['error'];
+				$error = sanitize_key( $_GET['error'] );
+			} elseif ( isset( $_REQUEST['error'] ) ) {
+				$error = sanitize_key( $_REQUEST['error'] );
+			} elseif ( isset( $_POST['error'] ) ) {
+				$error = sanitize_key( $_POST['error'] );
 			} else {
 				$error = false;
 			}
 			if ( $error && isset( $current_module->messages[ $error ] ) ) {
-				$display_text = '<span class="edit-flow-error-message edit-flow-message">' . esc_html( $current_module->messages[ $error ] ) . '</span>';
+				add_settings_error(
+					'edit-flow',
+					'edit-flow-' . $error,
+					$current_module->messages[ $error ],
+					'error'
+				);
 			}
 
-			if ( $current_module->img_url ) {
-				$page_icon = '<img src="' . esc_url( $current_module->img_url ) . '" class="module-icon icon32" />';
+			// Build the page title
+			if ( 'settings' !== $current_module->name ) {
+				$page_title = sprintf(
+					/* translators: %s: module title */
+					__( 'Edit Flow: %s', 'edit-flow' ),
+					$current_module->title
+				);
 			} else {
-				$page_icon = '<div class="icon32" id="icon-options-general"><br/></div>';
+				$page_title = __( 'Edit Flow: Features', 'edit-flow' );
 			}
 			?>
 		<div class="wrap edit-flow-admin">
-			<?php if ( 'settings' != $current_module->name ) : ?>
-				<?php echo wp_kses_post( $page_icon ); ?>
-			<h2><a href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php _e( 'Edit Flow', 'edit-flow' ); ?></a>:&nbsp;<?php echo esc_attr( $current_module->title ); ?><?php echo ( isset( $display_text ) ? wp_kses_post( $display_text ) : '' ); ?></h2>
-			<?php else : ?>
-				<?php echo wp_kses_post( $page_icon ); ?>
-			<h2><?php _e( 'Edit Flow', 'edit-flow' ); ?><?php echo ( isset( $display_text ) ? wp_kses_post( $display_text ) : '' ); ?></h2>
-			<?php endif; ?>
+			<h1><?php echo esc_html( $page_title ); ?></h1>
+			<?php settings_errors( 'edit-flow' ); ?>
 
+			<?php if ( $current_module->short_description || $current_module->extended_description ) : ?>
 			<div class="explanation">
 				<?php if ( $current_module->short_description ) : ?>
-				<h3><?php echo wp_kses_post( $current_module->short_description ); ?></h3>
+				<p class="description"><?php echo wp_kses_post( $current_module->short_description ); ?></p>
 				<?php endif; ?>
 				<?php if ( $current_module->extended_description ) : ?>
 				<p><?php echo wp_kses_post( $current_module->extended_description ); ?></p>
 				<?php endif; ?>
 			</div>
+			<?php endif; ?>
 			<?php
 		}
 		//phpcs:enable:WordPress.Security.NonceVerification.Missing
@@ -234,10 +267,8 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		<form class="basic-settings" action="<?php echo esc_url( menu_page_url( $this->module->settings_slug, false ) ); ?>" method="post">
 			<?php settings_fields( $this->module->options_group_name ); ?>
 			<?php do_settings_sections( $this->module->options_group_name ); ?>
-			<?php
-				echo '<input id="edit_flow_module_name" name="edit_flow_module_name" type="hidden" value="' . esc_attr( $this->module->name ) . '" />';
-			?>
-			<p class="submit"><?php submit_button( null, 'primary', 'submit', false ); ?></p>
+			<input id="edit_flow_module_name" name="edit_flow_module_name" type="hidden" value="<?php echo esc_attr( $this->module->name ); ?>" />
+			<?php submit_button(); ?>
 		</form>
 			<?php
 		}
@@ -258,16 +289,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 		public function print_default_footer( $current_module ) {
 			?>
-			<?php if ( 'settings' == $current_module->slug ) : ?>
-		<div class="credits">
-		<p><?php echo wp_kses( __( '<a href="http://editflow.org/">Edit Flow</a> is produced by <a href="http://danielbachhuber.com/">Daniel Bachhuber</a>, <a href="http://digitalize.ca/">Mo Jangda</a>, and <a href="http://www.scottbressler.com/blog/">Scott Bressler</a>, with special help from <a href="http://andrewspittle.net">Andrew Spittle</a> and <a href="http://andrewwitherspoon.com/">Andrew Witherspoon</a>.', 'edit-flow' ), 'a' ); ?>
-				<?php /* translators: 1: installed version of Edit Flow */ ?>
-		<br /><?php echo esc_html( sprintf( __( 'You\'re using Edit Flow version %s.', 'edit-flow' ), EDIT_FLOW_VERSION ) ); ?>
-		<br /><?php echo wp_kses( __( 'Icons courtesy of the <a href="http://thenounproject.com/">Noun Project</a>.', 'edit-flow' ), 'a' ); ?>
-		<br /><?php echo wp_kses( __( '<a href="http://wordpress.org/tags/edit-flow?forum_id=10">Please give us your feedback, ideas, bug reports and comments</a> in the WordPress.org forums.', 'edit-flow' ), 'a' ); ?>
 		</div>
-		</div>
-		<?php endif; ?>
 			<?php
 		}
 
@@ -300,15 +322,11 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 					}
 					echo '<form method="get" action="' . esc_url( get_admin_url( null, 'options.php' ) ) . '">';
 					echo '<h4>' . esc_html( $mod_data->title ) . '</h4>';
-					if ( 'on' == $mod_data->options->enabled ) {
-						echo '<p>' . wp_kses( $mod_data->short_description, 'a' ) . '</p>';
-					} else {
-						echo '<p>' . esc_html( $mod_data->short_description ) . '</p>';
-					}
+					echo '<p>' . wp_kses( $mod_data->short_description, 'post' ) . '</p>';
 					echo '<p class="edit-flow-module-actions">';
 					if ( $mod_data->configure_page_cb ) {
 						$configure_url = add_query_arg( 'page', $mod_data->settings_slug, get_admin_url( null, 'admin.php' ) );
-						echo '<a href="' . esc_url( $configure_url ) . '" class="configure-edit-flow-module button button-primary';
+						echo '<a href="' . esc_url( $configure_url ) . '" class="configure-edit-flow-module';
 						if ( 'off' == $mod_data->options->enabled ) {
 							echo ' hidden" style="display:none;';
 						}
@@ -429,9 +447,13 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			$edit_flow->update_all_module_options( $edit_flow->$module_name->module->name, $new_options );
 
 			// Redirect back to the settings page that was submitted without any previous messages
-			$goback = add_query_arg( 'message', 'settings-updated', remove_query_arg( array( 'message' ), wp_get_referer() ) );
+			$referer = wp_get_referer();
+			if ( ! $referer ) {
+				$referer = admin_url( 'admin.php?page=' . $edit_flow->$module_name->module->settings_slug );
+			}
+			$goback = add_query_arg( 'message', 'settings-updated', remove_query_arg( array( 'message' ), $referer ) );
 			wp_safe_redirect( $goback );
-			wp_die();
+			exit;
 		}
 	}
 

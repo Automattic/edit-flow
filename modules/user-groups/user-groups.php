@@ -665,7 +665,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 					</div>
 					<?php wp_nonce_field( 'add-usergroup' ); ?>
 					<input id="form-action" name="form-action" type="hidden" value="add-usergroup" />
-					<p class="submit"><?php submit_button( __( 'Add New User Group', 'edit-flow' ), 'primary', 'submit', false ); ?><a class="cancel-settings-link" href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php _e( 'Back to Edit Flow', 'edit-flow' ); ?></a></p>
+					<?php submit_button( __( 'Add New User Group', 'edit-flow' ) ); ?>
 					</form>
 				<?php endif; ?>
 			</div></div></div>

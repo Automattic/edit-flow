@@ -1,5 +1,3 @@
-/* @override http://localhost:8888/wpplugindev/wp-content/plugins/edit-flow/css/settings.css?ver=0.6.4 */
-
 .float-right {
 	float:right;
 }
@@ -20,82 +18,84 @@
 	clear: both;
 }
 
+/* Feature cards grid layout */
 .edit-flow-modules {
-	width: 100%;
-	overflow: hidden;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 15px;
 	margin-top: 20px;
-	display: flex;
-	flex-wrap: wrap;
+}
+
+/* Responsive grid for smaller screens */
+@media screen and (max-width: 1400px) {
+	.edit-flow-modules {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media screen and (max-width: 1100px) {
+	.edit-flow-modules {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.edit-flow-modules {
+		grid-template-columns: 1fr;
+	}
 }
 
 .edit-flow-modules .edit-flow-module {
-	width: 250px;
-	min-height: 150px;
+	min-height: 180px;
 	position: relative;
-	float: left;
-	border: 1px solid #e1e1e1;
-	padding: 10px;
-	background-color: #f1f1f1;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	margin-right: 15px;
-	margin-bottom: 15px;
+	border: 1px solid #c3c4c7;
+	padding: 15px;
+	background-color: #fff;
+	border-radius: 4px;
 }
 
 .edit-flow-modules .edit-flow-module p {
-	font-size: 12px;
-	color: #3d3d3d;
-	line-height: 150%;
-	font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",Verdana,"Bitstream Vera Sans",sans-serif;
+	font-size: 14px;
+	color: #3c434a;
+	line-height: 1.6;
 }
 
 .edit-flow-modules .edit-flow-module h4 {
-	color: #000000;
-    font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",Verdana,"Bitstream Vera Sans",sans-serif;
-    font-size: 17px;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1.1;
-    margin: 0;
-    padding: 0;
+	color: #1d2327;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+	margin: 0 0 8px 0;
+	padding: 0;
 }
 
 .edit-flow-modules .edit-flow-module .edit-flow-module-actions {
 	position: absolute;
-	bottom: 0px;
-	left: 10px;
-	width: 250px;
+	bottom: 15px;
+	left: 15px;
+	right: 15px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 12px;
 }
 
-.edit-flow-modules .edit-flow-module .button-primary:hover {
-	color: #FFFFFF;
-	border-color: #3B5D0C;
+/* Configure links as regular links instead of buttons */
+.edit-flow-modules .edit-flow-module a.configure-edit-flow-module {
+	color: #2271b1;
+	text-decoration: none;
+	font-size: 13px;
+	margin-right: auto;
 }
 
-.edit-flow-modules .edit-flow-module .button-primary.configure-edit-flow-module {
-	color: #f1f1f1;
-	border: solid 1px #666;
-	background: #DDD;
-	background: -webkit-gradient(linear, left top, left bottom, from(#BBB), to(#888));
-	background: -moz-linear-gradient(top,  #BBB,  #888);
-	box-shadow: none;
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#BBB', endColorstr='#888');
-	text-shadow: none;
-	float: right;
+.edit-flow-modules .edit-flow-module a.configure-edit-flow-module:hover {
+	color: #135e96;
+	text-decoration: underline;
 }
 
-.edit-flow-modules .edit-flow-module .button-primary.enable-disable-edit-flow-module {
-	float: left;
-}
-
-.edit-flow-modules .edit-flow-module .button-primary.configure-edit-flow-module:hover {
-	color: #FFF;
-	border-color: #444;
-}
-
-.edit-flow-admin a.cancel-settings-link {
-	margin-left: 10px;
+/* Enable/Disable buttons on the right */
+.edit-flow-modules .edit-flow-module .enable-disable-edit-flow-module {
+	flex-shrink: 0;
 }
 
 .edit-flow-admin .inline-edit-row fieldset label span.title {
@@ -154,19 +154,6 @@
 	margin: 0;
 }
 
-.edit-flow-modules .edit-flow-module a.button-primary {
-	float: right;
-}
-
-.credits {
-	color: #666666;
-	font-size: 11px;
-}
-
-.credits a {
-	color: #666666;
-}
-
 /* Module specific image styles */
 
 .button-inline-block {
@@ -192,32 +179,6 @@ h3.nav-tab-wrapper {
 
 .form-wrap p.submit a {
 	font-style: normal;
-}
-
-.edit-flow-message {
-	position: relative;
-	top: -5px;
-	margin-left: 25px;
-	font-weight:normal;
-	font-size: 12px;
-	line-height: 20px;
-	padding-left: 25px;
-	padding-right: 25px;	
-	padding-top: 5px;
-	padding-bottom: 4px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;	
-}
-
-.edit-flow-updated-message {
-	background-color: #FFFFE0;
-	border: 1px solid #E6DB55;
-}
-
-.edit-flow-error-message {
-	background-color: #FFEBE8;
-	border: 1px solid #CC0000;
 }
 
 /* Admin Menu Icon */

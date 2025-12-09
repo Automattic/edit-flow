@@ -7,7 +7,7 @@ test.describe('Edit Flow', () => {
 	test('the plugin settings page loads', async ({ admin, page }) => {
 		await admin.visitAdminPage('admin.php', 'page=ef-settings');
 
-		const heading = page.locator('.edit-flow-admin h2');
-		await expect(heading).toHaveText('Edit Flow');
+		const heading = page.locator('.edit-flow-admin h1');
+		await expect(heading).toHaveText('Edit Flow: Features');
 	});
 });

@@ -10,7 +10,7 @@ module.exports = defineConfig({
 	},
 	webServer: {
 		...baseConfig.webServer,
-		port: 8889,
+		port: parseInt( process.env.WP_BASE_URL?.match( /:(\d+)$/ )?.[1] || '8889', 10 ),
 	},
 	projects: [
 		{

@@ -1431,7 +1431,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				<?php
 					echo '<input id="edit_flow_module_name" name="edit_flow_module_name" type="hidden" value="' . esc_attr( $this->module->name ) . '" />';
 				?>
-				<p class="submit"><?php submit_button( null, 'primary', 'submit', false ); ?><a class="cancel-settings-link" href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php _e( 'Back to Edit Flow', 'edit-flow' ); ?></a></p>
+				<?php submit_button(); ?>
 			</form>
 			<?php
 		}
