@@ -1044,12 +1044,24 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				// Allow other plugins to add actions
 				$item_actions = apply_filters( 'ef_calendar_item_actions', $item_actions, $post->ID );
 			if ( count( $item_actions ) ) {
+				// Separate the save action to render it on its own row
+				$save_action = '';
+				if ( isset( $item_actions['save hidden'] ) ) {
+					$save_action = $item_actions['save hidden'];
+					unset( $item_actions['save hidden'] );
+				}
+
 				echo '<div class="item-actions">';
 				$html = '';
 				foreach ( $item_actions as $class => $item_action ) {
-					$html .= '<span class="' . esc_attr( $class ) . '">' . $item_action . ' | </span> '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$html .= '<span class="' . esc_attr( $class ) . '">' . $item_action . '</span> | '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
-				echo rtrim( $html, '| ' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo rtrim( $html, ' | ' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+				// Render save button on its own row (hidden by default, shown via JS when editing)
+				if ( $save_action ) {
+					echo '<span class="save hidden">' . $save_action . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
 				echo '</div>';
 			}
 			?>
@@ -1522,7 +1534,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			<?php
 				echo '<input id="edit_flow_module_name" name="edit_flow_module_name" type="hidden" value="' . esc_attr( $this->module->name ) . '" />';
 			?>
-			<p class="submit"><?php submit_button( null, 'primary', 'submit', false ); ?><a class="cancel-settings-link" href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php esc_html_e( 'Back to Edit Flow', 'edit-flow' ); ?></a></p>
+			<?php submit_button(); ?>
 		</form>
 			<?php
 		}

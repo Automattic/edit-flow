@@ -55,6 +55,9 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			add_menu_page( $this->module->title, $this->module->title, 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ), $this->module->module_url . $ef_logo );
 
+			// Add "Features" as the first submenu item (replaces the duplicate "Edit Flow" item)
+			add_submenu_page( $this->module->settings_slug, __( 'Features', 'edit-flow' ), __( 'Features', 'edit-flow' ), 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ) );
+
 			foreach ( $edit_flow->modules as $mod_name => $mod_data ) {
 				if ( isset( $mod_data->options->enabled ) && 'on' == $mod_data->options->enabled
 				&& $mod_data->configure_page_cb && $mod_name != $this->module->name ) {
@@ -159,8 +162,24 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 * @since 0.10.0
 		 */
 		public function register_settings() {
-			add_settings_section( $this->module->options_group_name . '_general', false, '__return_false', $this->module->options_group_name );
-			add_settings_field( 'vip_features', __( 'Turn on WordPress VIP features', 'edit-flow' ), array( $this, 'settings_vip_features_option' ), $this->module->options_group_name, $this->module->options_group_name . '_general' );
+			add_settings_section(
+				$this->module->options_group_name . '_general',
+				__( 'WordPress VIP', 'edit-flow' ),
+				array( $this, 'settings_vip_section_description' ),
+				$this->module->options_group_name
+			);
+			add_settings_field( 'vip_features', __( 'Enable VIP features', 'edit-flow' ), array( $this, 'settings_vip_features_option' ), $this->module->options_group_name, $this->module->options_group_name . '_general' );
+		}
+
+		/**
+		 * Print the description for the VIP features section.
+		 *
+		 * @since 0.10.0
+		 */
+		public function settings_vip_section_description() {
+			echo '<p>';
+			esc_html_e( 'WordPress VIP features provide enhanced editorial workflow capabilities optimised for enterprise environments.', 'edit-flow' );
+			echo '</p>';
 		}
 
 		/**
@@ -216,7 +235,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 					$current_module->title
 				);
 			} else {
-				$page_title = __( 'Edit Flow', 'edit-flow' );
+				$page_title = __( 'Edit Flow: Features', 'edit-flow' );
 			}
 			?>
 		<div class="wrap edit-flow-admin">
@@ -270,16 +289,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 		public function print_default_footer( $current_module ) {
 			?>
-			<?php if ( 'settings' == $current_module->slug ) : ?>
-		<div class="credits">
-		<p><?php echo wp_kses( __( '<a href="http://editflow.org/">Edit Flow</a> is produced by <a href="http://danielbachhuber.com/">Daniel Bachhuber</a>, <a href="http://digitalize.ca/">Mo Jangda</a>, and <a href="http://www.scottbressler.com/blog/">Scott Bressler</a>, with special help from <a href="http://andrewspittle.net">Andrew Spittle</a> and <a href="http://andrewwitherspoon.com/">Andrew Witherspoon</a>.', 'edit-flow' ), 'a' ); ?>
-				<?php /* translators: 1: installed version of Edit Flow */ ?>
-		<br /><?php echo esc_html( sprintf( __( 'You\'re using Edit Flow version %s.', 'edit-flow' ), EDIT_FLOW_VERSION ) ); ?>
-		<br /><?php echo wp_kses( __( 'Icons courtesy of the <a href="http://thenounproject.com/">Noun Project</a>.', 'edit-flow' ), 'a' ); ?>
-		<br /><?php echo wp_kses( __( '<a href="http://wordpress.org/tags/edit-flow?forum_id=10">Please give us your feedback, ideas, bug reports and comments</a> in the WordPress.org forums.', 'edit-flow' ), 'a' ); ?>
 		</div>
-		</div>
-		<?php endif; ?>
 			<?php
 		}
 
@@ -312,15 +322,11 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 					}
 					echo '<form method="get" action="' . esc_url( get_admin_url( null, 'options.php' ) ) . '">';
 					echo '<h4>' . esc_html( $mod_data->title ) . '</h4>';
-					if ( 'on' == $mod_data->options->enabled ) {
-						echo '<p>' . wp_kses( $mod_data->short_description, 'a' ) . '</p>';
-					} else {
-						echo '<p>' . esc_html( $mod_data->short_description ) . '</p>';
-					}
+					echo '<p>' . wp_kses( $mod_data->short_description, 'post' ) . '</p>';
 					echo '<p class="edit-flow-module-actions">';
 					if ( $mod_data->configure_page_cb ) {
 						$configure_url = add_query_arg( 'page', $mod_data->settings_slug, get_admin_url( null, 'admin.php' ) );
-						echo '<a href="' . esc_url( $configure_url ) . '" class="configure-edit-flow-module button button-primary';
+						echo '<a href="' . esc_url( $configure_url ) . '" class="configure-edit-flow-module';
 						if ( 'off' == $mod_data->options->enabled ) {
 							echo ' hidden" style="display:none;';
 						}

@@ -50,7 +50,7 @@ global $edit_flow;
 
 				<?php wp_nonce_field( 'custom-status-add-nonce' ); ?>
 				<input id="action" name="action" type="hidden" value="add-new" />
-				<p class="submit"><?php submit_button( __( 'Add New Status', 'edit-flow' ), 'primary', 'submit', false ); ?><a class="cancel-settings-link" href="<?php echo esc_url( EDIT_FLOW_SETTINGS_PAGE ); ?>"><?php esc_html_e( 'Back to Edit Flow', 'edit-flow' ); ?></a></p>
+				<?php submit_button( __( 'Add New Status', 'edit-flow' ) ); ?>
 			</form>
 			<?php } ?>
 		</div>

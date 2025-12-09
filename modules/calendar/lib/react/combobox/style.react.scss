@@ -1,10 +1,35 @@
 .ef-combobox {
     position: relative;
-    
+    min-width: 180px;
+
+    .ef-combobox-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: #1e1e1e;
+    }
+
+    // Match WordPress SelectControl label styling when inside calendar filters
+    .components-base-control__label.ef-combobox-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
     .ef-combobox-input-wrapper {
       position: relative;
-  
+
       .ef-combobox-input {
+        // Match WordPress SelectControl 40px height
+        height: 40px;
+        min-height: 40px;
+        padding: 8px 32px 8px 12px;
+        width: 100%;
+        box-sizing: border-box;
+
         &.is-open {
           border-color: #007cba;
           box-shadow: 0 0 0 1px #007cba;
@@ -21,13 +46,16 @@
           color: #32373c;
         }
       }
-  
+
       .ef-combobox-input-button {
         position: absolute;
-        top: 0;
-        right: 0;
-        height: calc(100% - 5px);
-        margin-top: 3px;
+        top: 50%;
+        right: 4px;
+        transform: translateY(-50%);
+        height: 32px;
+        width: 32px;
+        min-width: 32px;
+        padding: 0;
         box-shadow: none !important;
         background-color: white;
 
