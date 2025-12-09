@@ -155,7 +155,7 @@ editorialCommentReply = {
 		} );
 
 		// No users will be notified, so return early with a default message.
-		if ( 0 === subscribed_users.length ) {
+		if ( 0 === usernames.length ) {
 			message_wrapper.addClass( 'ef-none-selected' );
 			message_wrapper.val( __ef_localize_post_comment.none_notified );
 			return;
