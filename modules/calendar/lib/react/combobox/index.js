@@ -57,6 +57,7 @@ const ComboBox = ( {
 	className,
 	placeholder,
 	inputLabel,
+	inputId,
 	buttonOpenLabel,
 	buttonCloseLabel,
 	buttonClearLabel,
@@ -131,23 +132,30 @@ const ComboBox = ( {
 
 					return (
 						<div>
+							{ inputLabel && (
+								<label
+									className="components-base-control__label ef-combobox-label"
+									htmlFor={ inputId }
+								>
+									{ inputLabel }
+								</label>
+							) }
 							<div className="ef-combobox-input-wrapper">
-								<BaseControl label={ inputLabel }>
-									<input
-										className={ classnames(
-											{ 'is-open': isOpen },
-											'ef-combobox-input components-text-control__input'
-										) }
-										{ ...getInputProps( {
-											onBlur: () => {
-												onInputBlur && onInputBlur( filteredItems, inputValue );
-											},
-											onFocus: openMenu,
-											type: 'text',
-											placeholder,
-										} ) }
-									/>
-								</BaseControl>
+								<input
+									className={ classnames(
+										{ 'is-open': isOpen },
+										'ef-combobox-input components-text-control__input'
+									) }
+									{ ...getInputProps( {
+										id: inputId,
+										onBlur: () => {
+											onInputBlur && onInputBlur( filteredItems, inputValue );
+										},
+										onFocus: openMenu,
+										type: 'text',
+										placeholder,
+									} ) }
+								/>
 								{ selectedItem ? (
 									<ACTIVE_ICON_BUTTON
 										{ ...getToggleButtonProps( {
@@ -188,6 +196,7 @@ ComboBox.propTypes = {
 	className: PropTypes.string,
 	placeholder: PropTypes.string,
 	inputLabel: PropTypes.string,
+	inputId: PropTypes.string,
 	buttonOpenLabel: PropTypes.string,
 	buttonCloseLabel: PropTypes.string,
 	buttonClearLabel: PropTypes.string,

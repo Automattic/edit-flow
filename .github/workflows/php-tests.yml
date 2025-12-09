@@ -1,6 +1,14 @@
 name: PHP Tests
 
-on: push
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - develop
+      - main
+
+# Disable all permissions by default; grant minimal permissions per job
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,6 +20,8 @@ jobs:
     name: WP ${{ matrix.wp == 'master' && 'latest' || matrix.wp }} and PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allowed_failure }}
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
@@ -19,28 +29,34 @@ jobs:
         include:
           # Check lowest supported WP version, with the lowest supported PHP.
           - php: '8.0'
-            wp: '6.0'
+            wp: '6.4'
             allowed_failure: false
-          # Check latest WP with the highest supported PHP.
+          # Check current stable WP (6.9) with latest PHP.
+          - php: 'latest'
+            wp: '6.9'
+            allowed_failure: false
+          # Check upcoming WP with latest PHP.
           - php: 'latest'
             wp: 'master'
-            allowed_failure: false
+            allowed_failure: true
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
 
       - name: Install wordpress environment
         run: npm -g install @wordpress/env
 
       - name: Setup PHP ${{ matrix.php }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
         with:
           php-version: ${{ matrix.php }}
           tools: composer
 
       - name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@3cf229dc2919194e9e36783941438d17239e8520 # 3.1.1
         with:
           composer-options: --prefer-dist --no-progress
 
@@ -49,11 +65,8 @@ jobs:
         env:
           WP_ENV_CORE: WordPress/WordPress#${{ matrix.wp }}
 
-      - name: Run PHPCS diff tests
-        run: bash bin/phpcs-diff.sh
-
       - name: Run PHPUnit tests (single site)
-        run: composer integration
+        run: composer test:integration
 
       - name: Run PHPUnit tests (multisite)
-        run: composer integration-ms
+        run: composer test:integration-ms

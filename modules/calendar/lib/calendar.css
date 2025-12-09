@@ -61,27 +61,26 @@ table#ef-calendar-view .day-unit.weekend-day {
 }
 
 #ef-calendar-view .calendar-heading {
-	height: 28px;
-	background: #DFDFDF url('menu-bits.gif') repeat-x scroll left top;
-	-webkit-border-top-left-radius: 6px;	/*** Adds the rounded effect to fit with WP styles ***/
-	-webkit-border-top-right-radius: 6px;
-	-moz-border-radius-topleft: 6px;
-	-moz-border-radius-topright: 6px;
-	border-radius-topleft: 6px;
-	border-radius-topright: 6px;
-	margin-top:5px;
+	height: 36px;
+	background: #fff;
+	border-top: 1px solid #c3c4c7;
+	border-bottom: 1px solid #c3c4c7;
+	margin-top: 5px;
 }
 
 #ef-calendar-view tr th.column-heading {
 	width: 12%;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-	color: #333333;
-	line-height: 1.3em;
-	font-size: 11px;
+	color: #1d2327;
+	line-height: 36px;
+	font-size: 13px;
+	font-weight: 600;
+	text-align: center;
+	padding: 0 8px;
 }
 
 #ef-calendar-view .day-heading span {
-	font-weight: normal;
+	font-weight: 400;
+	color: #50575e;
 }
 
 #ef-calendar-view .month-marker {
@@ -335,11 +334,12 @@ table#ef-calendar-view .day-unit ul li .item-overlay .item-inner {
 }
 
 table#ef-calendar-view .day-unit ul li .item-overlay .item-actions {
-	padding-left: 3px;
-	padding-right: 3px;
-	border-top: 1px solid #CCC;
-	padding-top: 3px;
-	margin-top: 4px;
+	padding: 6px 3px 0;
+	border-top: 1px solid #c3c4c7;
+	margin-top: 8px;
+	color: #a7aaad;
+	font-size: 13px;
+	line-height: 1.8;
 }
 
 table#ef-calendar-view .day-unit ul li .item-overlay .item-actions a {
@@ -347,7 +347,31 @@ table#ef-calendar-view .day-unit ul li .item-overlay .item-actions a {
 }
 
 table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.trash a {
-	color: #BC0B0B;
+	color: #b32d2e;
+}
+
+/* Style the Save button as a primary action */
+table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save {
+	display: block;
+	margin-top: 8px;
+}
+
+table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save.hidden {
+	display: none;
+}
+
+table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save a {
+	display: inline-block;
+	background: #2271b1;
+	color: #fff;
+	padding: 4px 12px;
+	border-radius: 3px;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save a:hover {
+	background: #135e96;
 }
 
 #ef-calendar-view .day-unit .show-more {

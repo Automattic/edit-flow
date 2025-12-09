@@ -8,4 +8,4 @@
  *
  * Since this is not the primary plugin file, it does not have the standard WordPress headers.
  */
-require_once dirname( __FILE__ ) . '/edit_flow.php';
+require_once __DIR__ . '/edit_flow.php';

@@ -14,7 +14,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = tab
 
-[{*.yml,*.feature}]
+[*.yml]
 indent_style = space
 indent_size = 2
 

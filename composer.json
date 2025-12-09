@@ -3,36 +3,34 @@
   "description": "WordPress plugin to accelerate your editorial workflow.",
   "homepage": "http://editflow.org/",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "support": {
     "issues": "https://github.com/Automattic/edit-flow/issues",
     "forum": "https://wordpress.org/support/plugin/edit-flow",
     "source": "https://github.com/Automattic/edit-flow"
   },
   "require": {
-    "composer/installers": "~1.0",
+    "composer/installers": "^1 || ^2",
     "php": ">=8.0"
   },
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
     "exussum12/coverage-checker": "^1.0.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.0",
-    "yoast/phpunit-polyfills": "^2.0"
+    "yoast/wp-test-utils": "^1.2"
   },
   "scripts": {
-    "cs": [
-      "@php ./vendor/bin/phpcs -p -s -v -n . --standard=\"WordPress-VIP-Go\" --extensions=php --ignore=\"/vendor/*,/node_modules/*,/tests/*\""
-    ],
-    "cbf": [
-      "@php ./vendor/bin/phpcbf -p -s -v -n . --standard=\"WordPress-VIP-Go\" --extensions=php --ignore=\"/vendor/*,/node_modules/*,/tests/*\""
-    ],
-    "integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow ./vendor/bin/phpunit",
-    "integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/Edit-Flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit'"
+    "cs": "@php ./vendor/bin/phpcs",
+    "cs-fix": "@php ./vendor/bin/phpcbf",
+    "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit --testsuite integration",
+    "test:integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit --testsuite integration'"
   },
   "config": {
     "allow-plugins": {
       "composer/installers": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
-    }
+    },
+    "lock": false
   }
 }

@@ -67,8 +67,8 @@ const filters = [
 	{
 		name: 'post_status',
 		filterType: 'select',
-		label: __( 'Select a status', 'edit-flow' ),
-		options: [ { value: '', label: __( 'Select a status', 'edit-flow' ) } ].concat(
+		label: __( 'Status', 'edit-flow' ),
+		options: [ { value: '', label: __( 'All statuses', 'edit-flow' ) } ].concat(
 			EF_CALENDAR.POST_STATI.map( ( { name: value, label } ) => ( { value, label } ) )
 		),
 		initialValue: EF_CALENDAR.FILTERS.post_status,
@@ -76,7 +76,7 @@ const filters = [
 	{
 		name: 'author',
 		filterType: 'combobox',
-		inputLabel: __( 'Find a user', 'edit-flow' ),
+		inputLabel: __( 'Author', 'edit-flow' ),
 		buttonOpenLabel: __( 'Open user menu', 'edit-flow' ),
 		buttonCloseLabel: __( 'Close user menu', 'edit-flow' ),
 		buttonClearLabel: __( 'Clear user selection', 'edit-flow' ),
@@ -88,7 +88,7 @@ const filters = [
 	{
 		name: 'cat',
 		filterType: 'combobox',
-		inputLabel: __( 'Find a category', 'edit-flow' ),
+		inputLabel: __( 'Category', 'edit-flow' ),
 		buttonOpenLabel: __( 'Open category menu', 'edit-flow' ),
 		buttonCloseLabel: __( 'Close category menu', 'edit-flow' ),
 		buttonClearLabel: __( 'Clear category selection', 'edit-flow' ),
@@ -106,8 +106,8 @@ if ( EF_CALENDAR.POST_TYPES && EF_CALENDAR.POST_TYPES.length > 1 ) {
 	filters.push( {
 		name: 'cpt',
 		filterType: 'select',
-		label: __( 'Select a type', 'edit-flow' ),
-		options: [ { value: '', label: __( 'Select a type', 'edit-flow' ) } ].concat(
+		label: __( 'Post Type', 'edit-flow' ),
+		options: [ { value: '', label: __( 'All types', 'edit-flow' ) } ].concat(
 			EF_CALENDAR.POST_TYPES.map( ( { name: value, label } ) => ( { value, label } ) )
 		),
 		initialValue: EF_CALENDAR.FILTERS.cpt,

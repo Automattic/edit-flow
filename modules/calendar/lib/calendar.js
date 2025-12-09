@@ -213,8 +213,10 @@ jQuery( document ).ready( function ( $ ) {
 			) {
 				let post_id = $( ui.item ).attr( 'id' ).split( '-' );
 				post_id = post_id[ post_id.length - 1 ];
-				const prev_date = $( this ).closest( '.day-unit' ).attr( 'id' );
-				const next_date = $( ui.item ).closest( '.day-unit' ).attr( 'id' );
+				const prev_date_id = $( this ).closest( '.day-unit' ).attr( 'id' );
+				const prev_date = prev_date_id.substr( 'date-'.length );
+				const next_date_id = $( ui.item ).closest( '.day-unit' ).attr( 'id' );
+				const next_date = next_date_id.substr( 'date-'.length );
 				const nonce = $( document ).find( '#ef-calendar-modify' ).val();
 				$( '.edit-flow-message' ).remove();
 				dispatch( 'edit-flow/calendar' ).setCalendarIsLoading( true );

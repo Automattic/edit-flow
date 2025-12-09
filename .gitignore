@@ -1,10 +1,12 @@
-.svn
-.DS_Store
 *.map
 node_modules
 wordpress
 vendor
+composer.lock
 
 # Test files
-.phpunit.result.cache
+.phpunit.cache/
 artifacts/
+
+# Local wp-env overrides
+.wp-env.override.json
