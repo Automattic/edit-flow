@@ -71,7 +71,7 @@
     "classnames": "^2.5.1",
     "downshift": "^9.0.12",
     "install": "^0.13.0",
-    "match-sorter": "^6.3.4",
+    "match-sorter": "^8.2.0",
     "prop-types": "^15.8.1"
   }
 }
