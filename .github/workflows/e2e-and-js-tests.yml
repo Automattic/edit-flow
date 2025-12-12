@@ -76,7 +76,9 @@ jobs:
 
   test:
     name: E2E and Jest tests
-    runs-on: ubuntu-latest
+    # Pin to ubuntu-22.04 for Playwright compatibility
+    # ubuntu-latest (24.04) has library version mismatches with Playwright's WebKit dependencies
+    runs-on: ubuntu-22.04
     needs: build
     permissions:
       contents: read
@@ -102,7 +104,7 @@ jobs:
           name: build-artifacts
           path: .
 
-      - name: Install Playwright
+      - name: Install Playwright browsers and system dependencies
         run: npx playwright install --with-deps chromium
 
       - name: Install WordPress with wp-env
