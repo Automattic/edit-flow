@@ -139,13 +139,6 @@ editorialCommentReply = {
 
 		const subscribed_users = jQuery( '.ef-post_following_list li input:checkbox:checked' );
 
-		// No users will be notified, so return early with a default message.
-		if ( 0 === subscribed_users.length ) {
-			message_wrapper.addClass( 'ef-none-selected' );
-			message_wrapper.val( __ef_localize_post_comment.none_notified );
-			return;
-		}
-
 		const usernames = [];
 		subscribed_users.each( function () {
 			// Add usernames of checked users to the list if they don't have a blocking class
@@ -160,6 +153,13 @@ editorialCommentReply = {
 				);
 			}
 		} );
+
+		// No users will be notified, so return early with a default message.
+		if ( 0 === usernames.length ) {
+			message_wrapper.addClass( 'ef-none-selected' );
+			message_wrapper.val( __ef_localize_post_comment.none_notified );
+			return;
+		}
 
 		// Convert array of usernames into a sentence.
 		let message = usernames.pop();
