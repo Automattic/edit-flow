@@ -16,15 +16,32 @@
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
     "exussum12/coverage-checker": "^1.0.0",
+    "php-parallel-lint/php-parallel-lint": "^1.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.0",
     "yoast/wp-test-utils": "^1.2"
   },
   "scripts": {
-    "cs": "@php ./vendor/bin/phpcs",
-    "cs-fix": "@php ./vendor/bin/phpcbf",
+    "coverage": "@php ./vendor/bin/phpunit --coverage-html ./build/coverage-html",
+    "coverage-ci": "@php ./vendor/bin/phpunit",
+    "cs": "@php ./vendor/bin/phpcs -q",
+    "cs-fix": "@php ./vendor/bin/phpcbf -q",
+    "i18n": "@php wp i18n make-pot . ./languages/edit-flow.pot",
+    "lint": "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . -e php --exclude vendor --exclude .git",
+    "lint-ci": "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . -e php --exclude vendor --exclude .git --checkstyle",
     "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit --testsuite integration",
     "test:integration-ms": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow /bin/bash -c 'WP_MULTISITE=1 ./vendor/bin/phpunit --testsuite integration'"
+  },
+  "scripts-descriptions": {
+    "coverage": "Run tests with code coverage reporting",
+    "coverage-ci": "Run tests with code coverage reporting and send results to stdout",
+    "cs": "Run PHP Code Sniffer",
+    "cs-fix": "Run PHP Code Sniffer and fix violations",
+    "i18n": "Generate a POT file for translation",
+    "lint": "Run PHP linting",
+    "lint-ci": "Run PHP linting and send results to stdout",
+    "test:integration": "Run integration tests",
+    "test:integration-ms": "Run integration tests in multisite mode"
   },
   "config": {
     "allow-plugins": {
