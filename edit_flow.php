@@ -6,7 +6,7 @@
  * Author: Daniel Bachhuber, Scott Bressler, Mohammad Jangda, Automattic, and others
  * Version: 0.10.0
  * Requires at least: 6.4
- * Requires PHP: 8.0
+ * Requires PHP: 7.4
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -21,12 +21,12 @@
 function _ef_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-			<p><?php esc_html_e( 'Edit Flow requires PHP 8.0+. Please contact your host to update your PHP version.', 'edit-flow' ); ?></p>
+			<p><?php esc_html_e( 'Edit Flow requires PHP 7.4+. Please contact your host to update your PHP version.', 'edit-flow' ); ?></p>
 		</div>
 	<?php
 }
 
-if ( version_compare( phpversion(), '8.0', '<' ) ) {
+if ( version_compare( phpversion(), '7.4', '<' ) ) {
 	add_action( 'admin_notices', '_ef_print_php_version_admin_notice' );
 	return;
 }
