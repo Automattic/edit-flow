@@ -14,8 +14,6 @@ updates:
         patterns: ["*"]
     labels:
       - "dependencies"
-    reviewers:
-      - "Automattic/vip-plugins"
     commit-message:
       prefix: "Actions"
       include: "scope"
@@ -39,8 +37,6 @@ updates:
           - "yoast/*"
     labels:
       - "dependencies"
-    reviewers:
-      - "Automattic/vip-plugins"
     commit-message:
       prefix: "Composer"
       include: "scope"
@@ -62,8 +58,6 @@ updates:
           - "@types/*"
     labels:
       - "dependencies"
-    reviewers:
-      - "Automattic/vip-plugins"
     commit-message:
       prefix: "npm"
       include: "scope"

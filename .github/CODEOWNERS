@@ -1,0 +1,3 @@
+# The following teams will get auto-tagged for a review.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+* @Automattic/vip-plugins
