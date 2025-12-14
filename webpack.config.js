@@ -4,7 +4,8 @@ var glob = require( 'glob' );
 
 const entries = glob.sync( './modules/**/lib/*-block.js' ).reduce( ( acc, item ) => {
 	const name = item.replace( /modules\/(.*)\/lib\/(.*)-block.js/, '$1' );
-	acc[ name ] = item;
+	// Ensure path starts with './' for webpack to treat it as a relative path
+	acc[ name ] = item.startsWith( './' ) ? item : './' + item;
 	return acc;
 }, {} );
 
