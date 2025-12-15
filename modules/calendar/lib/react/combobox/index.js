@@ -28,8 +28,8 @@ import './style.react.scss';
 function getItems( filter, items ) {
 	return filter
 		? matchSorter( items, filter, {
-				keys: [ 'name' ],
-		  } )
+			keys: [ 'name' ],
+		} )
 		: items;
 }
 
