@@ -4,7 +4,7 @@ Donate link: http://editflow.org/contribute/
 Tags: workflow, editorial, editorial calendar, custom status, newsroom
 Requires at least: 6.4
 Requires PHP: 7.4
-Tested up to: 6.5
+Tested up to: 6.9
 Stable tag: 0.9.9
 
 Redefining your editorial workflow.
