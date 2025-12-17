@@ -19,7 +19,6 @@ jobs:
     # Alias 'master' to 'latest'
     name: WP ${{ matrix.wp == 'master' && 'latest' || matrix.wp }} and PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.allowed_failure }}
     permissions:
       contents: read
 
@@ -30,15 +29,9 @@ jobs:
           # Check lowest supported WP version, with the lowest supported PHP.
           - php: '7.4'
             wp: '6.4'
-            allowed_failure: false
-          # Check current stable WP (6.9) with latest PHP.
-          - php: 'latest'
-            wp: '6.9'
-            allowed_failure: false
-          # Check upcoming WP with latest PHP.
+          # Check latest WP with the latest PHP.
           - php: 'latest'
             wp: 'master'
-            allowed_failure: true
 
     steps:
       - name: Checkout code
