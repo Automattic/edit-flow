@@ -1,7 +1,4 @@
 const AutomatticPlugin = require( '@automattic/eslint-plugin-wpvip' );
-const ReactPlugin = require( 'eslint-plugin-react' );
-const ReactHooksPlugin = require( 'eslint-plugin-react-hooks' );
-const JsxA11yPlugin = require( 'eslint-plugin-jsx-a11y' );
 
 module.exports = [
 	{
@@ -12,14 +9,7 @@ module.exports = [
 			'**/*.build.js',
 		],
 	},
-	// Use individual configs instead of "recommended" to avoid react-hooks flat config bug
-	// in @automattic/eslint-plugin-wpvip@1.0.0 (uses legacy plugins array format)
-	...AutomatticPlugin.configs.javascript,
-	...AutomatticPlugin.configs.testing,
-	// Manually configure React with correct flat config exports
-	ReactPlugin.configs.flat.recommended,
-	ReactHooksPlugin.configs.flat.recommended,
-	JsxA11yPlugin.flatConfigs.recommended,
+	...AutomatticPlugin.configs.recommended,
 	{
 		settings: {
 			react: {
