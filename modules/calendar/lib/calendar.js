@@ -13,7 +13,7 @@ jQuery( document ).ready( function ( $ ) {
 	 * html given the input type
 	 */
 	$( '.day-unit' ).on( 'click', '.editable-value', function ( event ) {
-		//Reset anything that was currently being edited.
+		// Reset anything that was currently being edited.
 		reset_editorial_metadata();
 		const t = this;
 		const $editable_el = $( this ).addClass( 'hidden' ).next( '.editable-html' );
@@ -34,7 +34,7 @@ jQuery( document ).ready( function ( $ ) {
 			.removeClass( 'hidden' );
 	} );
 
-	//Save the editorial metadata we've changed
+	// Save the editorial metadata we've changed
 	$( '.day-unit' ).on( 'click', 'a#save-editorial-metadata', function () {
 		const post_id = $( this ).attr( 'class' ).replace( 'post-', '' );
 		save_editorial_metadata( post_id );
@@ -117,10 +117,10 @@ jQuery( document ).ready( function ( $ ) {
 	 * Somewhat hackish way to close overlays automagically when you click outside an overlay
 	 */
 	$( document ).on( 'click', function ( event ) {
-		//Did we click on a list item? How do we figure that out?
-		//First let's see if we directly clicked on a .day-item
+		// Did we click on a list item? How do we figure that out?
+		// First let's see if we directly clicked on a .day-item
 		let target = $( event.target );
-		//Case where we've clicked on the list item directly
+		// Case where we've clicked on the list item directly
 		if ( target.hasClass( 'day-item' ) ) {
 			if ( target.hasClass( 'active' ) ) {
 				return;
@@ -139,7 +139,7 @@ jQuery( document ).ready( function ( $ ) {
 			return;
 		}
 
-		//Case where we've clicked in the list item
+		// Case where we've clicked in the list item
 		target = target.closest( '.day-item' );
 		if ( target.length ) {
 			if ( target.hasClass( 'day-item' ) ) {
@@ -291,11 +291,11 @@ jQuery( document ).ready( function ( $ ) {
 				EFQuickPublish.$current_date_square = $this.parent();
 			}
 
-			//Get our form content
+			// Get our form content
 			const $new_post_form_content =
 				EFQuickPublish.$current_date_square.find( '.post-insert-dialog' );
 
-			//Inject the form (it will automatically be removed on click-away because of its 'item-overlay' class)
+			// Inject the form (it will automatically be removed on click-away because of its 'item-overlay' class)
 			EFQuickPublish.$new_post_form = $new_post_form_content
 				.clone()
 				.addClass( 'item-overlay post-insert-overlay' )
@@ -353,11 +353,11 @@ jQuery( document ).ready( function ( $ ) {
 					},
 					success( response, textStatus, XMLHttpRequest ) {
 						if ( response.status == 'success' ) {
-							//The response message on success is the html for the a post list item
+							// The response message on success is the html for the a post list item
 							const $new_post = $( response.message );
 
 							if ( redirect_to_draft ) {
-								//If user clicked on the 'edit post' link, let's send them to the new post
+								// If user clicked on the 'edit post' link, let's send them to the new post
 								const edit_url = $new_post.find( '.item-actions .edit a' ).attr( 'href' );
 								window.location = edit_url;
 							} else {

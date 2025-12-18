@@ -35,7 +35,9 @@ const moveByWeeks = ( addOrSubtract, beginningOfWeek, pageUrl, filterValues, wee
 		queryArgFilters.start_date = beginningOfWeek;
 	}
 
-	queryArgFilters.start_date = moment( queryArgFilters.start_date, 'YYYY-MM-DD' )[ addOrSubtract ]( weeksNumber, 'weeks' ).format( 'YYYY-MM-DD' );
+	queryArgFilters.start_date = moment( queryArgFilters.start_date, 'YYYY-MM-DD' )
+		[ addOrSubtract ]( weeksNumber, 'weeks' )
+		.format( 'YYYY-MM-DD' );
 
 	return addQueryArgs( pageUrl, queryArgFilters );
 };

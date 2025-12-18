@@ -6,7 +6,6 @@
 import { SelectControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 
