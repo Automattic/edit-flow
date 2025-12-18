@@ -42,14 +42,12 @@ jobs:
       - name: Verify built assets exist
         run: |
           echo "Checking custom-status assets..."
-          test -f dist/custom-status.build.js || (echo "Missing: dist/custom-status.build.js" && exit 1)
-          test -f dist/custom-status.editor.build.css || (echo "Missing: dist/custom-status.editor.build.css" && exit 1)
-          test -f dist/custom-status.style.build.css || (echo "Missing: dist/custom-status.style.build.css" && exit 1)
+          test -f build/custom-status-block.js || (echo "Missing: build/custom-status-block.js" && exit 1)
+          test -f build/custom-status-block.css || (echo "Missing: build/custom-status-block.css" && exit 1)
 
           echo "Checking calendar assets..."
-          test -f modules/calendar/lib/dist/calendar.react.build.js || (echo "Missing: modules/calendar/lib/dist/calendar.react.build.js" && exit 1)
-          test -f modules/calendar/lib/dist/calendar.react.editor.build.css || (echo "Missing: modules/calendar/lib/dist/calendar.react.editor.build.css" && exit 1)
-          test -f modules/calendar/lib/dist/calendar.react.style.build.css || (echo "Missing: modules/calendar/lib/dist/calendar.react.style.build.css" && exit 1)
+          test -f build/calendar-react.js || (echo "Missing: build/calendar-react.js" && exit 1)
+          test -f build/calendar-react.css || (echo "Missing: build/calendar-react.css" && exit 1)
 
           echo "All expected assets present!"
 
@@ -59,8 +57,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
           echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| custom-status.build.js | $(du -h dist/custom-status.build.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
-          echo "| calendar.react.build.js | $(du -h modules/calendar/lib/dist/calendar.react.build.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| custom-status-block.js | $(du -h build/custom-status-block.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| calendar-react.js | $(du -h build/calendar-react.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
 
       - name: Run Lint JS
         run: npm run lint-js
@@ -69,9 +67,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: build-artifacts
-          path: |
-            dist/
-            modules/calendar/lib/dist/
+          path: build/
           retention-days: 1
 
   test:
@@ -102,7 +98,7 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: build-artifacts
-          path: .
+          path: build/
 
       - name: Install Playwright browsers and system dependencies
         run: npx playwright install --with-deps chromium

@@ -192,7 +192,16 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			// Only load calendar styles on the calendar page
 			if ( 'index.php' === $pagenow && isset( $_GET['page'] ) && 'calendar' === $_GET['page'] ) {
 				wp_enqueue_style( 'edit-flow-calendar-css', $this->module_url . 'lib/calendar.css', false, EDIT_FLOW_VERSION );
-				wp_enqueue_style( 'edit-flow-calendar-react-css', $this->module_url . 'lib/dist/calendar.react.style.build.css', array( 'wp-components' ), EDIT_FLOW_VERSION );
+
+				$asset_file = EDIT_FLOW_ROOT . '/build/calendar-react.asset.php';
+				$asset      = file_exists( $asset_file ) ? require $asset_file : [ 'dependencies' => [], 'version' => EDIT_FLOW_VERSION ];
+
+				wp_enqueue_style(
+					'edit-flow-calendar-react-css',
+					EDIT_FLOW_URL . 'build/calendar-react.css',
+					[ 'wp-components' ],
+					$asset['version']
+				);
 			}
 		}
 
@@ -227,7 +236,16 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				/**
 				 * Powering the new React interface
 				 */
-				wp_enqueue_script( 'edit-flow-calendar-react-js', $this->module_url . 'lib/dist/calendar.react.build.js', array( 'react', 'react-dom', 'wp-components', 'wp-url', 'wp-data', 'moment' ), EDIT_FLOW_VERSION, true );
+				$asset_file = EDIT_FLOW_ROOT . '/build/calendar-react.asset.php';
+				$asset      = file_exists( $asset_file ) ? require $asset_file : [ 'dependencies' => [], 'version' => EDIT_FLOW_VERSION ];
+
+				wp_enqueue_script(
+					'edit-flow-calendar-react-js',
+					EDIT_FLOW_URL . 'build/calendar-react.js',
+					$asset['dependencies'],
+					$asset['version'],
+					true
+				);
 
 				wp_add_inline_script(
 					'edit-flow-calendar-react-js',

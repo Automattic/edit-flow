@@ -11,12 +11,24 @@ module.exports = [
 	},
 	...AutomatticPlugin.configs.recommended,
 	{
+		languageOptions: {
+			parserOptions: {
+				babelOptions: {
+					presets: [ '@babel/preset-react' ],
+				},
+			},
+		},
 		settings: {
 			react: {
 				version: 'detect',
 			},
+			// WordPress packages are loaded at runtime, not installed as npm dependencies
+			'import/core-modules': [ '@wordpress/i18n', '@wordpress/url', '@wordpress/data', '@wordpress/components', '@wordpress/compose', '@wordpress/plugins', '@wordpress/editor', 'moment', 'react', 'react-dom' ],
 		},
 		rules: {
+			// WordPress packages (react, react-dom, etc.) are available at runtime via wp-scripts
+			'import/no-extraneous-dependencies': 'off',
+			'no-duplicate-imports': 'off', // Conflicts with type-only imports pattern
 			// Project-specific rule overrides (matching previous .eslintrc.js)
 			'no-prototype-builtins': 'off',
 			'no-eval': 'off',

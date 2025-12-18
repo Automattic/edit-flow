@@ -326,7 +326,15 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		public function load_scripts_for_block_editor() {
 			global $post;
 
-			wp_enqueue_script( 'edit-flow-block-custom-status-script', EDIT_FLOW_URL . 'dist/custom-status.build.js', [ 'wp-blocks', 'wp-element', 'wp-edit-post', 'wp-plugins', 'wp-components' ], EDIT_FLOW_VERSION );
+			$asset_file = EDIT_FLOW_ROOT . '/build/custom-status-block.asset.php';
+			$asset      = file_exists( $asset_file ) ? require $asset_file : [ 'dependencies' => [], 'version' => EDIT_FLOW_VERSION ];
+
+			wp_enqueue_script(
+				'edit-flow-block-custom-status-script',
+				EDIT_FLOW_URL . 'build/custom-status-block.js',
+				$asset['dependencies'],
+				$asset['version']
+			);
 
 			$custom_statuses = apply_filters( 'ef_custom_status_list', $this->get_custom_statuses(), $post );
 
@@ -334,7 +342,15 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		public function load_styles_for_block_editor() {
-			wp_enqueue_style( 'edit-flow-block-custom-status-styles', EDIT_FLOW_URL . 'dist/custom-status.editor.build.css', false, EDIT_FLOW_VERSION );
+			$asset_file = EDIT_FLOW_ROOT . '/build/custom-status-block.asset.php';
+			$asset      = file_exists( $asset_file ) ? require $asset_file : [ 'dependencies' => [], 'version' => EDIT_FLOW_VERSION ];
+
+			wp_enqueue_style(
+				'edit-flow-block-custom-status-styles',
+				EDIT_FLOW_URL . 'build/custom-status-block.css',
+				[],
+				$asset['version']
+			);
 		}
 
 		/**

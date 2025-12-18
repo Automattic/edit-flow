@@ -3,6 +3,7 @@ node_modules
 wordpress
 vendor
 composer.lock
+build/
 
 # Test files
 .phpunit.cache/
