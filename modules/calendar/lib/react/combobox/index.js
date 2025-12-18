@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { BaseControl, Button, IconButton } from '@wordpress/components';
+import { Button, IconButton } from '@wordpress/components';
 import classnames from 'classnames';
 import Downshift from 'downshift';
 import { matchSorter } from 'match-sorter';
@@ -28,8 +28,8 @@ import './style.react.scss';
 function getItems( filter, items ) {
 	return filter
 		? matchSorter( items, filter, {
-			keys: [ 'name' ],
-		} )
+				keys: [ 'name' ],
+		  } )
 		: items;
 }
 
