@@ -757,6 +757,10 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 
 			$post_status = get_post_status_object( get_post_status( $post->ID ) );
 
+			if ( ! is_object( $post_status ) ) {
+				return $post_states;
+			}
+
 			$filtered_status = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : '';
 			if ( $filtered_status === $post_status->name ) {
 				// No need to display the post status if a specific status was already requested.
