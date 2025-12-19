@@ -194,8 +194,10 @@ class EF_Story_Budget extends EF_Module {
 	 * @since 0.7
 	 */
 	public function handle_form_date_range_change() {
+		$is_today_submit = isset( $_POST['ef-story-budget-today-submit'] );
+		$is_range_submit = isset( $_POST['ef-story-budget-range-submit'], $_POST['ef-story-budget-number-days'], $_POST['ef-story-budget-start-date_hidden'] );
 
-		if ( ! isset( $_POST['ef-story-budget-range-submit'], $_POST['ef-story-budget-number-days'], $_POST['ef-story-budget-start-date_hidden'] ) ) {
+		if ( ! $is_today_submit && ! $is_range_submit ) {
 			return;
 		}
 
@@ -204,15 +206,28 @@ class EF_Story_Budget extends EF_Module {
 		}
 
 		$current_user = wp_get_current_user();
-		$new_filters = array(
-			'start_date' => $_POST['ef-story-budget-start-date_hidden'],
-			'number_days' => (int) $_POST['ef-story-budget-number-days'],
-		);
+
+		if ( $is_today_submit ) {
+			// "Today" button: set start date to current date, keep existing number of days
+			$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
+			$new_filters = array(
+				'start_date'  => current_time( 'Y-m-d' ),
+				'number_days' => isset( $existing_filters['number_days'] ) ? (int) $existing_filters['number_days'] : 10,
+			);
+		} else {
+			// "Change" button: use form values
+			$new_filters = array(
+				'start_date'  => $_POST['ef-story-budget-start-date_hidden'],
+				'number_days' => (int) $_POST['ef-story-budget-number-days'],
+			);
+		}
+
 		$user_filters = $this->update_user_filters_from_form_date_range_change( $current_user, $new_filters );
 
 		$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
-		wp_redirect( menu_page_url( $this->module->slug, false ) );
-		wp_die();
+
+		wp_safe_redirect( menu_page_url( $this->module->slug, false ) );
+		exit;
 	}
 
 	/**
@@ -376,6 +391,7 @@ class EF_Story_Budget extends EF_Module {
 				<input id="ef-story-budget-range-submit" name="ef-story-budget-range-submit" type="submit" class="button-primary" value="<?php echo esc_attr( __( 'Change', 'edit-flow' ) ); ?>" />
 				<a class="change-date-cancel hidden" href="#"><?php echo esc_html( __( 'Cancel', 'edit-flow' ) ); ?></a>
 				<a class="change-date" href="#"><?php echo esc_html( __( 'Change', 'edit-flow' ) ); ?></a>
+				<button id="ef-story-budget-today-submit" name="ef-story-budget-today-submit" type="submit" value="1" class="button-secondary"><?php esc_html_e( 'Today', 'edit-flow' ); ?></button>
 			</span>
 			<?php wp_nonce_field( 'change-date', 'nonce', 'change-date-nonce', true ); ?>
 		</form>
