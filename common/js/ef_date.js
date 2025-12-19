@@ -26,6 +26,7 @@ jQuery( document ).ready( function() {
 			firstDay: ef_week_first_day,
 			altField: '#' + $datePicker.prop( 'id' ) + '_hidden',
 			altFormat: 'yy-mm-dd',
+			showButtonPanel: true,
 		} );
 	} );
 } );

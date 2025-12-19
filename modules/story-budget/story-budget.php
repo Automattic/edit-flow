@@ -30,6 +30,10 @@ class EF_Story_Budget extends EF_Module {
 	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 	const default_num_columns = 1;
 
+	public $show_excerpts = false;
+
+	public $hide_empty_terms = false;
+
 	private $term_columns;
 
 	/**
@@ -66,13 +70,16 @@ class EF_Story_Budget extends EF_Module {
 			return;
 		}
 
-		$this->num_columns = $this->get_num_columns();
-		$this->max_num_columns = apply_filters( 'ef_story_budget_max_num_columns', 3 );
+		$this->num_columns       = $this->get_num_columns();
+		$this->show_excerpts     = $this->get_show_excerpts();
+		$this->hide_empty_terms  = $this->get_hide_empty_terms();
+		$this->max_num_columns   = apply_filters( 'ef_story_budget_max_num_columns', 3 );
 
 		// Filter to allow users to pick a taxonomy other than 'category' for sorting their posts
 		$this->taxonomy_used = apply_filters( 'ef_story_budget_taxonomy_used', $this->taxonomy_used );
 
 		add_action( 'admin_init', array( $this, 'handle_form_date_range_change' ) );
+		add_action( 'admin_init', array( $this, 'handle_filter_reset' ) );
 		add_action( 'admin_init', array( $this, 'add_screen_options_panel' ) );
 		// Register the columns of data appearing on every term. This is hooked into admin_init
 		// so other Edit Flow modules can register their filters if needed
@@ -189,15 +196,46 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
+	 * Handle a request to reset filters.
+	 *
+	 * @since 0.10
+	 */
+	public function handle_filter_reset() {
+		if ( ! isset( $_GET['page'] ) || 'story-budget' !== $_GET['page'] ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['reset-filters'] ) || '1' !== $_GET['reset-filters'] ) {
+			return;
+		}
+
+		$current_user = wp_get_current_user();
+
+		// Clear filter values from user meta, preserving date settings.
+		$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
+
+		$user_filters = array(
+			'post_status' => '',
+			'cat'         => '',
+			'author'      => '',
+			'start_date'  => isset( $existing_filters['start_date'] ) ? $existing_filters['start_date'] : null,
+			'number_days' => isset( $existing_filters['number_days'] ) ? $existing_filters['number_days'] : null,
+		);
+
+		$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
+
+		// Redirect to clean URL without the reset-filters param.
+		wp_safe_redirect( menu_page_url( $this->module->slug, false ) );
+		exit;
+	}
+
+	/**
 	 * Handle a form submission to change the user's date range on the budget
 	 *
 	 * @since 0.7
 	 */
 	public function handle_form_date_range_change() {
-		$is_today_submit = isset( $_POST['ef-story-budget-today-submit'] );
-		$is_range_submit = isset( $_POST['ef-story-budget-range-submit'], $_POST['ef-story-budget-number-days'], $_POST['ef-story-budget-start-date_hidden'] );
-
-		if ( ! $is_today_submit && ! $is_range_submit ) {
+		if ( ! isset( $_POST['ef-story-budget-range-submit'] ) || ! isset( $_POST['ef-story-budget-number-days'] ) ) {
 			return;
 		}
 
@@ -205,22 +243,18 @@ class EF_Story_Budget extends EF_Module {
 			wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 		}
 
-		$current_user = wp_get_current_user();
+		$current_user     = wp_get_current_user();
+		$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
 
-		if ( $is_today_submit ) {
-			// "Today" button: set start date to current date, keep existing number of days
-			$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
-			$new_filters = array(
-				'start_date'  => current_time( 'Y-m-d' ),
-				'number_days' => isset( $existing_filters['number_days'] ) ? (int) $existing_filters['number_days'] : 10,
-			);
-		} else {
-			// "Change" button: use form values
-			$new_filters = array(
-				'start_date'  => $_POST['ef-story-budget-start-date_hidden'],
-				'number_days' => (int) $_POST['ef-story-budget-number-days'],
-			);
-		}
+		// Use form values, but preserve start_date if hidden field is empty.
+		$start_date = ! empty( $_POST['ef-story-budget-start-date_hidden'] )
+			? sanitize_text_field( $_POST['ef-story-budget-start-date_hidden'] )
+			: ( isset( $existing_filters['start_date'] ) ? $existing_filters['start_date'] : current_time( 'Y-m-d' ) );
+
+		$new_filters = array(
+			'start_date'  => $start_date,
+			'number_days' => (int) $_POST['ef-story-budget-number-days'],
+		);
 
 		$user_filters = $this->update_user_filters_from_form_date_range_change( $current_user, $new_filters );
 
@@ -253,11 +287,8 @@ class EF_Story_Budget extends EF_Module {
 
 		if ( isset( $new_filters['number_days'] ) ) {
 			$new_filters['number_days'] = intval( $new_filters['number_days'] );
-			if ( $new_filters['number_days'] <= 1 ) {
-				$existing_filters['number_days'] = 1;
-			} else {
-				$existing_filters['number_days'] = $new_filters['number_days'];
-			}
+			// Enforce min 1 and max 30.
+			$existing_filters['number_days'] = max( 1, min( 30, $new_filters['number_days'] ) );
 		}
 
 		return $existing_filters;
@@ -269,7 +300,7 @@ class EF_Story_Budget extends EF_Module {
 	public function get_num_columns() {
 
 		if ( empty( $this->num_columns ) ) {
-			$current_user = wp_get_current_user();
+			$current_user      = wp_get_current_user();
 			$this->num_columns = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'screen_columns', true );
 			// If usermeta didn't have a value already, use a default value and insert into DB
 			if ( empty( $this->num_columns ) ) {
@@ -278,6 +309,28 @@ class EF_Story_Budget extends EF_Module {
 			}
 		}
 		return $this->num_columns;
+	}
+
+	/**
+	 * Get the user's preference for showing excerpts.
+	 *
+	 * @return bool Whether to show excerpts.
+	 */
+	public function get_show_excerpts() {
+		$current_user = wp_get_current_user();
+		$show         = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'show_excerpts', true );
+		return (bool) $show;
+	}
+
+	/**
+	 * Get the user's preference for hiding empty categories.
+	 *
+	 * @return bool Whether to hide empty categories.
+	 */
+	public function get_hide_empty_terms() {
+		$current_user = wp_get_current_user();
+		$hide         = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'hide_empty_terms', true );
+		return (bool) $hide;
 	}
 
 	/**
@@ -298,19 +351,36 @@ class EF_Story_Budget extends EF_Module {
 		for ( $i = 1; $i <= $this->max_num_columns; ++$i ) {
 			$return_val .= "<label><input type='radio' name='" . esc_attr( self::usermeta_key_prefix ) . "screen_columns' value='" . esc_attr( $i ) . "' " . checked( $this->get_num_columns(), $i, false ) . ' />&nbsp;' . esc_attr( $i ) . "</label>\n";
 		}
+
+		$return_val .= '<br /><br />';
+		$return_val .= "<label><input type='checkbox' name='" . esc_attr( self::usermeta_key_prefix ) . "show_excerpts' value='1' " . checked( $this->get_show_excerpts(), true, false ) . ' />&nbsp;' . esc_html__( 'Show post excerpts', 'edit-flow' ) . "</label>\n";
+
+		$return_val .= '<br />';
+		$return_val .= "<label><input type='checkbox' name='" . esc_attr( self::usermeta_key_prefix ) . "hide_empty_terms' value='1' " . checked( $this->get_hide_empty_terms(), true, false ) . ' />&nbsp;' . esc_html__( 'Hide empty categories', 'edit-flow' ) . "</label>\n";
+
 		return $return_val;
 	}
 
 	/**
-	 * Save the current user's preference for number of columns.
+	 * Save the current user's screen preferences.
 	 */
 	public function save_column_prefs( $posted_fields ) {
-
-		$key = self::usermeta_key_prefix . 'screen_columns';
-		$this->num_columns = (int) $posted_fields[ $key ];
-
 		$current_user = wp_get_current_user();
-		$this->update_user_meta( $current_user->ID, $key, $this->num_columns );
+
+		// Save columns preference.
+		$columns_key       = self::usermeta_key_prefix . 'screen_columns';
+		$this->num_columns = isset( $posted_fields[ $columns_key ] ) ? (int) $posted_fields[ $columns_key ] : self::default_num_columns;
+		$this->update_user_meta( $current_user->ID, $columns_key, $this->num_columns );
+
+		// Save excerpts preference.
+		$excerpts_key        = self::usermeta_key_prefix . 'show_excerpts';
+		$this->show_excerpts = ! empty( $posted_fields[ $excerpts_key ] );
+		$this->update_user_meta( $current_user->ID, $excerpts_key, $this->show_excerpts ? 1 : 0 );
+
+		// Save hide empty terms preference.
+		$hide_empty_key         = self::usermeta_key_prefix . 'hide_empty_terms';
+		$this->hide_empty_terms = ! empty( $posted_fields[ $hide_empty_key ] );
+		$this->update_user_meta( $current_user->ID, $hide_empty_key, $this->hide_empty_terms ? 1 : 0 );
 	}
 
 	/**
@@ -338,11 +408,18 @@ class EF_Story_Budget extends EF_Module {
 		}
 		$this->terms = apply_filters( 'ef_story_budget_filter_terms', $terms ); // allow for reordering or any other filtering of terms
 
+		$wrap_classes = 'wrap';
+		if ( $this->show_excerpts ) {
+			$wrap_classes .= ' show-excerpts';
+		}
+		if ( $this->hide_empty_terms ) {
+			$wrap_classes .= ' hide-empty-terms';
+		}
 		?>
-		<div class="wrap" id="ef-story-budget-wrap">
+		<div class="<?php echo esc_attr( $wrap_classes ); ?>" id="ef-story-budget-wrap">
 			<div id="ef-story-budget-title">
 				<?php echo '<img src="' . esc_url( $this->module->img_url ) . '" class="module-icon icon32" />'; ?>
-				<h2><?php _e( 'Story Budget', 'edit-flow' ); ?>&nbsp;<span class="time-range"><?php $this->story_budget_time_range(); ?></span></h2>
+				<h2><?php _e( 'Story Budget', 'edit-flow' ); ?></h2>
 			</div><!-- /Story Budget Title -->
 			<?php $this->print_messages(); ?>
 			<?php $this->table_navigation(); ?>
@@ -358,9 +435,14 @@ class EF_Story_Budget extends EF_Module {
 				<style>
 					<?php
 					for ( $i = 1; $i <= $this->max_num_columns; ++$i ) {
+						// Account for gap: each column needs (gap * (n-1) / n) less width.
+						$gap_adjustment = ( 10 * ( $i - 1 ) ) / $i;
 						?>
 					.columns-number-<?php echo (int) $i; ?> .postbox {
-						flex-basis: <?php echo floatval( 99 / $i ); ?>%;
+						flex-basis: calc(<?php echo floatval( 100 / $i ); ?>% - <?php echo floatval( $gap_adjustment ); ?>px);
+						flex-grow: 0;
+						flex-shrink: 1;
+						min-width: 0;
 					}
 						<?php
 					}
@@ -378,21 +460,18 @@ class EF_Story_Budget extends EF_Module {
 	 */
 	public function story_budget_time_range() {
 		?>
-		<form method="POST" action="<?php echo esc_url( menu_page_url( $this->module->slug, false ) ); ?>">
-			<?php _e( 'starting', 'edit-flow' ); ?>
-			<span class="form-value"><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $this->user_filters['start_date'] ) ) ); ?></span>
-			<input type="text" id="ef-story-budget-start-date" name="ef-story-budget-start-date" size="20" autocomplete="off" class="date-pick" value="<?php echo esc_attr( date_i18n( get_option( 'date_format' ), strtotime( $this->user_filters['start_date'] ) ) ); ?>" />
+		<form method="POST" action="<?php echo esc_url( menu_page_url( $this->module->slug, false ) ); ?>" id="ef-story-budget-date-form">
+			<label for="ef-story-budget-start-date">
+				<span class="screen-reader-text"><?php esc_html_e( 'Start date', 'edit-flow' ); ?></span>
+				<input type="text" id="ef-story-budget-start-date" name="ef-story-budget-start-date" size="12" autocomplete="off" class="date-pick" value="<?php echo esc_attr( date_i18n( get_option( 'date_format' ), strtotime( $this->user_filters['start_date'] ) ) ); ?>" />
+			</label>
 			<input type="hidden" id="ef-story-budget-start-date_hidden" name="ef-story-budget-start-date_hidden" />
-			<?php _e( 'showing', 'edit-flow' ); ?>
-			<input type="text" id="ef-story-budget-number-days" name="ef-story-budget-number-days" size="3" maxlength="3" value="<?php echo esc_attr( $this->user_filters['number_days'] ); ?>" />
-			<span class="form-value"><?php echo esc_html( $this->user_filters['number_days'] ); ?></span>
+			<label for="ef-story-budget-number-days">
+				<span class="screen-reader-text"><?php esc_html_e( 'Number of days', 'edit-flow' ); ?></span>
+				<input type="number" id="ef-story-budget-number-days" name="ef-story-budget-number-days" min="1" max="30" value="<?php echo esc_attr( $this->user_filters['number_days'] ); ?>" />
+			</label>
 			<?php echo esc_html( _n( 'day', 'days', $this->user_filters['number_days'], 'edit-flow' ) ); ?>
-			<span class="change-date-buttons">
-				<input id="ef-story-budget-range-submit" name="ef-story-budget-range-submit" type="submit" class="button-primary" value="<?php echo esc_attr( __( 'Change', 'edit-flow' ) ); ?>" />
-				<a class="change-date-cancel hidden" href="#"><?php echo esc_html( __( 'Cancel', 'edit-flow' ) ); ?></a>
-				<a class="change-date" href="#"><?php echo esc_html( __( 'Change', 'edit-flow' ) ); ?></a>
-				<button id="ef-story-budget-today-submit" name="ef-story-budget-today-submit" type="submit" value="1" class="button-secondary"><?php esc_html_e( 'Today', 'edit-flow' ); ?></button>
-			</span>
+			<button id="ef-story-budget-range-submit" name="ef-story-budget-range-submit" type="submit" class="button-secondary"><?php esc_html_e( 'Update', 'edit-flow' ); ?></button>
 			<?php wp_nonce_field( 'change-date', 'nonce', 'change-date-nonce', true ); ?>
 		</form>
 		<?php
@@ -490,8 +569,13 @@ class EF_Story_Budget extends EF_Module {
 			echo ' postbox-has-posts';}
 		?>
 	">
-		<div class="handlediv" title="<?php _e( 'Click to toggle', 'edit-flow' ); ?>"><br /></div>
-		<h3 class='hndle'><span><?php echo esc_html( $term->name ); ?></span></h3>
+		<h3 class='hndle'>
+			<span><?php echo esc_html( $term->name ); ?></span>
+			<button type="button" class="handlediv" aria-expanded="true" title="<?php esc_attr_e( 'Click to toggle', 'edit-flow' ); ?>">
+				<span class="screen-reader-text"><?php esc_html_e( 'Toggle panel', 'edit-flow' ); ?></span>
+				<span class="toggle-indicator" aria-hidden="true"></span>
+			</button>
+		</h3>
 		<div class="inside">
 			<?php if ( ! empty( $posts ) ) : ?>
 			<table class="widefat post fixed story-budget" cellspacing="0">
@@ -530,7 +614,8 @@ class EF_Story_Budget extends EF_Module {
 		<tr id='post-<?php echo esc_attr( $post->ID ); ?>' class='alternate' valign="top">
 			<?php
 			foreach ( (array) $this->term_columns as $key => $name ) {
-				echo '<td>';
+				$class = ( 'title' === $key ) ? ' class="post-title"' : '';
+				echo '<td' . $class . '>';
 				if ( method_exists( $this, 'term_column_' . $key ) ) {
 					$method = 'term_column_' . $key;
 					echo wp_kses_post( $this->$method( $post, $parent_term ) );
@@ -574,10 +659,13 @@ class EF_Story_Budget extends EF_Module {
 				return $post_author->display_name;
 				break;
 			case 'post_date':
-				$output = get_the_time( get_option( 'date_format' ), $post->ID ) . '<br />';
-				$output .= get_the_time( get_option( 'time_format' ), $post->ID );
+				$output = get_the_time( get_option( 'date_format' ), $post->ID );
+				// Only show time if it's not midnight (indicating a specific time was set).
+				$post_time = get_the_time( 'H:i', $post->ID );
+				if ( '00:00' !== $post_time ) {
+					$output .= '<br />' . get_the_time( get_option( 'time_format' ), $post->ID );
+				}
 				return $output;
-				break;
 			case 'post_modified':
 				// translators: %s is a human-readable time difference
 				return sprintf( esc_html__( '%s ago', 'edit-flow' ), human_time_diff( get_the_time( 'U', $post->ID ), current_time( 'timestamp' ) ) );
@@ -602,6 +690,21 @@ class EF_Story_Budget extends EF_Module {
 		} else {
 			$output = '<strong>' . esc_html( $post_title ) . '</strong>';
 		}
+
+		// Post excerpt/details (toggleable)
+		$output .= '<div class="post-details">';
+		if ( current_user_can( 'read_post', $post->ID ) ) {
+			if ( post_password_required( $post ) ) {
+				$output .= '<p class="post-excerpt">' . esc_html__( 'There is no excerpt because this is a protected post.', 'edit-flow' ) . '</p>';
+			} elseif ( ! empty( $post->post_excerpt ) ) {
+				$output .= '<p class="post-excerpt">' . esc_html( wp_strip_all_tags( $post->post_excerpt ) ) . '</p>';
+			} else {
+				$excerpt_length = apply_filters( 'ef_story_budget_excerpt_length', 20 );
+				$excerpt_more   = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+				$output        .= '<p class="post-excerpt">' . wp_trim_words( wp_strip_all_tags( $post->post_content ), $excerpt_length, $excerpt_more ) . '</p>';
+			}
+		}
+		$output .= '</div>';
 
 		// Edit or Trash or View
 		$output .= '<div class="row-actions">';
@@ -671,35 +774,27 @@ class EF_Story_Budget extends EF_Module {
 	 * Print the table navigation and filter controls, using the current user's filters if any are set.
 	 */
 	public function table_navigation() {
+		$has_active_filter = ! empty( $this->user_filters['post_status'] )
+			|| ! empty( $this->user_filters['cat'] )
+			|| ! empty( $this->user_filters['author'] );
 		?>
 	<div class="tablenav" id="ef-story-budget-tablenav">
 		<div class="alignleft actions">
-			<form method="GET" style="float: left;">
+			<?php $this->story_budget_time_range(); ?>
+
+			<form method="GET" id="ef-story-budget-filters">
 				<input type="hidden" name="page" value="story-budget"/>
 				<?php
 				foreach ( $this->story_budget_filters() as $select_id => $select_name ) {
 					echo wp_kses_post( $this->story_budget_filter_options( $select_id, $select_name, $this->user_filters ) );
 				}
 				?>
-				<input type="submit" id="post-query-submit" value="<?php _e( 'Filter', 'edit-flow' ); ?>" class="button-primary button" />
-			</form>
-			<form method="GET" style="float: left;">
-				<input type="hidden" name="page" value="story-budget"/>
-				<input type="hidden" name="post_status" value=""/>
-				<input type="hidden" name="cat" value=""/>
-				<input type="hidden" name="author" value=""/>
-				<?php
-				foreach ( $this->story_budget_filters() as $select_id => $select_name ) {
-					echo '<input type="hidden" name="' . esc_attr( $select_name ) . '" value="" />';
-				}
-				?>
-				<input type="submit" id="post-query-clear" value="<?php _e( 'Reset', 'edit-flow' ); ?>" class="button-secondary button" />
+				<input type="submit" id="post-query-submit" value="<?php esc_attr_e( 'Filter', 'edit-flow' ); ?>" class="button-primary button" />
+				<?php if ( $has_active_filter ) : ?>
+				<a href="<?php echo esc_url( add_query_arg( 'reset-filters', '1', menu_page_url( $this->module->slug, false ) ) ); ?>" id="post-query-clear" class="button-secondary button"><?php esc_html_e( 'Reset', 'edit-flow' ); ?></a>
+				<?php endif; ?>
 			</form>
 		</div><!-- /alignleft actions -->
-
-		<div class="print-box" style="float:right; margin-right: 30px;"><!-- Print link -->
-			<a href="#" id="print_link"><?php _e( 'Print', 'edit-flow' ); ?></a>
-		</div>
 		<div class="clear"></div>
 
 	</div><!-- /tablenav -->
@@ -797,20 +892,25 @@ class EF_Story_Budget extends EF_Module {
 			case 'post_status':
 				$post_stati = $this->get_budget_post_stati();
 				?>
-				<select id="post_status" name="post_status"><!-- Status selectors -->
-						<option value=""><?php _e( 'View all statuses', 'edit-flow' ); ?></option>
+				<label for="post_status">
+					<span class="screen-reader-text"><?php esc_html_e( 'Filter by status', 'edit-flow' ); ?></span>
+					<select id="post_status" name="post_status">
+						<option value=""><?php esc_html_e( 'View all statuses', 'edit-flow' ); ?></option>
 						<?php
 						foreach ( $post_stati as $status ) {
-							echo '<option value="' . esc_attr( $status->name ) . '" ' . selected( $status->name, $filters['post_status'] ) . '>' . esc_html( $status->label ) . '</option>';
+							echo '<option value="' . esc_attr( $status->name ) . '" ' . selected( $status->name, $filters['post_status'], false ) . '>' . esc_html( $status->label ) . '</option>';
 						}
-							echo '<option value="unpublish"' . selected( 'unpublish', $filters['post_status'] ) . '>' . esc_html__( 'Unpublished', 'edit-flow' ) . '</option>';
+						echo '<option value="unpublish"' . selected( 'unpublish', $filters['post_status'], false ) . '>' . esc_html__( 'Unpublished', 'edit-flow' ) . '</option>';
 						?>
 					</select>
+				</label>
 				<?php
 				break;
 			case 'cat':
 				// Borrowed from wp-admin/edit.php
 				if ( taxonomy_exists( 'category' ) ) {
+					echo '<label for="cat">';
+					echo '<span class="screen-reader-text">' . esc_html__( 'Filter by category', 'edit-flow' ) . '</span>';
 					$category_dropdown_args = array(
 						'show_option_all' => __( 'View all categories', 'edit-flow' ),
 						'hide_empty' => 0,
@@ -820,9 +920,12 @@ class EF_Story_Budget extends EF_Module {
 						'selected' => $this->user_filters['cat'],
 					);
 					wp_dropdown_categories( $category_dropdown_args );
+					echo '</label>';
 				}
 				break;
 			case 'author':
+				echo '<label for="author">';
+				echo '<span class="screen-reader-text">' . esc_html__( 'Filter by author', 'edit-flow' ) . '</span>';
 				$users_dropdown_args = array(
 					'show_option_all' => __( 'View all users', 'edit-flow' ),
 					'name'     => 'author',
@@ -831,6 +934,7 @@ class EF_Story_Budget extends EF_Module {
 				);
 				$users_dropdown_args = apply_filters( 'ef_story_budget_users_dropdown_args', $users_dropdown_args );
 				wp_dropdown_users( $users_dropdown_args );
+				echo '</label>';
 				break;
 			default:
 				do_action( 'ef_story_budget_filter_display', $select_id, $select_name, $filters );

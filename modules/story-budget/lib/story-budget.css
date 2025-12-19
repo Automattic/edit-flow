@@ -8,38 +8,52 @@
 	max-width: 300px;
 }
 
-#ef-story-budget-title h2 span {
-	color: #999999;
+/* Date form comes first, then filters */
+#ef-story-budget-date-form {
+	display: inline-block;
+	margin-right: 10px;
+	padding-right: 10px;
+	border-right: 1px solid #c3c4c7;
+	vertical-align: middle;
 }
 
-#ef-story-budget-title h2 form {
-	display: inline;
-	position: relative;
+#ef-story-budget-filters {
+	display: inline-block;
+	vertical-align: middle;
 }
 
-#ef-story-budget-title h2 form input {
-	display:none;
+#ef-story-budget-date-form input[type="text"] {
+	width: auto;
+	vertical-align: middle;
 }
 
-#ef-story-budget-title h2 a.change-date {
-	display:inline-block;
+#ef-story-budget-date-form #ef-story-budget-start-date {
+	width: 11em;
 }
 
-#ef-story-budget-title h2 a.change-date,
-#ef-story-budget-title h2 a.change-date-cancel {
-	font-size: 14px;
+#ef-story-budget-date-form #ef-story-budget-number-days {
+	width: 4em;
+	padding-right: 0;
+	vertical-align: middle;
 }
 
-.postbox {
-	display: block;
-	margin: 0 auto 10px;
-	justify-content: space-between;
+#ef-story-budget-date-form button {
+	vertical-align: middle;
 }
 
+/* Card layout - gaps only between cards, not at edges */
 .postbox-container {
 	padding-right: 0;
 	display: flex;
 	flex-flow: row wrap;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.postbox {
+	display: block;
+	margin: 0;
+	box-sizing: border-box;
 }
 
 .postbox .inside {
@@ -73,4 +87,81 @@
 
 #start_date, #end_date {
 	width: 100px;
+}
+
+/* Post excerpts - hidden by default, shown via screen option */
+.post-details {
+	display: none;
+}
+
+.show-excerpts .post-details {
+	display: block;
+}
+
+.post-details .post-excerpt {
+	margin: 0.5em 0;
+	color: #666;
+	font-style: italic;
+}
+
+/* Hide empty categories when option is enabled */
+.hide-empty-terms .postbox:not(.postbox-has-posts) {
+	display: none;
+}
+
+/* Ensure consistent card width regardless of content */
+.postbox .inside .message {
+	min-height: 1em;
+}
+
+/* Override WordPress postbox drag cursor - cards are not draggable */
+#ef-story-budget-wrap .postbox h3.hndle {
+	cursor: default;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+/* Toggle button styling */
+#ef-story-budget-wrap .postbox .handlediv {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	margin: -8px -10px -8px 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	border-radius: 0;
+}
+
+#ef-story-budget-wrap .postbox .handlediv:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+#ef-story-budget-wrap .postbox .handlediv:focus {
+	outline: 1px dotted #1e8cbe;
+	outline-offset: -1px;
+}
+
+#ef-story-budget-wrap .postbox .handlediv .toggle-indicator {
+	display: block;
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 6px solid #50575e;
+	transition: transform 0.15s ease-in-out;
+}
+
+#ef-story-budget-wrap .postbox.closed .handlediv .toggle-indicator {
+	transform: rotate(-90deg);
+}
+
+/* Collapsed postbox styling */
+#ef-story-budget-wrap .postbox.closed {
+	padding-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
 }
