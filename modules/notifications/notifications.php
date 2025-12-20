@@ -192,17 +192,33 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		 * @uses wp_enqueue_script()
 		 */
 		public function enqueue_admin_scripts() {
+			global $post;
 
 			if ( $this->is_whitelisted_functional_view() ) {
 				wp_enqueue_script( 'jquery-listfilterizer' );
 				wp_enqueue_script( 'edit-flow-notifications-js', $this->module_url . 'lib/notifications.js', [ 'jquery', 'jquery-listfilterizer' ], EDIT_FLOW_VERSION, true );
+
+				$localization_data = [
+					'no_access'       => esc_html__( 'No Access', 'edit-flow' ),
+					'no_email'        => esc_html__( 'No Email', 'edit-flow' ),
+					'post_author'     => esc_html__( 'Post Author', 'edit-flow' ),
+					'auto_subscribed' => esc_html__( 'Auto-subscribed', 'edit-flow' ),
+				];
+
+				// Add post author info if we're on a post edit screen.
+				if ( $post ) {
+					$localization_data['post_author_id']            = (int) $post->post_author;
+					$localization_data['post_author_auto_subscribe'] = apply_filters( 'ef_notification_auto_subscribe_post_author', true, 'subscription_action' );
+
+					// Check if post author is currently a follower.
+					$followers                                       = $this->get_following_users( $post->ID, 'id' );
+					$localization_data['post_author_is_following']   = in_array( (int) $post->post_author, $followers, true );
+				}
+
 				wp_localize_script(
 					'edit-flow-notifications-js',
 					'ef_notifications_localization',
-					[
-						'no_access' => esc_html__( 'No Access', 'edit-flow' ),
-						'no_email'  => esc_html__( 'No Email', 'edit-flow' ),
-					]
+					$localization_data
 				);
 			}
 		}
@@ -375,31 +391,49 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		}
 
 		/**
-		 * Show warning badges next to a subscriber's name if they won't receive notifications
+		 * Show badges next to a subscriber's name for status information
 		 *
-		 * Applies on initial loading of list via. PHP. JS will set these spans based on AJAX response when box is ticked/unticked.
+		 * Applies on initial loading of list via PHP. JS will set these spans based on AJAX response when box is ticked/unticked.
 		 *
-		 * @param int $user_id
+		 * @param int  $user_id The user ID.
 		 * @param bool $checked True if the user is subscribed already, false otherwise.
 		 * @return void
 		 */
 		public function display_subscriber_warning_badges( $user_id, $checked ) {
 			global $post;
 
-			if ( ! isset( $post ) || ! $checked ) {
+			if ( ! isset( $post ) ) {
 				return;
 			}
 
-			// Add No Access span if they won't be notified
+			$is_post_author    = ( (int) $post->post_author === (int) $user_id );
+			$auto_subscribe_on = apply_filters( 'ef_notification_auto_subscribe_post_author', true, 'subscription_action' );
+
+			// Show "Post Author" badge for the post author.
+			if ( $is_post_author ) {
+				echo '<span class="post_following_list-post_author">' . esc_html__( 'Post Author', 'edit-flow' ) . '</span>';
+			}
+
+			// Show "Auto-subscribed" badge if post author is auto-subscribed.
+			if ( $is_post_author && $auto_subscribe_on && $checked ) {
+				echo '<span class="post_following_list-auto_subscribed">' . esc_html__( 'Auto-subscribed', 'edit-flow' ) . '</span>';
+			}
+
+			// Only show warning badges if user is subscribed.
+			if ( ! $checked ) {
+				return;
+			}
+
+			// Add No Access span if they won't be notified.
 			if ( ! $this->user_can_be_notified( get_user_by( 'id', $user_id ), $post->ID ) ) {
-				// span.post_following_list-no_access is also added in notifications.js after AJAX that ticks/unticks a user
+				// span.post_following_list-no_access is also added in notifications.js after AJAX that ticks/unticks a user.
 				echo '<span class="post_following_list-no_access">' . esc_html__( 'No Access', 'edit-flow' ) . '</span>';
 			}
 
-			// Add No Email span if they have no email
+			// Add No Email span if they have no email.
 			$user_object = get_user_by( 'id', $user_id );
 			if ( ! is_a( $user_object, 'WP_User' ) || empty( $user_object->user_email ) ) {
-				// span.post_following_list-no_email is also added in notifications.js after AJAX that ticks/unticks a user
+				// span.post_following_list-no_email is also added in notifications.js after AJAX that ticks/unticks a user.
 				echo '<span class="post_following_list-no_email">' . esc_html__( 'No Email', 'edit-flow' ) . '</span>';
 			}
 		}
