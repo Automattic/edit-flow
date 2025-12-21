@@ -537,9 +537,6 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				return new WP_Error( 'invalid', __( "Custom status doesn't exist.", 'edit-flow' ) );
 			}
 
-			// Reset our internal object cache
-			$this->custom_statuses_cache = [];
-
 			// Prevent user from changing draft name or slug
 			if ( 'draft' === $old_status->slug
 			&& (
@@ -573,7 +570,12 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			$args['description']           = $encoded_description;
 
 			$updated_status_array = wp_update_term( $status_id, self::taxonomy_key, $args );
-			$updated_status       = $this->get_custom_status_by( 'id', $updated_status_array['term_id'] );
+
+			// Reset our internal object cache after the update, not before.
+			// This ensures get_custom_status_by() returns fresh data.
+			$this->custom_statuses_cache = [];
+
+			$updated_status = $this->get_custom_status_by( 'id', $updated_status_array['term_id'] );
 
 			return $updated_status;
 		}
