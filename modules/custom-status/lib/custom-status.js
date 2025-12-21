@@ -126,7 +126,16 @@ jQuery( document ).ready( function () {
 			);
 		}
 
-		// Add remaining statuses to dropdown. 'private' is always handled by a checkbox, and 'future' already exists if we need it
+		// Add "Private" status to bulk/quick-edit for users that can publish
+		// On the post editor, private is handled by the Visibility checkbox, but bulk edit has no such control
+		if ( id == 'select[name="_status"]' && current_user_can_publish_posts ) {
+			jQuery( id ).append(
+				jQuery( '<option></option' ).attr( 'value', 'private' ).text( i18n.private )
+			);
+		}
+
+		// Add remaining statuses to dropdown. 'future' already exists if we need it.
+		// 'private' is handled above for bulk/quick edit, or via Visibility checkbox on post editor.
 		jQuery.each( custom_statuses, function () {
 			if ( this.slug == 'private' || this.slug == 'future' ) {
 				return;
