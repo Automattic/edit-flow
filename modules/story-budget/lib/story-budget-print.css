@@ -1,99 +1,235 @@
-/* Print styles for Edit Flow's Story Budget view */
+/**
+ * Print styles for Edit Flow's Story Budget view.
+ *
+ * Creates a clean, readable printout of the Story Budget content.
+ *
+ * @package EditFlow
+ * @since 0.7
+ * @updated 0.10.1 - Refreshed for modern WordPress admin
+ */
 
-/* Hide the styles that we don't need */
-#ef-story-budget-tablenav,
-#adminmenu,
+/* ==========================================================================
+   Hide UI elements not needed for print
+   ========================================================================== */
+
+/* WordPress admin chrome */
 #wpadminbar,
 #adminmenuback,
-#screen-meta-links,
-#wphead,
-#footer,
+#adminmenuwrap,
+#adminmenu,
+#wpfooter,
 #screen-meta,
-#ef-story-budget-wrap .change-date-buttons,
-#ef-story-budget-wrap .time-range input,
-#ef-story-budget-wrap .module-icon,
-.row-actions {
-	display: none;
+#screen-meta-links,
+.screen-reader-shortcut,
+.notice,
+.update-nag,
+#wpbody-content > .notice,
+#wpbody-content > .updated,
+#wpbody-content > .error {
+	display: none !important;
 }
 
-#ef-story-budget-wrap .time-range form {
-	display: inline;
+/* Story Budget navigation and filters */
+#ef-story-budget-tablenav,
+#ef-story-budget-date-form,
+#ef-story-budget-filters,
+#ef-story-budget-title .module-icon,
+.row-actions,
+.handlediv {
+	display: none !important;
+}
+
+/* ==========================================================================
+   Page setup
+   ========================================================================== */
+
+@page {
+	margin: 1.5cm;
+	size: auto;
+}
+
+html {
+	font-size: 12pt;
 }
 
 body {
-	font: 12pt/16pt Georgia, Times, serif;
-	padding: 10px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-size: 12pt;
+	line-height: 1.5;
+	color: #1e1e1e;
+	background: #fff !important;
+	margin: 0;
+	padding: 0;
 }
 
-a {
-	color: #000000;
+/* ==========================================================================
+   Layout adjustments
+   ========================================================================== */
+
+#wpcontent,
+#wpbody,
+#wpbody-content {
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
-#wpbody {
-	margin-left: 0px;
-	margin-top: -20px;
+#ef-story-budget-wrap {
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
-#wpcontent {
-	margin-left: 1em;
-	margin-right: 2em;
+#ef-story-budget-title h2 {
+	font-size: 18pt;
+	font-weight: 600;
+	margin: 0 0 12pt 0;
+	padding: 0;
+	border-bottom: 2pt solid #1e1e1e;
+	padding-bottom: 6pt;
 }
 
-#wpbody #wpbody-content,
-#wpbody #wpbody-content .postbox-container,
-.postbox,
-.inside,
-.widefat,
-.meta-box-sortables {
-	float: none !important; /* Hack to prevent Gecko from cutting off floated elements in print */
-}
+/* ==========================================================================
+   Category cards (postboxes)
+   ========================================================================== */
 
-.icon32 {
-	display: block;
-	float: none;
-}
-
-.wrap h2 {
-	font-style: normal;
-}
-
-.meta-box-sortables .postbox {
-	width: 100% !important; /* Important hack to override the inline styles applied to .postbox */
-}
-
-.postbox,
-.widefat,
-.widefat td {
-	border-color: #ffffff;
-}
-
-.widefat td {
-	padding-top: 10px !important;
-}
-
-.widefat td,
-.widefat th,
-.row-title {
-	font-size: 13px !important;
-	line-height: 17px;
-}
-
-.widefat td p {
-	color: #3d3d3d;
+.metabox-holder,
+.postbox-container {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	float: none !important;
+	flex-wrap: nowrap !important;
 }
 
 .postbox {
-	margin-bottom: 30px;
+	display: block !important;
+	width: 100% !important;
+	flex-basis: 100% !important;
+	margin: 0 0 12pt 0 !important;
+	padding: 0 !important;
+	border: 1pt solid #ddd !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	page-break-inside: avoid;
+	break-inside: avoid;
 }
 
+.postbox h3.hndle,
 .postbox .hndle {
-	background-image: none;
+	font-size: 14pt;
+	font-weight: 600;
+	margin: 0;
+	padding: 8pt 10pt;
+	background: #f6f7f7 !important;
+	border-bottom: 1pt solid #ddd;
+	cursor: default;
 }
 
-.meta-box-sortables .postbox h3 {
-	border-bottom: 1px solid #e1e1e1;
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 20px;
-	font-weight: normal;
-	text-shadow: none;
+.postbox .inside {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Ensure collapsed boxes still print their content */
+.postbox.closed .inside {
+	display: block !important;
+}
+
+/* ==========================================================================
+   Post tables
+   ========================================================================== */
+
+.widefat {
+	width: 100%;
+	border-collapse: collapse;
+	border: none;
+	margin: 0;
+}
+
+.widefat thead th {
+	font-size: 10pt;
+	font-weight: 600;
+	text-align: left;
+	padding: 6pt 10pt;
+	background: #f0f0f1 !important;
+	border-bottom: 1pt solid #ddd;
+}
+
+.widefat tbody td {
+	font-size: 10pt;
+	padding: 8pt 10pt;
+	border-bottom: 1pt solid #eee;
+	vertical-align: top;
+}
+
+.widefat tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.widefat .row-title {
+	font-size: 11pt;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+
+.widefat .row-title a {
+	color: #1e1e1e;
+	text-decoration: none;
+}
+
+/* ==========================================================================
+   Post details and excerpts
+   ========================================================================== */
+
+.post-details {
+	display: block !important;
+}
+
+.post-details .post-excerpt {
+	font-size: 10pt;
+	font-style: italic;
+	color: #50575e;
+	margin: 4pt 0 0 0;
+}
+
+/* ==========================================================================
+   Links and colors
+   ========================================================================== */
+
+a {
+	color: #1e1e1e;
+	text-decoration: none;
+}
+
+/* Show URLs after links for reference */
+.widefat .row-title a::after {
+	content: none; /* Don't show URLs - they clutter the printout */
+}
+
+/* ==========================================================================
+   Empty state messages
+   ========================================================================== */
+
+.postbox .inside .message {
+	font-size: 10pt;
+	color: #50575e;
+	padding: 8pt 10pt;
+	font-style: italic;
+}
+
+/* ==========================================================================
+   Page breaks
+   ========================================================================== */
+
+h2 {
+	page-break-after: avoid;
+}
+
+.postbox h3.hndle {
+	page-break-after: avoid;
+}
+
+.widefat tr {
+	page-break-inside: avoid;
 }
