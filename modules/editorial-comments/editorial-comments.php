@@ -276,9 +276,25 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			<div class="post-comment-wrap">
 				<h5 class="comment-meta">
 					<?php
-					/* translators: 1: HTML email link to the author of the current comment, 2: the date of the comment, 3: the time of the comment */
+					/**
+					 * Filters whether to show the email link for editorial comment authors.
+					 *
+					 * By default, email addresses are hidden for privacy.
+					 * Return true to show a mailto: link for the comment author.
+					 *
+					 * @since 0.10.1
+					 *
+					 * @param bool $show_email Whether to show the email link. Default false.
+					 * @param int  $user_id    The comment author's user ID.
+					 */
+					$show_email_link = apply_filters( 'ef_editorial_comment_show_email_link', false, $comment->user_id );
+					$comment_author  = $show_email_link
+						? comment_author_email_link( $comment->comment_author )
+						: esc_html( $comment->comment_author );
+
+					/* translators: 1: comment author name (or email link), 2: the date of the comment, 3: the time of the comment */
 					printf( wp_kses_post( __( '<span class="comment-author">%1$s</span><span class="meta"> said on %2$s at %3$s</span>', 'edit-flow' ) ),
-						wp_kses_post( comment_author_email_link( $comment->comment_author ) ),
+						wp_kses_post( $comment_author ),
 						esc_attr( get_comment_date( get_option( 'date_format' ) ) ),
 					esc_attr( get_comment_time() ) );
 					?>

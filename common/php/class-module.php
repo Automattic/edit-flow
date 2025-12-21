@@ -489,6 +489,7 @@ if ( ! class_exists( 'EF_Module' ) ) {
 				'fields' => array(
 					'ID',
 					'display_name',
+					'user_nicename',
 					'user_email',
 				),
 				'orderby' => 'display_name',
@@ -523,7 +524,23 @@ if ( ! class_exists( 'EF_Module' ) ) {
 							</div>
 
 							<span class="ef-user_displayname"><?php echo esc_html( $user->display_name ); ?></span>
-							<span class="ef-user_useremail"><?php echo esc_html( $user->user_email ); ?></span>
+							<?php
+							/**
+							 * Filters the secondary user identifier shown in the notifications list.
+							 *
+							 * By default, shows user_nicename for unique identification without exposing email.
+							 * Return user_email to show email addresses, or empty string to hide.
+							 *
+							 * @since 0.10.1
+							 *
+							 * @param string $identifier The secondary identifier to display.
+							 * @param object $user       The user object.
+							 */
+							$secondary_identifier = apply_filters( 'ef_user_secondary_identifier', $user->user_nicename, $user );
+							if ( ! empty( $secondary_identifier ) ) :
+								?>
+								<span class="ef-user_useremail"><?php echo esc_html( $secondary_identifier ); ?></span>
+							<?php endif; ?>
 						</label>
 					</li>
 				<?php endforeach; ?>
