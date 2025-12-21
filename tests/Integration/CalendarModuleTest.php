@@ -424,4 +424,130 @@ class CalendarModuleTest extends TestCase {
 		// Should return Friday, January 17, 2025
 		$this->assertEquals( '2025-01-17', $ending );
 	}
+
+	/**
+	 * Test that posts scheduled at exactly the same time are both retrieved.
+	 *
+	 * This is a regression test for issue #770 where posts with the same
+	 * date/time would only show one on the calendar.
+	 */
+	public function test_posts_with_same_timestamp_both_retrieved() {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		// Use a date in the current week for the test.
+		$test_date     = date( 'Y-m-d', strtotime( '+1 day' ) );
+		$test_datetime = $test_date . ' 10:00:00';
+
+		// Create two posts with the exact same timestamp.
+		$post1_id = self::factory()->post->create(
+			[
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+				'post_title'  => 'Test Post 1 - Same Time',
+				'post_date'   => $test_datetime,
+			]
+		);
+
+		$post2_id = self::factory()->post->create(
+			[
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+				'post_title'  => 'Test Post 2 - Same Time',
+				'post_date'   => $test_datetime,
+			]
+		);
+
+		// Set the calendar start date to include our test date.
+		$edit_flow->calendar->start_date = $test_date;
+
+		// Get posts for the week.
+		$week_posts = $edit_flow->calendar->get_calendar_posts_for_week(
+			[
+				'post_status' => 'draft',
+			]
+		);
+
+		// Verify both posts are in the result.
+		$this->assertArrayHasKey( $test_date, $week_posts, 'The test date should have posts' );
+		$this->assertCount( 2, $week_posts[ $test_date ], 'Both posts with same timestamp should be returned' );
+
+		// Verify we got the correct posts.
+		$returned_ids = array_map(
+			function ( $post ) {
+				return $post->ID;
+			},
+			$week_posts[ $test_date ]
+		);
+
+		$this->assertContains( $post1_id, $returned_ids, 'Post 1 should be in the results' );
+		$this->assertContains( $post2_id, $returned_ids, 'Post 2 should be in the results' );
+	}
+
+	/**
+	 * Test that scheduled (future) posts at exactly the same time are both retrieved.
+	 *
+	 * This is a regression test for issue #770 where posts with the same
+	 * date/time would only show one on the calendar.
+	 */
+	public function test_future_posts_with_same_timestamp_both_retrieved() {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		// Use a date in the future for scheduled posts.
+		$test_date     = date( 'Y-m-d', strtotime( '+3 days' ) );
+		$test_datetime = $test_date . ' 14:30:00';
+
+		// Create two scheduled posts with the exact same timestamp.
+		$post1_id = self::factory()->post->create(
+			[
+				'post_author'   => self::$admin_user_id,
+				'post_status'   => 'future',
+				'post_title'    => 'Scheduled Post 1 - Same Time',
+				'post_date'     => $test_datetime,
+				'post_date_gmt' => get_gmt_from_date( $test_datetime ),
+			]
+		);
+
+		$post2_id = self::factory()->post->create(
+			[
+				'post_author'   => self::$admin_user_id,
+				'post_status'   => 'future',
+				'post_title'    => 'Scheduled Post 2 - Same Time',
+				'post_date'     => $test_datetime,
+				'post_date_gmt' => get_gmt_from_date( $test_datetime ),
+			]
+		);
+
+		// Verify both posts were created with 'future' status.
+		$this->assertEquals( 'future', get_post_status( $post1_id ) );
+		$this->assertEquals( 'future', get_post_status( $post2_id ) );
+
+		// Set the calendar start date to include our test date.
+		$edit_flow->calendar->start_date = $test_date;
+
+		// Get posts for the week.
+		$week_posts = $edit_flow->calendar->get_calendar_posts_for_week(
+			[
+				'post_status' => 'future',
+			]
+		);
+
+		// Verify both posts are in the result.
+		$this->assertArrayHasKey( $test_date, $week_posts, 'The test date should have posts' );
+		$this->assertCount( 2, $week_posts[ $test_date ], 'Both scheduled posts with same timestamp should be returned' );
+
+		// Verify we got the correct posts.
+		$returned_ids = array_map(
+			function ( $post ) {
+				return $post->ID;
+			},
+			$week_posts[ $test_date ]
+		);
+
+		$this->assertContains( $post1_id, $returned_ids, 'Scheduled Post 1 should be in the results' );
+		$this->assertContains( $post2_id, $returned_ids, 'Scheduled Post 2 should be in the results' );
+	}
 }

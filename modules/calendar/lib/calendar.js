@@ -1,5 +1,22 @@
 const dispatch = wp.data.dispatch;
 
+/**
+ * Safely dispatch an action to the edit-flow/calendar store.
+ * Returns a no-op object if the store isn't registered yet.
+ */
+function getCalendarDispatch() {
+	const calendarStore = dispatch( 'edit-flow/calendar' );
+	if ( calendarStore ) {
+		return calendarStore;
+	}
+	// Return no-op functions if store isn't available
+	return {
+		setCalendarIsLoading: () => {},
+		setPostSaved: () => {},
+		clearCalendarSnackbarMessage: () => {},
+	};
+}
+
 jQuery( document ).ready( function ( $ ) {
 	$( 'a.show-more' ).on( 'click', function () {
 		const parent = $( this ).closest( 'td.day-unit' );
@@ -219,7 +236,7 @@ jQuery( document ).ready( function ( $ ) {
 				const next_date = next_date_id.substr( 'date-'.length );
 				const nonce = $( document ).find( '#ef-calendar-modify' ).val();
 				$( '.edit-flow-message' ).remove();
-				dispatch( 'edit-flow/calendar' ).setCalendarIsLoading( true );
+				getCalendarDispatch().setCalendarIsLoading( true );
 				// $('li.ajax-actions .waiting').show();
 				// make ajax request
 				const params = {
@@ -234,10 +251,10 @@ jQuery( document ).ready( function ( $ ) {
 						clearTimeout( snackbarMessageTimeout );
 					}
 
-					dispatch( 'edit-flow/calendar' ).setPostSaved( response.message );
+					getCalendarDispatch().setPostSaved( response.message );
 
 					snackbarMessageTimeout = setTimeout( () => {
-						dispatch( 'edit-flow/calendar' ).clearCalendarSnackbarMessage();
+						getCalendarDispatch().clearCalendarSnackbarMessage();
 					}, 2500 );
 
 					setTimeout( edit_flow_calendar_hide_message, 10000 );
