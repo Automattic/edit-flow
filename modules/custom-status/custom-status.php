@@ -314,6 +314,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				wp_localize_script('edit_flow-custom_status', '__ef_localize_custom_status', [
 					'no_change' => esc_html__( '&mdash; No Change &mdash;', 'edit-flow' ),
 					'published' => esc_html__( 'Published', 'edit-flow' ),
+					'private'   => esc_html__( 'Private', 'edit-flow' ),
 					'save_as'   => esc_html__( 'Save as', 'edit-flow' ),
 					'save'      => esc_html__( 'Save', 'edit-flow' ),
 					'edit'      => esc_html__( 'Edit', 'edit-flow' ),
