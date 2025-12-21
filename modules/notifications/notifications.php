@@ -732,12 +732,24 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 					$body .= sprintf( __( 'Author: %1$s (%2$s)', 'edit-flow' ), $post_author->display_name, $post_author->user_email ) . "\r\n";
 				}
 
-				$edit_link = htmlspecialchars_decode( get_edit_post_link( $post_id ) );
+				$edit_post_link = get_edit_post_link( $post_id );
+				if ( is_null( $edit_post_link ) ) {
+					return;
+				}
+
+				$edit_link = htmlspecialchars_decode( $edit_post_link );
+
 				if ( 'publish' != $new_status ) {
 					$view_link = add_query_arg( [ 'preview' => 'true' ], wp_get_shortlink( $post_id ) );
 				} else {
-					$view_link = htmlspecialchars_decode( get_permalink( $post_id ) );
+					$permalink = get_permalink( $post_id );
+					if ( is_null( $permalink ) ) {
+						return;
+					}
+
+					$view_link = htmlspecialchars_decode( $permalink );
 				}
+
 				$body .= "\r\n";
 				$body .= __( '== Actions ==', 'edit-flow' ) . "\r\n";
 				/* translators: 1: edit link */
@@ -830,8 +842,19 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				$body .= esc_html__( 'Notified', 'edit-flow' ) . ': ' . esc_html( $notification_list ) . "\n";
 			}
 
-			$edit_link = htmlspecialchars_decode( get_edit_post_link( $post_id ) );
-			$view_link = htmlspecialchars_decode( get_permalink( $post_id ) );
+			$edit_post_link = get_edit_post_link( $post_id );
+			if ( is_null( $edit_post_link ) ) {
+				return;
+			}
+
+			$edit_link = htmlspecialchars_decode( $edit_post_link );
+
+			$permalink = get_permalink( $post_id );
+			if ( is_null( $permalink ) ) {
+				return;
+			}
+
+			$view_link = htmlspecialchars_decode( $permalink );
 
 			$body .= "\r\n";
 			$body .= __( '== Actions ==', 'edit-flow' ) . "\r\n";

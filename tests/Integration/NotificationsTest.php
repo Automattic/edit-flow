@@ -52,6 +52,8 @@ class NotificationsTest extends TestCase {
 	function test_send_post_notification_no_status() {
 		global $edit_flow;
 
+		wp_set_current_user( self::$admin_user_id );
+
 		$edit_flow->notifications->module->options->always_notify_admin = 'on';
 
 		$post = array(
@@ -74,6 +76,8 @@ class NotificationsTest extends TestCase {
 	 */
 	function test_send_post_notification_no_status_custom_status_disabled_for_post_type() {
 		global $edit_flow, $typenow;
+
+		wp_set_current_user( self::$admin_user_id );
 
 		/**
 		 * Prevent the registration of custom status to check if notification module will still
