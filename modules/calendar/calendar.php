@@ -217,24 +217,10 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			if ( 'index.php' === $pagenow && isset( $_GET['page'] ) && 'calendar' === $_GET['page'] ) {
 				$this->enqueue_datepicker_resources();
 
-				$js_libraries = array(
-					'jquery',
-					'jquery-ui-core',
-					'jquery-ui-sortable',
-					'jquery-ui-draggable',
-					'jquery-ui-droppable',
-					'wp-data',
-				);
-				foreach ( $js_libraries as $js_library ) {
-					wp_enqueue_script( $js_library );
-				}
-				wp_enqueue_script( 'edit-flow-calendar-js', $this->module_url . 'lib/calendar.js', $js_libraries, EDIT_FLOW_VERSION, true );
-
-				$ef_cal_js_params = array( 'can_add_posts' => current_user_can( $this->create_post_cap ) ? 'true' : 'false' );
-				wp_localize_script( 'edit-flow-calendar-js', 'ef_calendar_params', $ef_cal_js_params );
-
 				/**
-				 * Powering the new React interface
+				 * Powering the new React interface.
+				 * Must be enqueued first because it registers the 'edit-flow/calendar' data store
+				 * that calendar.js depends on for drag-and-drop functionality.
 				 */
 				$asset_file = EDIT_FLOW_ROOT . '/build/calendar-react.asset.php';
 				$asset      = file_exists( $asset_file ) ? require $asset_file : [ 'dependencies' => [], 'version' => EDIT_FLOW_VERSION ];
@@ -246,6 +232,23 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					$asset['version'],
 					true
 				);
+
+				$js_libraries = array(
+					'jquery',
+					'jquery-ui-core',
+					'jquery-ui-sortable',
+					'jquery-ui-draggable',
+					'jquery-ui-droppable',
+					'wp-data',
+					'edit-flow-calendar-react-js', // Required for the 'edit-flow/calendar' data store.
+				);
+				foreach ( $js_libraries as $js_library ) {
+					wp_enqueue_script( $js_library );
+				}
+				wp_enqueue_script( 'edit-flow-calendar-js', $this->module_url . 'lib/calendar.js', $js_libraries, EDIT_FLOW_VERSION, true );
+
+				$ef_cal_js_params = array( 'can_add_posts' => current_user_can( $this->create_post_cap ) ? 'true' : 'false' );
+				wp_localize_script( 'edit-flow-calendar-js', 'ef_calendar_params', $ef_cal_js_params );
 
 				wp_add_inline_script(
 					'edit-flow-calendar-react-js',
