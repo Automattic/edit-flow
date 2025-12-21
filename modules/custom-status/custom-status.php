@@ -598,9 +598,6 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				return new WP_Error( 'invalid', __( 'Cannot reassign to the status you want to delete', 'edit-flow' ) );
 			}
 
-			// Reset our internal object cache
-			$this->custom_statuses_cache = [];
-
 			if ( ! $this->is_restricted_status( $old_status ) && 'draft' !== $old_status ) {
 				$default_status = $this->get_default_custom_status()->slug;
 				// If new status in $reassign, use that for all posts of the old_status
@@ -616,7 +613,13 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 
 				$this->reassign_post_status( $old_status, $new_status );
 
-				return wp_delete_term( $status_id, self::taxonomy_key, $args );
+				$result = wp_delete_term( $status_id, self::taxonomy_key, $args );
+
+				// Reset our internal object cache after the delete, not before.
+				// This ensures subsequent calls to get_custom_statuses() return fresh data.
+				$this->custom_statuses_cache = [];
+
+				return $result;
 			} else {
 				return new WP_Error( 'restricted', __( 'Restricted status ', 'edit-flow' ) . '(' . $this->get_custom_status_by( 'id', $status_id )->name . ')' );
 			}
@@ -656,17 +659,17 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			$ordered_statuses = [];
 			$hold_to_end      = [];
 			foreach ( $statuses as $key => $status ) {
-				// Unencode and set all of our psuedo term meta because we need the position if it exists
+				// Unencode and set all of our pseudo term meta because we need the position if it exists.
+				// Create a new object to avoid modifying the original term object from WordPress's cache.
 				$unencoded_description = $this->get_unencoded_description( $status->description );
+				$defaults              = [
+					'position' => false,
+				];
+				$status = array_merge( $defaults, (array) $status );
 				if ( is_array( $unencoded_description ) ) {
-					foreach ( $unencoded_description as $key => $value ) {
-						$status->$key = $value;
-					}
+					$status = array_merge( $status, $unencoded_description );
 				}
-				// We require the position key later on (e.g. management table)
-				if ( ! isset( $status->position ) ) {
-					$status->position = false;
-				}
+				$status = (object) $status;
 				// Only add the status to the ordered array if it has a set position and doesn't conflict with another key
 				// Otherwise, hold it for later
 				if ( $status->position && ! array_key_exists( $status->position, $ordered_statuses ) ) {
