@@ -107,6 +107,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_action( 'admin_init', [ $this, 'check_timestamp_on_publish' ] );
 			add_filter( 'wp_insert_post_data', [ $this, 'fix_custom_status_timestamp' ], 10, 2 );
 			add_filter( 'wp_insert_post_data', [ $this, 'maybe_keep_post_name_empty' ], 10, 2 );
+			add_filter( 'wp_insert_post_data', [ $this, 'update_post_date_on_publish_from_custom_status' ], 10, 2 );
 			add_filter( 'pre_wp_unique_post_slug', [ $this, 'fix_unique_post_slug' ], 10, 6 );
 			add_filter( 'preview_post_link', [ $this, 'fix_preview_link_part_one' ] );
 			add_filter( 'post_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
@@ -1392,6 +1393,63 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			|| '0000-00-00 00:00:00' == $postarr['post_date_gmt'] ) {
 				$data['post_date_gmt'] = '0000-00-00 00:00:00';
 			}
+
+			return $data;
+		}
+
+		/**
+		 * Update post_date to current time when publishing from a custom status.
+		 *
+		 * When a post with a custom status (like "Pitch" or "Assigned") is published,
+		 * the post_date should reflect the actual publication time, not the original
+		 * creation time. This matches WordPress core behavior for 'draft' and 'pending'.
+		 *
+		 * @since 0.10.0
+		 *
+		 * @see https://github.com/Automattic/Edit-Flow/issues/750
+		 *
+		 * @param array $data    An array of slashed, sanitized post data.
+		 * @param array $postarr An array of sanitized post data.
+		 * @return array Modified post data with updated post_date if applicable.
+		 */
+		public function update_post_date_on_publish_from_custom_status( $data, $postarr ) {
+			// Only process when transitioning to 'publish' status.
+			if ( 'publish' !== $data['post_status'] ) {
+				return $data;
+			}
+
+			// Must be an existing post (have an ID) for this to be a status transition.
+			if ( empty( $postarr['ID'] ) ) {
+				return $data;
+			}
+
+			// Get the current post from the database to check its current status.
+			$current_post = get_post( $postarr['ID'] );
+			if ( ! $current_post ) {
+				return $data;
+			}
+
+			// If already published, scheduled, or private, don't change the date.
+			$published_statuses = [ 'publish', 'future', 'private' ];
+			if ( in_array( $current_post->post_status, $published_statuses, true ) ) {
+				return $data;
+			}
+
+			// If the post had an explicitly set GMT date (scheduled), don't change it.
+			if ( ! empty( $current_post->post_date_gmt )
+				&& '0000-00-00 00:00:00' !== $current_post->post_date_gmt ) {
+				return $data;
+			}
+
+			// If the user is explicitly setting a different date in this update, respect it.
+			// Compare the incoming post_date with the current post_date.
+			if ( ! empty( $postarr['post_date'] ) && $postarr['post_date'] !== $current_post->post_date ) {
+				return $data;
+			}
+
+			// Update post_date to current time.
+			$data['post_date']     = current_time( 'mysql' );
+			$data['post_date_gmt'] = current_time( 'mysql', true );
 
 			return $data;
 		}
