@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+* fix: allow text selection in calendar overlay without triggering drag by @GaryJones in [#857](https://github.com/Automattic/Edit-Flow/pull/857)
 * fix: update post date to current time when publishing from custom status by @GaryJones in [#856](https://github.com/Automattic/Edit-Flow/pull/856)
 * fix: resolve calendar drag-and-drop not persisting post date changes by @GaryJones in [#854](https://github.com/Automattic/Edit-Flow/pull/854)
 * fix: guard against null return from get_edit_post_link() and get_permalink() by @GaryJones in [#853](https://github.com/Automattic/Edit-Flow/pull/853)

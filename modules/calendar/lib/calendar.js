@@ -210,6 +210,7 @@ jQuery( document ).ready( function ( $ ) {
 		items: 'li.day-item.sortable',
 		connectWith: 'td.day-unit ul',
 		placeholder: 'ui-state-highlight',
+		cancel: '.item-overlay, .item-overlay *, .post-insert-overlay, .post-insert-overlay *',
 		start( event, ui ) {
 			$( this ).disableSelection();
 			edit_flow_calendar_close_overlays();
