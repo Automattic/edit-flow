@@ -24,6 +24,8 @@ global $edit_flow;
 				<a href="<?php echo esc_url( $this->get_link() ); ?>" class="nav-tab <?php echo esc_attr( $add_new_nav_class ); ?>"><?php esc_html_e( 'Add New', 'edit-flow' ); ?></a>
 				<?php $options_nav_class = 'change-options' === $action ? 'nav-tab-active' : ''; ?>
 				<a href="<?php echo esc_url( $this->get_link( array( 'action' => 'change-options' ) ) ); ?>" class="nav-tab <?php echo esc_attr( $options_nav_class ); ?>"><?php esc_html_e( 'Options', 'edit-flow' ); ?></a>
+				<?php $migrate_nav_class = 'migrate-status' === $action ? 'nav-tab-active' : ''; ?>
+				<a href="<?php echo esc_url( $this->get_link( array( 'action' => 'migrate-status' ) ) ); ?>" class="nav-tab <?php echo esc_attr( $migrate_nav_class ); ?>"><?php esc_html_e( 'Migrate', 'edit-flow' ); ?></a>
 			</h3>
 
 			<?php if ( 'change-options' === $action ) { ?>
@@ -32,6 +34,76 @@ global $edit_flow;
 				<?php do_settings_sections( $this->module->options_group_name ); ?>
 				<input id="edit_flow_module_name" name="edit_flow_module_name" type="hidden" value="<?php echo esc_attr( $this->module->name ); ?>" />
 				<?php submit_button(); ?>
+			</form>
+			<?php } elseif ( 'migrate-status' === $action ) { ?>
+			<!-- Migrate posts between statuses -->
+				<?php
+				$custom_statuses = $this->get_custom_statuses();
+				$core_statuses   = [
+					'draft'   => __( 'Draft', 'edit-flow' ),
+					'pending' => __( 'Pending Review', 'edit-flow' ),
+					'publish' => __( 'Published', 'edit-flow' ),
+					'private' => __( 'Private', 'edit-flow' ),
+					'trash'   => __( 'Trash', 'edit-flow' ),
+				];
+				?>
+			<p class="description" style="margin-bottom: 1em;">
+				<?php esc_html_e( 'Use this tool to migrate posts from one status to another. This is useful when deactivating Edit Flow or consolidating statuses.', 'edit-flow' ); ?>
+			</p>
+			<form action="<?php echo esc_url( $this->get_link( array( 'action' => 'migrate-status' ) ) ); ?>" method="post" id="migrate-status-form">
+				<div class="form-field">
+					<label for="migrate_from"><?php esc_html_e( 'From Status', 'edit-flow' ); ?></label>
+					<select id="migrate_from" name="migrate_from">
+						<option value=""><?php esc_html_e( '— Select Status —', 'edit-flow' ); ?></option>
+						<optgroup label="<?php esc_attr_e( 'Custom Statuses', 'edit-flow' ); ?>">
+							<?php foreach ( $custom_statuses as $status ) : ?>
+								<?php
+								$count = $this->get_post_count_for_status( $status->slug );
+								?>
+								<option value="<?php echo esc_attr( $status->slug ); ?>">
+									<?php echo esc_html( $status->name ); ?> (<?php echo esc_html( $count ); ?>)
+								</option>
+							<?php endforeach; ?>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Core Statuses', 'edit-flow' ); ?>">
+							<?php foreach ( $core_statuses as $slug => $label ) : ?>
+								<?php
+								$count = $this->get_post_count_for_status( $slug );
+								?>
+								<option value="<?php echo esc_attr( $slug ); ?>">
+									<?php echo esc_html( $label ); ?> (<?php echo esc_html( $count ); ?>)
+								</option>
+							<?php endforeach; ?>
+						</optgroup>
+					</select>
+					<p class="description"><?php esc_html_e( 'Select the status to migrate posts from.', 'edit-flow' ); ?></p>
+				</div>
+
+				<div class="form-field">
+					<label for="migrate_to"><?php esc_html_e( 'To Status', 'edit-flow' ); ?></label>
+					<select id="migrate_to" name="migrate_to">
+						<option value=""><?php esc_html_e( '— Select Status —', 'edit-flow' ); ?></option>
+						<optgroup label="<?php esc_attr_e( 'Custom Statuses', 'edit-flow' ); ?>">
+							<?php foreach ( $custom_statuses as $status ) : ?>
+								<option value="<?php echo esc_attr( $status->slug ); ?>">
+									<?php echo esc_html( $status->name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</optgroup>
+						<optgroup label="<?php esc_attr_e( 'Core Statuses', 'edit-flow' ); ?>">
+							<?php foreach ( $core_statuses as $slug => $label ) : ?>
+								<option value="<?php echo esc_attr( $slug ); ?>">
+									<?php echo esc_html( $label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</optgroup>
+					</select>
+					<p class="description"><?php esc_html_e( 'Select the target status for the posts.', 'edit-flow' ); ?></p>
+				</div>
+
+				<?php wp_nonce_field( 'custom-status-migrate-nonce' ); ?>
+				<input type="hidden" name="action" value="migrate" />
+				<?php submit_button( __( 'Migrate Posts', 'edit-flow' ), 'primary', 'submit', true, array( 'id' => 'migrate-submit' ) ); ?>
 			</form>
 			<?php } else { ?>
 			<!-- Custom form for adding a new Custom Status term -->

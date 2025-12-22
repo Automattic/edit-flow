@@ -54,6 +54,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 					'term-updated'            => __( 'Post status updated.', 'edit-flow' ),
 					'status-deleted'          => __( 'Post status deleted.', 'edit-flow' ),
 					'status-position-updated' => __( 'Status order updated.', 'edit-flow' ),
+					'status-migrated'         => __( 'Posts migrated successfully.', 'edit-flow' ),
 				],
 				'autoload'              => false,
 				'settings_help_tab'     => [
@@ -71,6 +72,11 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		 */
 		public function init() {
 			global $edit_flow;
+
+			// Load WP-CLI commands.
+			if ( defined( 'WP_CLI' ) && WP_CLI ) {
+				require_once __DIR__ . '/lib/class-cli.php';
+			}
 
 			// Register custom statuses as a taxonomy
 			$this->register_custom_statuses();
@@ -100,6 +106,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_action( 'admin_init', [ $this, 'handle_edit_custom_status' ] );
 			add_action( 'admin_init', [ $this, 'handle_make_default_custom_status' ] );
 			add_action( 'admin_init', [ $this, 'handle_delete_custom_status' ] );
+			add_action( 'admin_init', [ $this, 'handle_migrate_status' ] );
 			add_action( 'wp_ajax_update_status_positions', [ $this, 'handle_ajax_update_status_positions' ] );
 			add_action( 'wp_ajax_inline_save_status', [ $this, 'ajax_inline_save_status' ] );
 
@@ -1052,6 +1059,79 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		/**
+		 * Handle a POST request to migrate posts between statuses.
+		 *
+		 * @since 0.9.10
+		 */
+		public function handle_migrate_status() {
+			// Check that this is our POST request.
+			if ( ! isset( $_POST['action'] ) || 'migrate' !== $_POST['action'] ) {
+				return;
+			}
+
+			// Verify the page.
+			if ( ! isset( $_GET['page'] ) || $_GET['page'] !== $this->module->settings_slug ) {
+				return;
+			}
+
+			// Check for proper nonce.
+			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'custom-status-migrate-nonce' ) ) {
+				wp_die( esc_html__( 'Invalid nonce for submission.', 'edit-flow' ) );
+			}
+
+			// Only allow users with the proper caps.
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_die( esc_html__( 'Sorry, you do not have permission to migrate posts.', 'edit-flow' ) );
+			}
+
+			$from_status = isset( $_POST['migrate_from'] ) ? sanitize_key( $_POST['migrate_from'] ) : '';
+			$to_status   = isset( $_POST['migrate_to'] ) ? sanitize_key( $_POST['migrate_to'] ) : '';
+
+			// Validate inputs.
+			if ( empty( $from_status ) || empty( $to_status ) ) {
+				wp_die( esc_html__( 'Please select both a source and target status.', 'edit-flow' ) );
+			}
+
+			if ( $from_status === $to_status ) {
+				wp_die( esc_html__( 'Source and target status cannot be the same.', 'edit-flow' ) );
+			}
+
+			// Perform the migration.
+			$this->reassign_post_status( $from_status, $to_status );
+
+			// Clear caches.
+			wp_cache_flush();
+
+			$redirect_url = $this->get_link(
+				[
+					'action'  => 'migrate-status',
+					'message' => 'status-migrated',
+				]
+			);
+			wp_redirect( $redirect_url );
+			exit;
+		}
+
+		/**
+		 * Get count of posts with a specific status.
+		 *
+		 * @since 0.9.10
+		 *
+		 * @param string $status The status slug.
+		 * @return int The number of posts with this status.
+		 */
+		public function get_post_count_for_status( $status ) {
+			global $wpdb;
+
+			return (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = %s",
+					$status
+				)
+			);
+		}
+
+		/**
 		 * Generate a link to one of the custom status actions
 		 *
 		 * @since 0.7
@@ -1261,7 +1341,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		 */
 		public function print_configure_view() {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- No verification required for unprivileged URL check.
-			$action = isset( $_GET['action'] ) && in_array( $_GET['action'], [ 'edit-status', 'change-options' ] ) ? $_GET['action'] : '';
+			$action = isset( $_GET['action'] ) && in_array( $_GET['action'], [ 'edit-status', 'change-options', 'migrate-status' ] ) ? $_GET['action'] : '';
 
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No verification required for unprivileged URL check.
 			$term_id = isset( $_GET['term-id'] ) ? absint( $_GET['term-id'] ) : false;
