@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+* fix: scope module asset loading to relevant pages only by @GaryJones in [#858](https://github.com/Automattic/Edit-Flow/pull/858)
 * fix: allow text selection in calendar overlay without triggering drag by @GaryJones in [#857](https://github.com/Automattic/Edit-Flow/pull/857)
 * fix: update post date to current time when publishing from custom status by @GaryJones in [#856](https://github.com/Automattic/Edit-Flow/pull/856)
 * fix: resolve calendar drag-and-drop not persisting post date changes by @GaryJones in [#854](https://github.com/Automattic/Edit-Flow/pull/854)

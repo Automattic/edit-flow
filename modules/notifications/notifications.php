@@ -194,7 +194,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		public function enqueue_admin_scripts() {
 			global $post;
 
-			if ( $this->is_whitelisted_functional_view() ) {
+			if ( $this->is_post_management_page( $this->module->name ) ) {
 				wp_enqueue_script( 'jquery-listfilterizer' );
 				wp_enqueue_script( 'edit-flow-notifications-js', $this->module_url . 'lib/notifications.js', [ 'jquery', 'jquery-listfilterizer' ], EDIT_FLOW_VERSION, true );
 
@@ -232,7 +232,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		 */
 		public function enqueue_admin_styles() {
 
-			if ( $this->is_whitelisted_functional_view() || $this->is_whitelisted_settings_view() ) {
+			if ( $this->is_post_management_page( $this->module->name ) || $this->is_whitelisted_settings_view( $this->module->name ) ) {
 				wp_enqueue_style( 'jquery-listfilterizer' );
 				wp_enqueue_style( 'edit-flow-notifications-css', $this->module->module_url . 'lib/notifications.css', false, EDIT_FLOW_VERSION );
 			}

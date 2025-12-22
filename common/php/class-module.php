@@ -372,16 +372,44 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		}
 
 		/**
-		 * Whether or not the current page is a user-facing Edit Flow View
-		 * @todo Think of a creative way to make this work
+		 * Whether or not the current page is a post management page.
+		 *
+		 * A post management page is where the module's functionality is actually
+		 * needed, such as post editing pages (post.php, post-new.php) or post listing
+		 * pages (edit.php) for supported post types.
 		 *
 		 * @since 0.7
+		 * @since 0.10.0 Actually implemented instead of returning true. Renamed from
+		 *               is_whitelisted_functional_view().
 		 *
-		 * @param string $module_name (Optional) Module name to check against
+		 * @see https://github.com/Automattic/Edit-Flow/issues/351
+		 *
+		 * @param string $module_name (Optional) Module name to check against.
+		 * @return bool Whether the current page is a post management page for the module.
 		 */
-		public function is_whitelisted_functional_view( $module_name = null ) {
+		public function is_post_management_page( $module_name = null ) {
+			global $pagenow, $edit_flow;
 
-			// @todo complete this method
+			// Only load on post editing and listing pages.
+			$functional_pages = [ 'post.php', 'post-new.php', 'edit.php' ];
+			if ( ! in_array( $pagenow, $functional_pages, true ) ) {
+				return false;
+			}
+
+			// Get the current post type.
+			$current_post_type = $this->get_current_post_type();
+			if ( ! $current_post_type ) {
+				return false;
+			}
+
+			// If a module name is specified, check if this post type is supported by that module.
+			if ( $module_name && isset( $edit_flow->modules->$module_name ) ) {
+				$module = $edit_flow->modules->$module_name;
+				$supported_post_types = $this->get_post_types_for_module( $module );
+				if ( ! in_array( $current_post_type, $supported_post_types, true ) ) {
+					return false;
+				}
+			}
 
 			return true;
 		}
