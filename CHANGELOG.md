@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+* feat(custom-status): add status migration tool and WP-CLI commands by @GaryJones in [#859](https://github.com/Automattic/Edit-Flow/pull/859)
 * feat(notifications): add Post Author and Auto-subscribed badges by @GaryJones in [#847](https://github.com/Automattic/Edit-Flow/pull/847)
 * feat(story-budget): improve UX with Screen Options and collapsible categories by @GaryJones in [#846](https://github.com/Automattic/Edit-Flow/pull/846)
 
