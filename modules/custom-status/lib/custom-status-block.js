@@ -24,11 +24,15 @@ subscribe( function () {
 	}
 
 	// For new posts, we need to force the default custom status.
+	// Only update if the current status differs to avoid marking the post as dirty.
 	const isCleanNewPost = select( 'core/editor' ).isCleanNewPost();
 	if ( isCleanNewPost ) {
-		dispatch( 'core/editor' ).editPost( {
-			status: ef_default_custom_status,
-		} );
+		const currentStatus = select( 'core/editor' ).getEditedPostAttribute( 'status' );
+		if ( currentStatus !== ef_default_custom_status ) {
+			dispatch( 'core/editor' ).editPost( {
+				status: ef_default_custom_status,
+			} );
+		}
 	}
 
 	// If the save button exists, let's update the text if needed.
