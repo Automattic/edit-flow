@@ -22,7 +22,6 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				'settings_slug' => 'ef-settings',
 				'default_options' => array(
 					'enabled' => 'on',
-					'vip_features' => $this->is_vip_site() ? 'on' : 'off',
 				),
 				'configure_page_cb' => 'print_default_settings',
 				'autoload' => true,
@@ -35,7 +34,6 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 */
 		public function init() {
 			add_action( 'admin_init', array( $this, 'helper_settings_validate_and_save' ), 100 );
-			add_action( 'admin_init', array( $this, 'register_settings' ) );
 
 			add_action( 'admin_print_styles', array( $this, 'action_admin_print_styles' ) );
 			add_action( 'admin_print_scripts', array( $this, 'action_admin_print_scripts' ) );
@@ -155,34 +153,6 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Register settings for notifications so we can partially use the Settings API
-		 * We use the Settings API for form generation, but not saving because we have our
-		 * own way of handling the data.
-		 *
-		 * @since 0.10.0
-		 */
-		public function register_settings() {
-			add_settings_section(
-				$this->module->options_group_name . '_general',
-				__( 'WordPress VIP', 'edit-flow' ),
-				array( $this, 'settings_vip_section_description' ),
-				$this->module->options_group_name
-			);
-			add_settings_field( 'vip_features', __( 'Enable VIP features', 'edit-flow' ), array( $this, 'settings_vip_features_option' ), $this->module->options_group_name, $this->module->options_group_name . '_general' );
-		}
-
-		/**
-		 * Print the description for the VIP features section.
-		 *
-		 * @since 0.10.0
-		 */
-		public function settings_vip_section_description() {
-			echo '<p>';
-			esc_html_e( 'WordPress VIP features provide enhanced editorial workflow capabilities optimised for enterprise environments.', 'edit-flow' );
-			echo '</p>';
-		}
-
-		/**
 		 * Disabling nonce verification because that is not available here, it's just rendering it. The actual save is done in helper_settings_validate_and_save and that's guarded well.
 		 * phpcs:disable:WordPress.Security.NonceVerification.Missing
 		 */
@@ -271,20 +241,6 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			<?php submit_button(); ?>
 		</form>
 			<?php
-		}
-
-		public function settings_vip_features_option() {
-			$options = array(
-				'off' => __( 'Disabled', 'edit-flow' ),
-				'on' => __( 'Enabled', 'edit-flow' ),
-			);
-			echo '<select id="vip_features" name="' . esc_attr( $this->module->options_group_name ) . '[vip_features]">';
-			foreach ( $options as $value => $label ) {
-				echo '<option value="' . esc_attr( $value ) . '"';
-				echo selected( $this->module->options->vip_features, $value );
-				echo '>' . esc_html( $label ) . '</option>';
-			}
-			echo '</select>';
 		}
 
 		public function print_default_footer( $current_module ) {

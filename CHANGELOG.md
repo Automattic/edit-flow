@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Maintenance
 
+* chore: remove unused VIP feature flag setting and related code by @GaryJones in [#862](https://github.com/Automattic/Edit-Flow/pull/862)
 * chore: rename workflow to match plugin standards by @GaryJones in [#850](https://github.com/Automattic/Edit-Flow/pull/850)
 * chore: migrate build system from webpack to wp-scripts by @GaryJones in [#845](https://github.com/Automattic/Edit-Flow/pull/845)
 * chore: simplify ESLint config after eslint-plugin-wpvip fix by @GaryJones in [#844](https://github.com/Automattic/Edit-Flow/pull/844)

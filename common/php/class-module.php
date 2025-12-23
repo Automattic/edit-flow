@@ -47,19 +47,6 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		}
 
 		/**
-		 * Returns whether vip features have been enabled or not.
-		 *
-		 * @since 0.10.0
-		 *
-		 * @return true, if the feature is enabled, false otherwise
-		 */
-		protected function are_vip_features_enabled() {
-			global $edit_flow;
-
-			return 'on' === $edit_flow->settings->module->options->vip_features;
-		}
-
-		/**
 		 * Returns whether analytics has been enabled or not.
 		 *
 		 * It's only enabled if the site is a production WPVIP site.
