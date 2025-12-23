@@ -43,19 +43,19 @@ class EF_Story_Budget extends EF_Module {
 
 		$this->module_url = $this->get_module_url( __FILE__ );
 		// Register the module with Edit Flow
-		$args = array(
-			'title' => __( 'Story Budget', 'edit-flow' ),
+		$args         = array(
+			'title'                => __( 'Story Budget', 'edit-flow' ),
 			// translators: %s is a link to the story budget page
-			'short_description' => sprintf( __( 'View the status of all your content <a href="%s">at a glance</a>.', 'edit-flow' ), admin_url( 'index.php?page=story-budget' ) ),
+			'short_description'    => sprintf( __( 'View the status of all your content <a href="%s">at a glance</a>.', 'edit-flow' ), admin_url( 'index.php?page=story-budget' ) ),
 			'extended_description' => __( 'Use the story budget to see how content on your site is progressing. Filter by specific categories or date ranges to see details about each post in progress.', 'edit-flow' ),
-			'module_url' => $this->module_url,
-			'img_url' => $this->module_url . 'lib/story_budget_s128.png',
-			'slug' => 'story-budget',
-			'default_options' => array(
+			'module_url'           => $this->module_url,
+			'img_url'              => $this->module_url . 'lib/story_budget_s128.png',
+			'slug'                 => 'story-budget',
+			'default_options'      => array(
 				'enabled' => 'on',
 			),
-			'configure_page_cb' => false,
-			'autoload' => false,
+			'configure_page_cb'    => false,
+			'autoload'             => false,
 		);
 		$this->module = EditFlow()->register_module( 'story_budget', $args );
 	}
@@ -70,10 +70,10 @@ class EF_Story_Budget extends EF_Module {
 			return;
 		}
 
-		$this->num_columns       = $this->get_num_columns();
-		$this->show_excerpts     = $this->get_show_excerpts();
-		$this->hide_empty_terms  = $this->get_hide_empty_terms();
-		$this->max_num_columns   = apply_filters( 'ef_story_budget_max_num_columns', 3 );
+		$this->num_columns      = $this->get_num_columns();
+		$this->show_excerpts    = $this->get_show_excerpts();
+		$this->hide_empty_terms = $this->get_hide_empty_terms();
+		$this->max_num_columns  = apply_filters( 'ef_story_budget_max_num_columns', 3 );
 
 		// Filter to allow users to pick a taxonomy other than 'category' for sorting their posts
 		$this->taxonomy_used = apply_filters( 'ef_story_budget_taxonomy_used', $this->taxonomy_used );
@@ -100,9 +100,9 @@ class EF_Story_Budget extends EF_Module {
 
 		$story_budget_roles = array(
 			'administrator' => array( 'ef_view_story_budget' ),
-			'editor' => array( 'ef_view_story_budget' ),
-			'author' => array( 'ef_view_story_budget' ),
-			'contributor' => array( 'ef_view_story_budget' ),
+			'editor'        => array( 'ef_view_story_budget' ),
+			'author'        => array( 'ef_view_story_budget' ),
+			'contributor'   => array( 'ef_view_story_budget' ),
 		);
 		foreach ( $story_budget_roles as $role => $caps ) {
 			$this->add_caps_to_role( $role, $caps );
@@ -184,14 +184,14 @@ class EF_Story_Budget extends EF_Module {
 	public function register_term_columns() {
 
 		$term_columns = array(
-			'title' => __( 'Title', 'edit-flow' ),
-			'status' => __( 'Status', 'edit-flow' ),
-			'author' => __( 'Author', 'edit-flow' ),
-			'post_date' => __( 'Post Date', 'edit-flow' ),
+			'title'         => __( 'Title', 'edit-flow' ),
+			'status'        => __( 'Status', 'edit-flow' ),
+			'author'        => __( 'Author', 'edit-flow' ),
+			'post_date'     => __( 'Post Date', 'edit-flow' ),
 			'post_modified' => __( 'Last Modified', 'edit-flow' ),
 		);
 
-		$term_columns = apply_filters( 'ef_story_budget_term_columns', $term_columns );
+		$term_columns       = apply_filters( 'ef_story_budget_term_columns', $term_columns );
 		$this->term_columns = $term_columns;
 	}
 
@@ -394,16 +394,16 @@ class EF_Story_Budget extends EF_Module {
 		$this->user_filters = $this->update_user_filters();
 
 		if ( ! empty( $this->user_filters[ $this->taxonomy_used ] ) ) {
-			$terms = array();
+			$terms   = array();
 			$terms[] = get_term( $this->user_filters[ $this->taxonomy_used ], $this->taxonomy_used );
 		} else {
 			// Get all of the terms from the taxonomy, regardless whether there are published posts
 			$terms = get_terms( array(
 				'taxonomy'   => $this->taxonomy_used,
-				'orderby' => 'name',
-				'order' => 'asc',
+				'orderby'    => 'name',
+				'order'      => 'asc',
 				'hide_empty' => 0,
-				'parent' => 0,
+				'parent'     => 0,
 			));
 		}
 		$this->terms = apply_filters( 'ef_story_budget_filter_terms', $terms ); // allow for reordering or any other filtering of terms
@@ -486,22 +486,22 @@ class EF_Story_Budget extends EF_Module {
 	public function get_posts_for_term( $term, $args = null ) {
 
 		$defaults = array(
-			'post_status' => null,
-			'author'      => null,
+			'post_status'    => null,
+			'author'         => null,
 			'posts_per_page' => apply_filters( 'ef_story_budget_max_query', 200 ),
 		);
-		$args = array_merge( $defaults, $args );
+		$args     = array_merge( $defaults, $args );
 
 		// Filter to the term and any children if it's hierarchical
-		$arg_terms = array(
+		$arg_terms         = array(
 			$term->term_id,
 		);
-		$arg_terms = array_merge( $arg_terms, get_term_children( $term->term_id, $this->taxonomy_used ) );
+		$arg_terms         = array_merge( $arg_terms, get_term_children( $term->term_id, $this->taxonomy_used ) );
 		$args['tax_query'] = array(
 			array(
 				'taxonomy' => $this->taxonomy_used,
-				'field' => 'id',
-				'terms' => $arg_terms,
+				'field'    => 'id',
+				'terms'    => $arg_terms,
 				'operator' => 'IN',
 			),
 		);
@@ -509,7 +509,7 @@ class EF_Story_Budget extends EF_Module {
 		// Unpublished as a status is just an array of everything but 'publish'.
 		if ( 'unpublish' == $args['post_status'] ) {
 			$args['post_status'] = '';
-			$post_stati = wp_filter_object_list( $this->get_budget_post_stati(), array( 'name' => 'publish' ), 'not' );
+			$post_stati          = wp_filter_object_list( $this->get_budget_post_stati(), array( 'name' => 'publish' ), 'not' );
 
 			if ( ! apply_filters( 'ef_show_scheduled_as_unpublished', false ) ) {
 				$post_stati = wp_filter_object_list( $post_stati, array( 'name' => 'future' ), 'not' );
@@ -524,8 +524,8 @@ class EF_Story_Budget extends EF_Module {
 		}
 
 		$beginning_date = strtotime( $this->user_filters['start_date'] );
-		$days_to_show = $this->user_filters['number_days'];
-		$ending_date = $beginning_date + ( $days_to_show * DAY_IN_SECONDS );
+		$days_to_show   = $this->user_filters['number_days'];
+		$ending_date    = $beginning_date + ( $days_to_show * DAY_IN_SECONDS );
 
 		$args['date_query'] = array(
 			'after'     => date( 'Y-m-d', $beginning_date ),
@@ -684,7 +684,7 @@ class EF_Story_Budget extends EF_Module {
 		$post_title = _draft_or_post_title( $post->ID );
 
 		$post_type_object = get_post_type_object( $post->post_type );
-		$can_edit_post = current_user_can( $post_type_object->cap->edit_post, $post->ID );
+		$can_edit_post    = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 		if ( $can_edit_post ) {
 			$output = '<strong><a href="' . get_edit_post_link( $post->ID ) . '">' . esc_html( $post_title ) . '</a></strong>';
 		} else {
@@ -707,7 +707,7 @@ class EF_Story_Budget extends EF_Module {
 		$output .= '</div>';
 
 		// Edit or Trash or View
-		$output .= '<div class="row-actions">';
+		$output      .= '<div class="row-actions">';
 		$item_actions = array();
 		if ( $can_edit_post ) {
 			$item_actions['edit'] = '<a title="' . __( 'Edit this post', 'edit-flow' ) . '" href="' . get_edit_post_link( $post->ID ) . '">' . __( 'Edit', 'edit-flow' ) . '</a>';
@@ -720,7 +720,7 @@ class EF_Story_Budget extends EF_Module {
 		if ( in_array( $post->post_status, array( 'publish' ) ) ) {
 			// translators: %s is the post title
 			$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
-		} else if ( $can_edit_post ) {
+		} elseif ( $can_edit_post ) {
 			// translators: %s is the post title
 			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
 		}
@@ -728,7 +728,7 @@ class EF_Story_Budget extends EF_Module {
 		$item_actions = apply_filters( 'ef_story_budget_item_actions', $item_actions, $post->ID );
 		if ( count( $item_actions ) ) {
 			$output .= '<div class="row-actions">';
-			$html = '';
+			$html    = '';
 			foreach ( $item_actions as $class => $item_action ) {
 				$html .= '<span class="' . esc_attr( $class ) . '">' . $item_action . '</span> | ';
 			}
@@ -747,7 +747,6 @@ class EF_Story_Budget extends EF_Module {
 
 		<?php
 		if ( isset( $_GET['trashed'] ) || isset( $_GET['untrashed'] ) ) {
-
 			echo '<div id="trashed-message" class="updated"><p>';
 
 			// Following mostly stolen from edit.php
@@ -810,11 +809,11 @@ class EF_Story_Budget extends EF_Module {
 		$current_user = wp_get_current_user();
 
 		$user_filters = array(
-			'post_status'   => $this->filter_get_param( 'post_status' ),
-			'cat'           => $this->filter_get_param( 'cat' ),
-			'author'        => $this->filter_get_param( 'author' ),
-			'start_date'    => $this->filter_get_param( 'start_date' ),
-			'number_days'   => $this->filter_get_param( 'number_days' ),
+			'post_status' => $this->filter_get_param( 'post_status' ),
+			'cat'         => $this->filter_get_param( 'cat' ),
+			'author'      => $this->filter_get_param( 'author' ),
+			'start_date'  => $this->filter_get_param( 'start_date' ),
+			'number_days' => $this->filter_get_param( 'number_days' ),
 		);
 
 		$current_user_filters = array();
@@ -870,7 +869,7 @@ class EF_Story_Budget extends EF_Module {
 		// Sure, this could be done in one line. But we're cooler than that: let's make it more readable!
 		if ( ! isset( $_GET[ $param ] ) ) {
 			return null;
-		} else if ( empty( $_GET[ $param ] ) ) {
+		} elseif ( empty( $_GET[ $param ] ) ) {
 			return '';
 		}
 
@@ -881,8 +880,8 @@ class EF_Story_Budget extends EF_Module {
 		$select_filter_names = array();
 
 		$select_filter_names['post_status'] = 'post_status';
-		$select_filter_names['cat'] = 'cat';
-		$select_filter_names['author'] = 'author';
+		$select_filter_names['cat']         = 'cat';
+		$select_filter_names['author']      = 'author';
 
 		return apply_filters( 'ef_story_budget_filter_names', $select_filter_names );
 	}
@@ -907,19 +906,22 @@ class EF_Story_Budget extends EF_Module {
 				<?php
 				break;
 			case 'cat':
-				// Borrowed from wp-admin/edit.php
-				if ( taxonomy_exists( 'category' ) ) {
+				if ( taxonomy_exists( $this->taxonomy_used ) ) {
+					$taxonomy_obj = get_taxonomy( $this->taxonomy_used );
 					echo '<label for="cat">';
-					echo '<span class="screen-reader-text">' . esc_html__( 'Filter by category', 'edit-flow' ) . '</span>';
-					$category_dropdown_args = array(
-						'show_option_all' => __( 'View all categories', 'edit-flow' ),
-						'hide_empty' => 0,
-						'hierarchical' => 1,
-						'show_count' => 0,
-						'orderby' => 'name',
-						'selected' => $this->user_filters['cat'],
+					// translators: %s is the taxonomy name (e.g., "category", "tag")
+					echo '<span class="screen-reader-text">' . esc_html( sprintf( __( 'Filter by %s', 'edit-flow' ), $taxonomy_obj->labels->singular_name ) ) . '</span>';
+					$dropdown_args = array(
+						// translators: %s is the taxonomy name (e.g., "categories", "tags")
+						'show_option_all' => sprintf( __( 'View all %s', 'edit-flow' ), strtolower( $taxonomy_obj->labels->name ) ),
+						'hide_empty'      => 0,
+						'hierarchical'    => $taxonomy_obj->hierarchical,
+						'show_count'      => 0,
+						'orderby'         => 'name',
+						'selected'        => $this->user_filters['cat'],
+						'taxonomy'        => $this->taxonomy_used,
 					);
-					wp_dropdown_categories( $category_dropdown_args );
+					wp_dropdown_categories( $dropdown_args );
 					echo '</label>';
 				}
 				break;
@@ -928,9 +930,9 @@ class EF_Story_Budget extends EF_Module {
 				echo '<span class="screen-reader-text">' . esc_html__( 'Filter by author', 'edit-flow' ) . '</span>';
 				$users_dropdown_args = array(
 					'show_option_all' => __( 'View all users', 'edit-flow' ),
-					'name'     => 'author',
-					'selected' => $this->user_filters['author'],
-					'who' => 'authors',
+					'name'            => 'author',
+					'selected'        => $this->user_filters['author'],
+					'who'             => 'authors',
 				);
 				$users_dropdown_args = apply_filters( 'ef_story_budget_users_dropdown_args', $users_dropdown_args );
 				wp_dropdown_users( $users_dropdown_args );
@@ -948,8 +950,8 @@ class EF_Story_Budget extends EF_Module {
 	 * @return array An array of StdClass objects representing statuses
 	 */
 	public function get_budget_post_stati() {
-		$post_stati = get_post_stati( array(), 'object' );
-		$custom_status_slugs = wp_list_pluck( $this->get_post_statuses(), 'slug' );
+		$post_stati            = get_post_stati( array(), 'object' );
+		$custom_status_slugs   = wp_list_pluck( $this->get_post_statuses(), 'slug' );
 		$custom_status_slugs[] = 'future';
 		$custom_status_slugs[] = 'publish';
 
