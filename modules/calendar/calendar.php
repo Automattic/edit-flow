@@ -1081,7 +1081,15 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					return '<textarea type="text" class="metadata-edit-' . esc_attr( $type ) . '">' . esc_html( $value ) . '</textarea>';
 				break;
 				case 'date':
-					return '<input type="text" value="' . esc_attr( $value ) . '" class="date-time-pick metadata-edit-' . esc_attr( $type ) . '"/>';
+					// Convert display value to datetime-local format (Y-m-d\TH:i).
+					$datetime_value = '';
+					if ( ! empty( $value ) ) {
+						$timestamp = strtotime( $value );
+						if ( false !== $timestamp ) {
+							$datetime_value = date( 'Y-m-d\TH:i', $timestamp );
+						}
+					}
+					return '<input type="datetime-local" value="' . esc_attr( $datetime_value ) . '" class="metadata-edit-' . esc_attr( $type ) . '"/>';
 				break;
 				case 'checkbox':
 					$output = '<select class="metadata-edit">';

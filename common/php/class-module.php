@@ -254,9 +254,13 @@ if ( ! class_exists( 'EF_Module' ) ) {
 
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 
-			//Timepicker needs to come after jquery-ui-datepicker and jquery
-			wp_enqueue_script( 'edit_flow-timepicker', EDIT_FLOW_URL . 'common/js/jquery-ui-timepicker-addon.js', array( 'jquery', 'jquery-ui-datepicker' ), EDIT_FLOW_VERSION, true );
-			wp_enqueue_script( 'edit_flow-date_picker', EDIT_FLOW_URL . 'common/js/ef_date.js', array( 'jquery', 'jquery-ui-datepicker', 'edit_flow-timepicker' ), EDIT_FLOW_VERSION, true );
+			// Build script dependencies. Add wp-data for Gutenberg integration if available.
+			$dependencies = array( 'jquery', 'jquery-ui-datepicker' );
+			if ( function_exists( 'use_block_editor_for_post' ) && use_block_editor_for_post( get_post() ) ) {
+				$dependencies[] = 'wp-data';
+			}
+
+			wp_enqueue_script( 'edit_flow-date_picker', EDIT_FLOW_URL . 'common/js/ef_date.js', $dependencies, EDIT_FLOW_VERSION, true );
 			wp_add_inline_script( 'edit_flow-date_picker', sprintf( 'var ef_week_first_day =  %s;', wp_json_encode( get_option( 'start_of_week' ) ) ), 'before' );
 
 			// Now styles
