@@ -129,3 +129,31 @@ div#normal-sortables .ef_editorial_meta_checkbox label {
 div#side-sortables .ef_editorial_meta_checkbox input {
 	margin-left: 4px;
 }
+
+/* Date + Time input wrapper */
+.ef-datetime-wrapper {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.ef-datetime-wrapper .date-pick {
+	flex: 1;
+	min-width: 120px;
+}
+
+.ef-datetime-wrapper .time-pick {
+	width: 100px;
+	flex-shrink: 0;
+}
+
+/* Sidebar adjustments for datetime wrapper */
+div#side-sortables .ef-datetime-wrapper {
+	flex-wrap: wrap;
+}
+
+div#side-sortables .ef-datetime-wrapper .date-pick,
+div#side-sortables .ef-datetime-wrapper .time-pick {
+	width: 100%;
+	min-width: unset;
+}

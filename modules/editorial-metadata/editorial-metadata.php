@@ -82,6 +82,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// Register the taxonomy we use for Editorial Metadata with WordPress core
 			$this->register_taxonomy();
 
+			// Register post meta for REST API support (enables Gutenberg saving).
+			$this->register_metadata_for_rest_api();
+
 			// Anything that needs to happen in the admin
 			add_action( 'admin_init', array( $this, 'action_admin_init' ) );
 
@@ -334,6 +337,36 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			);
 		}
 
+		/**
+		 * Register editorial metadata post meta keys for REST API support.
+		 *
+		 * This enables Gutenberg to save metadata values directly through the REST API
+		 * when the post is saved, rather than relying on legacy metabox form submission.
+		 */
+		private function register_metadata_for_rest_api() {
+			$terms                = $this->get_editorial_metadata_terms();
+			$supported_post_types = $this->get_post_types_for_module( $this->module );
+
+			foreach ( $terms as $term ) {
+				$meta_key = $this->get_postmeta_key( $term );
+
+				foreach ( $supported_post_types as $post_type ) {
+					register_post_meta(
+						$post_type,
+						$meta_key,
+						array(
+							'show_in_rest'  => true,
+							'single'        => true,
+							'type'          => 'string',
+							'auth_callback' => function ( $allowed, $meta_key, $post_id ) {
+								return current_user_can( 'edit_post', $post_id );
+							},
+						)
+					);
+				}
+			}
+		}
+
 		/*****************************************************
 		 * Post meta box generation and processing
 		 ****************************************************/
@@ -391,17 +424,32 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 					echo "<div class='" . esc_attr( self::metadata_taxonomy ) . ' ' . esc_attr( self::metadata_taxonomy ) . "_$type'>";
 					switch ( $type ) {
 						case 'date':
-							// TODO: Move this to a function
+							$date_value   = '';
+							$time_value   = '';
+							$hidden_value = '';
 							if ( ! empty( $current_metadata ) ) {
-								// Turn timestamp into a human-readable date
-								$current_metadata = $this->show_date_or_datetime( intval( $current_metadata ) );
+								$timestamp    = intval( $current_metadata );
+								$date_value   = date_i18n( 'M d Y', $timestamp );
+								$hidden_value = date( 'Y-m-d', $timestamp );
+								// Only show time if it's not midnight (00:00).
+								if ( date( 'Hi', $timestamp ) !== '0000' ) {
+									$time_value    = date( 'H:i', $timestamp );
+									$hidden_value .= ' ' . $time_value;
+								} else {
+									$hidden_value .= ' 00:00';
+								}
 							}
-							echo '<label for="' . esc_attr( $postmeta_key ) . '">' . esc_html( $term->name ) . '</label>';
+							echo '<label for="' . esc_attr( $postmeta_key ) . '_date">' . esc_html( $term->name ) . '</label>';
 							if ( $description_span ) {
-								echo '<label for="' . esc_attr( $postmeta_key ) . '">' . wp_kses_post( $description_span ) . '</label>';
+								echo '<label for="' . esc_attr( $postmeta_key ) . '_date">' . wp_kses_post( $description_span ) . '</label>';
 							}
-							echo '<input id="' . esc_attr( $postmeta_key ) . '" name="' . esc_attr( $postmeta_key ) . '" type="tex" class="date-time-pick" value="' . esc_attr( $current_metadata ) . '" />';
-							echo '<input type="hidden" id="' . esc_attr( $postmeta_key ) . '_hidden name="' . esc_attr( $postmeta_key ) . '_hidden" />';
+							echo '<div class="ef-datetime-wrapper">';
+							// The date input has name="$postmeta_key" to pass the empty check in save_meta_box().
+							// The hidden field has the machine-readable value used for actual parsing.
+							echo '<input id="' . esc_attr( $postmeta_key ) . '_date" name="' . esc_attr( $postmeta_key ) . '" type="text" class="date-pick" value="' . esc_attr( $date_value ) . '" placeholder="' . esc_attr__( 'Select date', 'edit-flow' ) . '" />';
+							echo '<input id="' . esc_attr( $postmeta_key ) . '_time" type="time" class="time-pick" value="' . esc_attr( $time_value ) . '" />';
+							echo '</div>';
+							echo '<input type="hidden" id="' . esc_attr( $postmeta_key ) . '_hidden" name="' . esc_attr( $postmeta_key ) . '_hidden" value="' . esc_attr( $hidden_value ) . '" />';
 							break;
 						case 'location':
 							echo '<label for="' . esc_attr( $postmeta_key ) . '">' . esc_html( $term->name ) . '</label>';
@@ -467,77 +515,77 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 		}
 
 		/**
+		 * Save editorial metadata values from POST data.
+		 * Called from save_post hook for Classic Editor form submissions.
+		 *
+		 * Note: In Gutenberg, metadata is saved via REST API (see register_metadata_for_rest_api).
+		 *
+		 * @param int $post_id Post ID.
+		 */
+		private function save_meta_box_data( $post_id ) {
+			// Verify nonce.
+			$nonce_key = self::metadata_taxonomy . '_nonce';
+			if ( ! isset( $_POST[ $nonce_key ] ) || ! wp_verify_nonce( $_POST[ $nonce_key ], 'ef-save-metabox' ) ) {
+				return;
+			}
+
+			// Verify user can edit.
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
+
+			$terms = $this->get_editorial_metadata_terms();
+
+			foreach ( $terms as $term ) {
+				$key          = $this->get_postmeta_key( $term );
+				$new_metadata = isset( $_POST[ $key ] ) ? $_POST[ $key ] : '';
+				$type         = $term->type;
+
+				if ( empty( $new_metadata ) ) {
+					delete_post_meta( $post_id, $key );
+				} else {
+					if ( 'date' === $type ) {
+						$date_to_parse = isset( $_POST[ $key . '_hidden' ] ) ? $_POST[ $key . '_hidden' ] : '';
+						$date          = DateTime::createFromFormat( 'Y-m-d H:i', $date_to_parse );
+
+						if ( false !== $date ) {
+							$new_metadata = $date->getTimestamp();
+						} else {
+							$new_metadata = strtotime( $new_metadata );
+						}
+					}
+
+					if ( 'number' === $type ) {
+						$new_metadata = (int) $new_metadata;
+					}
+
+					$new_metadata = strip_tags( $new_metadata );
+					update_post_meta( $post_id, $key, $new_metadata );
+				}
+
+				do_action( 'ef_editorial_metadata_field_updated', $key, $new_metadata, $post_id, $type );
+			}
+		}
+
+		/**
 		 * Save any values in the editorial metadata post meta box
 		 *
 		 * @param int $id Unique ID for the post being saved
 		 * @param object $post Post object
 		 */
 		public function save_meta_box( $id, $post ) {
-
-			// Authentication checks: make sure data came from our meta box and that the current user is allowed to edit the post
-			// TODO: switch to using check_admin_referrer? See core (e.g. edit.php) for usage
-			if ( ! isset( $_POST[ self::metadata_taxonomy . '_nonce' ] )
-			|| ! wp_verify_nonce( $_POST[ self::metadata_taxonomy . '_nonce' ], 'ef-save-metabox' ) ) {
+			// Skip autosave.
+			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 				return $id;
 			}
 
-			if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
-			|| ! in_array( $post->post_type, $this->get_post_types_for_module( $this->module ) )
-			|| ( 'post' == $post->post_type && ! current_user_can( 'edit_post', $id ) )
-			|| ( 'page' == $post->post_type && ! current_user_can( 'edit_page', $id ) ) ) {
+			// Skip if post type not supported.
+			if ( ! in_array( $post->post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
 				return $id;
 			}
 
-			// Authentication passed, let's save the data
-			$terms = $this->get_editorial_metadata_terms();
-			$term_slugs = array();
-
-			foreach ( $terms as $term ) {
-				// Setup the key for this editorial metadata term (same as what's in $_POST)
-				$key = $this->get_postmeta_key( $term );
-
-				// Get the current editorial metadata
-				// TODO: do we care about the current_metadata at all?
-				//$current_metadata = get_post_meta( $id, $key, true );
-
-				$new_metadata = isset( $_POST[ $key ] ) ? $_POST[ $key ] : '';
-
-				$type = $term->type;
-				if ( empty( $new_metadata ) ) {
-					delete_post_meta( $id, $key );
-				} else {
-
-					// TODO: Move this to a function
-					if ( 'date' === $type ) {
-						$date_to_parse = isset( $_POST[ $key . '_hidden' ] ) ? $_POST[ $key . '_hidden' ] : '';
-						$date = DateTime::createFromFormat( 'Y-m-d H:i', $date_to_parse );
-
-						if ( false !== $date ) {
-							$new_metadata = $date->getTimestamp();
-						} else {
-							// Fallback, in case $_POST[ $key . '_hidden' ] was not previosuly set
-							$new_metadata = strtotime( $new_metadata );
-						}
-					}
-					if ( 'number' === $type ) {
-						$new_metadata = (int) $new_metadata;
-					}
-
-					$new_metadata = strip_tags( $new_metadata );
-					update_post_meta( $id, $key, $new_metadata );
-
-					// Add the slugs of the terms with non-empty new metadata to an array
-					$term_slugs[] = $term->slug;
-				}
-				do_action( 'ef_editorial_metadata_field_updated', $key, $new_metadata, $id, $type );
-			}
-
-			// Relate the post to the terms used and taxonomy type (wp_term_relationships table).
-			// This will allow us to update and display the count of metadata in posts in use per term.
-			// TODO: Core only correlates posts with terms if the post_status is publish. Do we care what it is?
-			if ( 'publish' === $post->post_status ) {
-				wp_set_object_terms( $id, $term_slugs, self::metadata_taxonomy );
-			}
+			// Save the data.
+			$this->save_meta_box_data( $id );
 		}
 
 		/**
