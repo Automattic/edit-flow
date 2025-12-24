@@ -1,0 +1,47 @@
+name: PHP Lint
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - develop
+      - main
+
+# Disable all permissions by default; grant minimal permissions per job
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: PHP Syntax and Coding Standards
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@9e72090525849c5e82e596468b86eb55e9cc5401 # 2.32.0
+        with:
+          php-version: '8.2'
+          tools: composer, cs2pr
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@3cf229dc2919194e9e36783941438d17239e8520 # 3.1.1
+        with:
+          composer-options: --prefer-dist --no-progress
+
+      - name: PHP syntax lint
+        run: composer lint-ci | cs2pr
+
+      - name: PHP coding standards
+        # continue-on-error until existing violations are addressed
+        continue-on-error: true
+        run: composer cs -- --report=checkstyle | cs2pr
