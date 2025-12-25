@@ -1,36 +1,49 @@
 <?php
+/**
+ * Settings module for Edit Flow.
+ *
+ * @package EditFlow
+ */
 
 if ( ! class_exists( 'EF_Settings' ) ) {
 
+	/**
+	 * Settings module class for Edit Flow.
+	 */
 	class EF_Settings extends EF_Module {
 
+		/**
+		 * The module object.
+		 *
+		 * @var object
+		 */
 		public $module;
 
 		/**
-		 * Register the module with Edit Flow but don't do anything else
+		 * Register the module with Edit Flow but don't do anything else.
 		 */
 		public function __construct() {
-			// Register the module with Edit Flow
+			// Register the module with Edit Flow.
 			$this->module_url = $this->get_module_url( __FILE__ );
-			$args = array(
-				'title' => __( 'Edit Flow', 'edit-flow' ),
-				'short_description' => __( 'Edit Flow redefines your WordPress publishing workflow.', 'edit-flow' ),
+			$args             = array(
+				'title'                => __( 'Edit Flow', 'edit-flow' ),
+				'short_description'    => __( 'Edit Flow redefines your WordPress publishing workflow.', 'edit-flow' ),
 				'extended_description' => __( 'Enable any of the features below to take control of your workflow. Custom statuses, email notifications, editorial comments, and more help you and your team save time so everyone can focus on what matters most: the content.', 'edit-flow' ),
-				'module_url' => $this->module_url,
-				'img_url' => $this->module_url . 'lib/eflogo_s128.png',
-				'slug' => 'settings',
-				'settings_slug' => 'ef-settings',
-				'default_options' => array(
+				'module_url'           => $this->module_url,
+				'img_url'              => $this->module_url . 'lib/eflogo_s128.png',
+				'slug'                 => 'settings',
+				'settings_slug'        => 'ef-settings',
+				'default_options'      => array(
 					'enabled' => 'on',
 				),
-				'configure_page_cb' => 'print_default_settings',
-				'autoload' => true,
+				'configure_page_cb'    => 'print_default_settings',
+				'autoload'             => true,
 			);
-			$this->module = EditFlow()->register_module( 'settings', $args );
+			$this->module     = EditFlow()->register_module( 'settings', $args );
 		}
 
 		/**
-		 * Initialize the rest of the stuff in the class if the module is active
+		 * Initialize the rest of the stuff in the class if the module is active.
 		 */
 		public function init() {
 			add_action( 'admin_init', array( $this, 'helper_settings_validate_and_save' ), 100 );
@@ -44,7 +57,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Add necessary things to the admin menu
+		 * Add necessary things to the admin menu.
 		 */
 		public function action_admin_menu() {
 			global $edit_flow;
@@ -53,7 +66,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			add_menu_page( $this->module->title, $this->module->title, 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ), $this->module->module_url . $ef_logo );
 
-			// Add "Features" as the first submenu item (replaces the duplicate "Edit Flow" item)
+			// Add "Features" as the first submenu item (replaces the duplicate "Edit Flow" item).
 			add_submenu_page( $this->module->settings_slug, __( 'Features', 'edit-flow' ), __( 'Features', 'edit-flow' ), 'manage_options', $this->module->settings_slug, array( $this, 'settings_page_controller' ) );
 
 			foreach ( $edit_flow->modules as $mod_name => $mod_data ) {
@@ -64,6 +77,9 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			}
 		}
 
+		/**
+		 * Enqueue scripts for the settings page.
+		 */
 		public function action_admin_enqueue_scripts() {
 			if ( $this->is_whitelisted_settings_view() ) {
 				wp_enqueue_script( 'edit-flow-settings-js', $this->module_url . 'lib/settings.js', array( 'jquery' ), EDIT_FLOW_VERSION, true );
@@ -71,7 +87,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Add settings styles to the settings page
+		 * Add settings styles to the settings page.
 		 */
 		public function action_admin_print_styles() {
 			if ( $this->is_whitelisted_settings_view() ) {
@@ -92,11 +108,15 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			<?php
 		}
 
+		/**
+		 * AJAX handler to enable or disable an Edit Flow module.
+		 */
 		public function ajax_change_edit_flow_module_state() {
 			global $edit_flow;
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! isset( $_POST['change_module_nonce'] ) || ! wp_verify_nonce( $_POST['change_module_nonce'], 'change-edit-flow-module-nonce' ) || ! current_user_can( 'manage_options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?' ) );
+				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
 			}
 
 			if ( ! isset( $_POST['module_action'], $_POST['slug'] ) ) {
@@ -104,7 +124,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			}
 
 			$module_action = sanitize_key( $_POST['module_action'] );
-			$slug = sanitize_key( $_POST['slug'] );
+			$slug          = sanitize_key( $_POST['slug'] );
 
 			$module = $edit_flow->get_module_by( 'slug', $slug );
 
@@ -114,7 +134,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			if ( 'enable' == $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'on' );
-			} else if ( 'disable' == $module_action ) {
+			} elseif ( 'disable' == $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'off' );
 			}
 
@@ -126,21 +146,24 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Handles all settings and configuration page requests. Required element for Edit Flow
+		 * Handles all settings and configuration page requests. Required element for Edit Flow.
+		 *
+		 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Rendering only, no data modification.
 		 */
 		public function settings_page_controller() {
 			global $edit_flow;
 
 			$page_requested = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : 'settings';
+			// phpcs:enable WordPress.Security.NonceVerification
 			$requested_module = $edit_flow->get_module_by( 'settings_slug', $page_requested );
 			if ( ! $requested_module ) {
 				wp_die( esc_html__( 'Not a registered Edit Flow module', 'edit-flow' ) );
 			}
 
-			$configure_callback = $requested_module->configure_page_cb;
+			$configure_callback    = $requested_module->configure_page_cb;
 			$requested_module_name = $requested_module->name;
 
-			// Don't show the settings page for the module if the module isn't activated
+			// Don't show the settings page for the module if the module isn't activated.
 			if ( ! $this->module_enabled( $requested_module_name ) ) {
 				/* translators: 1: link to the settings page for Edit Flow */
 				echo '<div class="message error"><p>' . wp_kses( sprintf( __( 'Module not enabled. Please enable it from the <a href="%1$s">Edit Flow settings page</a>.', 'edit-flow' ), esc_url( EDIT_FLOW_SETTINGS_PAGE ) ), 'a' ) . '</p></div>';
@@ -153,12 +176,17 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Disabling nonce verification because that is not available here, it's just rendering it. The actual save is done in helper_settings_validate_and_save and that's guarded well.
-		 * phpcs:disable:WordPress.Security.NonceVerification.Missing
+		 * Print the default header for the settings page.
+		 *
+		 * Nonce verification is not available here - it's just rendering. The actual save
+		 * is done in helper_settings_validate_and_save and that's guarded well.
+		 *
+		 * @param object $current_module The current module being displayed.
+		 *
+		 * phpcs:disable WordPress.Security.NonceVerification
 		 */
 		public function print_default_header( $current_module ) {
-			// Register admin notices for standard WordPress display
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for message display
+			// Register admin notices for standard WordPress display.
 			if ( isset( $_GET['message'] ) ) {
 				$message = sanitize_key( $_GET['message'] );
 			} elseif ( isset( $_REQUEST['message'] ) ) {
@@ -177,8 +205,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				);
 			}
 
-			// If there's been an error, register it as an admin notice
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for error display
+			// If there's been an error, register it as an admin notice.
 			if ( isset( $_GET['error'] ) ) {
 				$error = sanitize_key( $_GET['error'] );
 			} elseif ( isset( $_REQUEST['error'] ) ) {
@@ -197,7 +224,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				);
 			}
 
-			// Build the page title
+			// Build the page title.
 			if ( 'settings' !== $current_module->name ) {
 				$page_title = sprintf(
 					/* translators: %s: module title */
@@ -224,7 +251,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			<?php endif; ?>
 			<?php
 		}
-		//phpcs:enable:WordPress.Security.NonceVerification.Missing
+		// phpcs:enable WordPress.Security.NonceVerification
 
 		/**
 		 * Adds Settings page for Edit Flow.
@@ -243,19 +270,26 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			<?php
 		}
 
+		/**
+		 * Print the default footer for the settings page.
+		 *
+		 * @param object $current_module The current module being displayed.
+		 */
 		public function print_default_footer( $current_module ) {
 			?>
 		</div>
 			<?php
 		}
 
+		/**
+		 * Print the list of Edit Flow modules on the settings page.
+		 */
 		public function print_modules() {
 			global $edit_flow;
 
 			if ( ! $edit_flow->modules_count ) {
 				echo '<div class="message error">' . esc_html__( 'There are no Edit Flow modules registered', 'edit-flow' ) . '</div>';
 			} else {
-
 				foreach ( $edit_flow->modules as $mod_name => $mod_data ) {
 					if ( $mod_data->autoload ) {
 						continue;
@@ -286,8 +320,8 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 						if ( 'off' == $mod_data->options->enabled ) {
 							echo ' hidden" style="display:none;';
 						}
-						// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-						echo '">' . esc_html__( $mod_data->configure_link_text ) . '</a>';
+						// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Dynamic configure link text.
+						echo '">' . esc_html__( $mod_data->configure_link_text, 'edit-flow' ) . '</a>';
 					}
 					echo '<input type="submit" class="button-primary button enable-disable-edit-flow-module"';
 					if ( 'on' == $mod_data->options->enabled ) {
@@ -312,13 +346,15 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 *
 		 * @since 0.7
 		 *
-		 * @param string $field The form field for which to check for an error
-		 * @param string $description Unlocalized string to display if there was no error with the given field
+		 * @param string $field       The form field for which to check for an error.
+		 * @param string $description Unlocalized string to display if there was no error with the given field.
 		 */
 		public function helper_print_error_or_description( $field, $description ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for error display, no data modification.
 			if ( isset( $_REQUEST['form-errors'][ $field ] ) ) :
 				?>
 			<div class="form-error">
+				<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display only, esc_html handles output. ?>
 				<p><?php echo esc_html( $_REQUEST['form-errors'][ $field ] ); ?></p>
 			</div>
 			<?php else : ?>
@@ -328,18 +364,18 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Generate an option field to turn post type support on/off for a given module
-		 *
-		 * @param object $module Edit Flow module we're generating the option field for
-		 * @param {missing}
+		 * Generate an option field to turn post type support on/off for a given module.
 		 *
 		 * @since 0.7
+		 *
+		 * @param object $module Edit Flow module we're generating the option field for.
+		 * @param array  $args   Optional. Additional arguments.
 		 */
 		public function helper_option_custom_post_type( $module, $args = array() ) {
 
-			$all_post_types = array(
-				'post' => __( 'Posts' ),
-				'page' => __( 'Pages' ),
+			$all_post_types    = array(
+				'post' => __( 'Posts', 'edit-flow' ),
+				'page' => __( 'Pages', 'edit-flow' ),
 			);
 			$custom_post_types = $this->get_supported_post_types_for_module();
 			if ( count( $custom_post_types ) ) {
@@ -355,10 +391,10 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				if ( isset( $module->options->post_types[ $post_type ] ) ) {
 					checked( $module->options->post_types[ $post_type ], 'on' );
 				}
-				// Defining post_type_supports in the functions.php file or similar should disable the checkbox
+				// Defining post_type_supports in the functions.php file or similar should disable the checkbox.
 				disabled( post_type_supports( $post_type, $module->post_type_support ), true );
 				echo ' type="checkbox" />&nbsp;&nbsp;&nbsp;' . esc_html( $title ) . '</label>';
-				// Leave a note to the admin as a reminder that add_post_type_support has been used somewhere in their code
+				// Leave a note to the admin as a reminder that add_post_type_support has been used somewhere in their code.
 				if ( post_type_supports( $post_type, $module->post_type_support ) ) {
 					/* translators: 1: post type, 2: post type support */
 					echo '&nbsp&nbsp;&nbsp;<span class="description">' . esc_html( sprintf( __( 'Disabled because add_post_type_support( \'%1$s\', \'%2$s\' ) is included in a loaded file.', 'edit-flow' ), $post_type, $module->post_type_support ) ) . '</span>';
@@ -368,10 +404,13 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		}
 
 		/**
-		 * Validation and sanitization on the settings field
-		 * This method is called automatically/ doesn't need to be registered anywhere
+		 * Validation and sanitization on the settings field.
+		 *
+		 * This method is called automatically and doesn't need to be registered anywhere.
 		 *
 		 * @since 0.7
+		 *
+		 * @return false|void Returns false if validation fails, otherwise redirects.
 		 */
 		public function helper_settings_validate_and_save() {
 
@@ -387,13 +426,15 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				return false;
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( $_POST['_wpnonce'], $edit_flow->$module_name->module->options_group_name . '-options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?' ) );
+				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitization is handled by each module's settings_validate method.
 			$new_options = ( isset( $_POST[ $edit_flow->$module_name->module->options_group_name ] ) ) ? $_POST[ $edit_flow->$module_name->module->options_group_name ] : array();
 
-			// Only call the validation callback if it exists?
+			// Only call the validation callback if it exists.
 			if ( method_exists( $edit_flow->$module_name, 'settings_validate' ) ) {
 				$new_options = $edit_flow->$module_name->settings_validate( $new_options );
 			}
@@ -402,7 +443,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			$new_options = (object) array_merge( (array) $edit_flow->$module_name->module->options, $new_options );
 			$edit_flow->update_all_module_options( $edit_flow->$module_name->module->name, $new_options );
 
-			// Redirect back to the settings page that was submitted without any previous messages
+			// Redirect back to the settings page that was submitted without any previous messages.
 			$referer = wp_get_referer();
 			if ( ! $referer ) {
 				$referer = admin_url( 'admin.php?page=' . $edit_flow->$module_name->module->settings_slug );

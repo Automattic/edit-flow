@@ -42,6 +42,4 @@ jobs:
         run: composer lint-ci | cs2pr
 
       - name: PHP coding standards
-        # continue-on-error until existing violations are addressed
-        continue-on-error: true
         run: composer cs -- --report=checkstyle | cs2pr

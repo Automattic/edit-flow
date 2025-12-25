@@ -1,4 +1,9 @@
 <?php
+/**
+ * View for configuring custom statuses.
+ *
+ * @package EditFlow
+ */
 
 defined( 'ABSPATH' ) || exit();
 
@@ -56,12 +61,12 @@ global $edit_flow;
 					<select id="migrate_from" name="migrate_from">
 						<option value=""><?php esc_html_e( '— Select Status —', 'edit-flow' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Custom Statuses', 'edit-flow' ); ?>">
-							<?php foreach ( $custom_statuses as $status ) : ?>
+							<?php foreach ( $custom_statuses as $custom_status ) : ?>
 								<?php
-								$count = $this->get_post_count_for_status( $status->slug );
+								$count = $this->get_post_count_for_status( $custom_status->slug );
 								?>
-								<option value="<?php echo esc_attr( $status->slug ); ?>">
-									<?php echo esc_html( $status->name ); ?> (<?php echo esc_html( $count ); ?>)
+								<option value="<?php echo esc_attr( $custom_status->slug ); ?>">
+									<?php echo esc_html( $custom_status->name ); ?> (<?php echo esc_html( $count ); ?>)
 								</option>
 							<?php endforeach; ?>
 						</optgroup>
@@ -84,9 +89,9 @@ global $edit_flow;
 					<select id="migrate_to" name="migrate_to">
 						<option value=""><?php esc_html_e( '— Select Status —', 'edit-flow' ); ?></option>
 						<optgroup label="<?php esc_attr_e( 'Custom Statuses', 'edit-flow' ); ?>">
-							<?php foreach ( $custom_statuses as $status ) : ?>
-								<option value="<?php echo esc_attr( $status->slug ); ?>">
-									<?php echo esc_html( $status->name ); ?>
+							<?php foreach ( $custom_statuses as $custom_status ) : ?>
+								<option value="<?php echo esc_attr( $custom_status->slug ); ?>">
+									<?php echo esc_html( $custom_status->name ); ?>
 								</option>
 							<?php endforeach; ?>
 						</optgroup>
@@ -110,13 +115,15 @@ global $edit_flow;
 			<form class="add:the-list:" action="<?php echo esc_url( $this->get_link() ); ?>" method="post" id="addstatus" name="addstatus">
 				<div class="form-field form-required">
 					<label for="status_name"><?php esc_html_e( 'Name', 'edit-flow' ); ?></label>
-					<input type="text" aria-required="true" size="20" maxlength="20" id="status_name" name="status_name" value="<?php echo ( empty( $_POST['status_name'] ) ? '' : esc_attr( $_POST['status_name'] ) ); ?>" />
+					<?php // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in form handler. ?>
+					<input type="text" aria-required="true" size="20" maxlength="20" id="status_name" name="status_name" value="<?php echo ( empty( $_POST['status_name'] ) ? '' : esc_attr( sanitize_text_field( wp_unslash( $_POST['status_name'] ) ) ) ); ?>" />
 					<?php $edit_flow->settings->helper_print_error_or_description( 'name', __( 'The name is used to identify the status. (Max: 20 characters)', 'edit-flow' ) ); ?>
 				</div>
 
 				<div class="form-field">
 					<label for="status_description"><?php esc_html_e( 'Description', 'edit-flow' ); ?></label>
-					<textarea cols="40" rows="5" id="status_description" name="status_description"><?php echo ( empty( $_POST['status_description'] ) ? '' : esc_textarea( $_POST['status_description'] ) ); ?></textarea>
+					<?php // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in form handler. ?>
+					<textarea cols="40" rows="5" id="status_description" name="status_description"><?php echo ( empty( $_POST['status_description'] ) ? '' : esc_textarea( sanitize_textarea_field( wp_unslash( $_POST['status_description'] ) ) ) ); ?></textarea>
 					<?php $edit_flow->settings->helper_print_error_or_description( 'description', __( 'The description is primarily for administrative use, to give you some context on what the custom status is to be used for.', 'edit-flow' ) ); ?>
 				</div>
 

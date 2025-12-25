@@ -1,43 +1,51 @@
 <?php
 /**
- * class EF_Editorial_Comments
- * Threaded commenting in the admin for discussion between writers and editors
+ * Editorial Comments module for Edit Flow.
  *
+ * Threaded commenting in the admin for discussion between writers and editors.
+ *
+ * @package EditFlow
  * @author batmoo
  */
 
 if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 
+	/**
+	 * Editorial Comments module class for Edit Flow.
+	 */
 	class EF_Editorial_Comments extends EF_Module {
 
-		// This is comment type used to differentiate editorial comments
+		// This is comment type used to differentiate editorial comments.
 		// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 		const comment_type = 'editorial-comment';
 
+		/**
+		 * Constructor.
+		 */
 		public function __construct() {
 
 			$this->module_url = $this->get_module_url( __FILE__ );
-			// Register the module with Edit Flow
-			$args = array(
-				'title' => __( 'Editorial Comments', 'edit-flow' ),
-				'short_description' => __( 'Share internal notes with your team.', 'edit-flow' ),
-				'extended_description' => __( 'Use editorial comments to hold a private discussion about a post. Communicate directly with your writers or editors about what works and what needs to be improved for each piece.', 'edit-flow' ),
-				'module_url' => $this->module_url,
-				'img_url' => $this->module_url . 'lib/editorial_comments_s128.png',
-				'slug' => 'editorial-comments',
-				'default_options' => array(
-					'enabled' => 'on',
+			// Register the module with Edit Flow.
+			$args         = array(
+				'title'                 => __( 'Editorial Comments', 'edit-flow' ),
+				'short_description'     => __( 'Share internal notes with your team.', 'edit-flow' ),
+				'extended_description'  => __( 'Use editorial comments to hold a private discussion about a post. Communicate directly with your writers or editors about what works and what needs to be improved for each piece.', 'edit-flow' ),
+				'module_url'            => $this->module_url,
+				'img_url'               => $this->module_url . 'lib/editorial_comments_s128.png',
+				'slug'                  => 'editorial-comments',
+				'default_options'       => array(
+					'enabled'    => 'on',
 					'post_types' => array(
 						'post' => 'on',
 						'page' => 'on',
 					),
 				),
-				'configure_page_cb' => 'print_configure_view',
-				'configure_link_text' => __( 'Choose Post Types', 'edit-flow' ),
-				'autoload' => false,
-				'settings_help_tab' => array(
-					'id' => 'ef-editorial-comments-overview',
-					'title' => __( 'Overview', 'edit-flow' ),
+				'configure_page_cb'     => 'print_configure_view',
+				'configure_link_text'   => __( 'Choose Post Types', 'edit-flow' ),
+				'autoload'              => false,
+				'settings_help_tab'     => array(
+					'id'      => 'ef-editorial-comments-overview',
+					'title'   => __( 'Overview', 'edit-flow' ),
 					'content' => __( '<p>Editorial comments help you cut down on email overload and keep the conversation close to where it matters: your content. Threaded commenting in the admin, similar to what you find at the end of a blog post, allows writers and editors to privately leave feedback and discuss what needs to be changed before publication.</p><p>Anyone with access to view the story in progress will also have the ability to comment on it. If you have notifications enabled, those following the post will receive an email every time a comment is left.</p>', 'edit-flow' ),
 				),
 				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="http://editflow.org/features/editorial-comments/">Editorial Comments Documentation</a></p><p><a href="http://wordpress.org/tags/edit-flow?forum_id=10">Edit Flow Forum</a></p><p><a href="https://github.com/danielbachhuber/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
@@ -46,7 +54,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Initialize the rest of the stuff in the class if the module is active
+		 * Initialize the rest of the stuff in the class if the module is active.
 		 */
 		public function init() {
 			add_action( 'add_meta_boxes', array( $this, 'add_post_meta_box' ) );
@@ -56,27 +64,29 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Upgrade our data in case we need to
+		 * Upgrade our data in case we need to.
 		 *
 		 * @since 0.7
+		 *
+		 * @param string $previous_version Previous plugin version.
 		 */
 		public function upgrade( $previous_version ) {
 			global $edit_flow;
 
-			// Upgrade path to v0.7
+			// Upgrade path to v0.7.
 			if ( version_compare( $previous_version, '0.7', '<' ) ) {
-				// Technically we've run this code before so we don't want to auto-install new data
+				// Technically we've run this code before so we don't want to auto-install new data.
 				$edit_flow->update_module_option( $this->module->name, 'loaded_once', true );
 			}
 		}
 
 		/**
-		 * Load any of the admin scripts we need but only on the pages we need them
+		 * Load any of the admin scripts we need but only on the pages we need them.
 		 */
 		public function add_admin_scripts() {
 			global $pagenow;
 
-			$post_type = $this->get_current_post_type();
+			$post_type            = $this->get_current_post_type();
 			$supported_post_types = $this->get_post_types_for_module( $this->module );
 			if ( ! in_array( $post_type, $supported_post_types ) ) {
 				return;
@@ -115,6 +125,9 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			}
 		}
 
+		/**
+		 * Display the editorial comments meta box.
+		 */
 		public function editorial_comments_meta_box() {
 			global $post, $post_ID;
 			?>
@@ -122,29 +135,29 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			<a name="editorialcomments"></a>
 
 			<?php
-			// Show comments only if not a new post
+			// Show comments only if not a new post.
 			if ( ! in_array( $post->post_status, array( 'new', 'auto-draft' ) ) ) :
 
-				// Unused since switched to wp_list_comments
+				// Unused since switched to wp_list_comments.
 				$editorial_comments = get_comments(
 					array(
-						'post_id' => $post->ID,
+						'post_id'      => $post->ID,
 						'comment_type' => self::comment_type,
-						'orderby' => 'comment_date',
-						'order' => 'ASC',
-						'status' => self::comment_type,
+						'orderby'      => 'comment_date',
+						'order'        => 'ASC',
+						'status'       => self::comment_type,
 					)
 				);
 				?>
 
 				<ul id="ef-comments">
 					<?php
-						// We use this so we can take advantage of threading and such
+						// We use this so we can take advantage of threading and such.
 
 						wp_list_comments(
 							array(
-								'type' => self::comment_type,
-								'callback' => array( $this, 'the_comment' ),
+								'type'         => self::comment_type,
+								'callback'     => array( $this, 'the_comment' ),
 								'end-callback' => '__return_false',
 							),
 							$editorial_comments
@@ -168,7 +181,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Displays the main commenting form
+		 * Displays the main commenting form.
 		 */
 		public function the_comment_form() {
 			global $post;
@@ -212,7 +225,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		/**
 		 * Maybe display who was notified underneath an editorial comment.
 		 *
-		 * @param int $comment_id
+		 * @param int $comment_id The comment ID.
 		 * @return void
 		 */
 		public function maybe_output_comment_meta( $comment_id ) {
@@ -233,32 +246,37 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Displays a single comment
+		 * Displays a single comment.
+		 *
+		 * @param WP_Comment $comment Comment object.
+		 * @param array      $args    Arguments.
+		 * @param int        $depth   Depth of comment threading.
 		 */
 		public function the_comment( $comment, $args, $depth ) {
 			global $current_user, $userdata;
 
-			// Get current user
+			// Get current user.
 			wp_get_current_user();
 
-			// ToDo: Find an alternative so we don't override global variables
+			// ToDo: Find an alternative so we don't override global variables.
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Without this, the comment will not appear.
 			$GLOBALS['comment'] = $comment;
 
 			$actions = array();
 
 			$actions_string = '';
-			// Comments can only be added by users that can edit the post
+			// Comments can only be added by users that can edit the post.
 			if ( current_user_can( 'edit_post', $comment->comment_post_ID ) ) {
 				// The output for this has been individually escaped. Escaping the entire string will break comment reply functionality.
 				// ToDo: Use wp_kses with a custom set of allowed tags instead.
+				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- ToDo comment.
 				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . esc_html( $comment->comment_ID ) . '\',\'' . esc_html( $comment->comment_post_ID ) . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
 
 				$sep = ' ';
-				$i = 0;
+				$i   = 0;
 				foreach ( $actions as $action => $link ) {
 					++$i;
-					// Reply and quickedit need a hide-if-no-js span
+					// Reply and quickedit need a hide-if-no-js span.
 					if ( 'reply' == $action || 'quickedit' == $action ) {
 						$action .= ' hide-if-no-js';
 					}
@@ -309,85 +327,86 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Handles AJAX insert comment
+		 * Handles AJAX insert comment.
 		 */
 		public function ajax_insert_comment() {
 			global $current_user, $user_ID, $wpdb;
 
-			// Verify nonce
+			// Verify nonce.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'comment' ) ) {
 				wp_die( esc_html__( "Nonce check failed. Please ensure you're supposed to be adding editorial comments.", 'edit-flow' ) );
 			}
 
-			// Get user info
+			// Get user info.
 			wp_get_current_user();
 
-			// Set up comment data
+			// Set up comment data.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$post_id = absint( $_POST['post_id'] );
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$parent  = absint( $_POST['parent'] );
+			$parent = absint( $_POST['parent'] );
 
-			// Only allow the comment if user can edit post
-			// @TODO: allow contributers to add comments as well (?)
+			// Only allow the comment if user can edit post.
+			// @TODO: Consider allowing contributors to add comments as well.
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
 				wp_die( esc_html__( 'Sorry, you don\'t have the privileges to add editorial comments. Please talk to your Administrator.', 'edit-flow' ) );
 			}
 
-			// Verify that comment was actually entered
+			// Verify that comment was actually entered.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Content is sanitized by wp_kses when building $data.
 			$comment_content = isset( $_POST['content'] ) ? trim( $_POST['content'] ) : '';
 			if ( ! $comment_content ) {
 				wp_die( esc_html__( 'Please enter a comment.', 'edit-flow' ) );
 			}
 
-			// Check that we have a post_id and user logged in
+			// Check that we have a post_id and user logged in.
 			if ( $post_id && $current_user ) {
 
-				// set current time
+				// Set current time.
 				$time = current_time( 'mysql', $gmt = 0 );
 
-				// Set comment data
+				// Set comment data.
 				$data = array(
-					'comment_post_ID' => (int) $post_id,
-					'comment_author' => esc_sql( $current_user->display_name ),
+					'comment_post_ID'      => (int) $post_id,
+					'comment_author'       => esc_sql( $current_user->display_name ),
 					'comment_author_email' => esc_sql( $current_user->user_email ),
-					'comment_author_url' => esc_sql( $current_user->user_url ),
-					'comment_content' => wp_kses( $comment_content, array(
-						'a' => array(
-							'href' => array(),
+					'comment_author_url'   => esc_sql( $current_user->user_url ),
+					'comment_content'      => wp_kses( $comment_content, array(
+						'a'          => array(
+							'href'  => array(),
 							'title' => array(),
 						),
-						'b' => array(),
-						'i' => array(),
-						'strong' => array(),
-						'em' => array(),
-						'u' => array(),
-						'del' => array(),
+						'b'          => array(),
+						'i'          => array(),
+						'strong'     => array(),
+						'em'         => array(),
+						'u'          => array(),
+						'del'        => array(),
 						'blockquote' => array(),
-						'sub' => array(),
-						'sup' => array(),
+						'sub'        => array(),
+						'sup'        => array(),
 					) ),
-					'comment_type' => self::comment_type,
-					'comment_parent' => (int) $parent,
-					'user_id' => (int) $user_ID,
-					// This is just used for logging in the DB, and it's been escaped as well
-					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
-					'comment_author_IP' => isset( $_SERVER['REMOTE_ADDR'] ) ? esc_sql( $_SERVER['REMOTE_ADDR'] ) : '',
+					'comment_type'         => self::comment_type,
+					'comment_parent'       => (int) $parent,
+					'user_id'              => (int) $user_ID,
 					// This is just used for logging in the DB, and it's been escaped as well.
-					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
-					// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
-					'comment_agent' => isset( $_SERVER['HTTP_USER_AGENT'] ) ? esc_sql( $_SERVER['HTTP_USER_AGENT'] ) : '',
-					'comment_date' => $time,
-					'comment_date_gmt' => $time,
+					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					'comment_author_IP'    => isset( $_SERVER['REMOTE_ADDR'] ) ? esc_sql( $_SERVER['REMOTE_ADDR'] ) : '',
+					// This is just used for logging in the DB, and it's been escaped as well.
+					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					'comment_agent'        => isset( $_SERVER['HTTP_USER_AGENT'] ) ? esc_sql( $_SERVER['HTTP_USER_AGENT'] ) : '',
+					'comment_date'         => $time,
+					'comment_date_gmt'     => $time,
 					// Set to -1?
-					'comment_approved' => self::comment_type,
+					'comment_approved'     => self::comment_type,
 				);
 
 				$data = apply_filters( 'ef_pre_insert_editorial_comment', $data );
 
-				// Insert Comment
+				// Insert comment.
 				$comment_id = wp_insert_comment( $data );
-				$comment = get_comment( $comment_id );
+				$comment    = get_comment( $comment_id );
 
 				// Save the list of notified users/usergroups.
 				if ( $this->module_enabled( 'notifications' ) && apply_filters( 'ef_editorial_comments_show_notified_users', true ) ) {
@@ -398,12 +417,12 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 					}
 				}
 
-				// Register actions -- will be used to set up notifications and other modules can hook into this
+				// Register actions - will be used to set up notifications and other modules can hook into this.
 				if ( $comment_id ) {
 					do_action( 'ef_post_insert_editorial_comment', $comment );
 				}
 
-				// Prepare response
+				// Prepare response.
 				$response = new WP_Ajax_Response();
 
 				ob_start();
@@ -412,14 +431,13 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				ob_end_clean();
 
 				$response->add( array(
-					'what' => 'comment',
-					'id' => $comment_id,
-					'data' => $comment_list_item,
+					'what'   => 'comment',
+					'id'     => $comment_id,
+					'data'   => $comment_list_item,
 					'action' => ( $parent ) ? 'reply' : 'new',
 				));
 
 				$response->send();
-
 			} else {
 				wp_die( esc_html__( 'There was a problem of some sort. Try again or contact your administrator.', 'edit-flow' ) );
 			}
@@ -437,7 +455,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Chose the post types for editorial comments
+		 * Chose the post types for editorial comments.
 		 *
 		 * @since 0.7
 		 */
@@ -447,13 +465,16 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		}
 
 		/**
-		 * Validate our user input as the settings are being saved
+		 * Validate our user input as the settings are being saved.
 		 *
 		 * @since 0.7
+		 *
+		 * @param array $new_options The new options to validate.
+		 * @return array The validated options.
 		 */
 		public function settings_validate( $new_options ) {
 
-			// Whitelist validation for the post type options
+			// Whitelist validation for the post type options.
 			if ( ! isset( $new_options['post_types'] ) ) {
 				$new_options['post_types'] = array();
 			}

@@ -358,10 +358,10 @@ class NotificationsBadgesTest extends TestCase {
 		global $edit_flow, $post, $pagenow, $typenow;
 
 		// Set up the admin context for a post edit screen.
-		$original_pagenow  = $pagenow;
-		$original_typenow  = $typenow;
-		$pagenow           = 'post.php';
-		$typenow           = 'post';
+		$original_pagenow = $pagenow;
+		$original_typenow = $typenow;
+		$pagenow          = 'post.php';
+		$typenow          = 'post';
 
 		// Create a post with a specific author.
 		$post_id = self::factory()->post->create(
@@ -385,8 +385,8 @@ class NotificationsBadgesTest extends TestCase {
 		$localized_data = $wp_scripts->get_data( 'edit-flow-notifications-js', 'data' );
 
 		// Restore original globals.
-		$pagenow  = $original_pagenow;
-		$typenow  = $original_typenow;
+		$pagenow = $original_pagenow;
+		$typenow = $original_typenow;
 		set_current_screen( 'front' );
 
 		// Verify the script was registered and has localization data.
@@ -406,10 +406,10 @@ class NotificationsBadgesTest extends TestCase {
 		global $edit_flow, $post, $pagenow, $typenow;
 
 		// Set up the admin context for a post edit screen.
-		$original_pagenow  = $pagenow;
-		$original_typenow  = $typenow;
-		$pagenow           = 'post.php';
-		$typenow           = 'post';
+		$original_pagenow = $pagenow;
+		$original_typenow = $typenow;
+		$pagenow          = 'post.php';
+		$typenow          = 'post';
 
 		// Create a post.
 		$post_id = self::factory()->post->create(
@@ -433,8 +433,8 @@ class NotificationsBadgesTest extends TestCase {
 		$localized_data = $wp_scripts->get_data( 'edit-flow-notifications-js', 'data' );
 
 		// Restore original globals.
-		$pagenow  = $original_pagenow;
-		$typenow  = $original_typenow;
+		$pagenow = $original_pagenow;
+		$typenow = $original_typenow;
 		set_current_screen( 'front' );
 
 		// Verify all badge labels are included in the localization data.
@@ -455,10 +455,10 @@ class NotificationsBadgesTest extends TestCase {
 		global $edit_flow, $post, $pagenow, $typenow;
 
 		// Set up the admin context for a post edit screen.
-		$original_pagenow  = $pagenow;
-		$original_typenow  = $typenow;
-		$pagenow           = 'post.php';
-		$typenow           = 'post';
+		$original_pagenow = $pagenow;
+		$original_typenow = $typenow;
+		$pagenow          = 'post.php';
+		$typenow          = 'post';
 
 		// Create a post with a specific author but don't add any followers.
 		$post_id = self::factory()->post->create(
@@ -482,8 +482,8 @@ class NotificationsBadgesTest extends TestCase {
 		$localized_data = $wp_scripts->get_data( 'edit-flow-notifications-js', 'data' );
 
 		// Restore original globals.
-		$pagenow  = $original_pagenow;
-		$typenow  = $original_typenow;
+		$pagenow = $original_pagenow;
+		$typenow = $original_typenow;
 		set_current_screen( 'front' );
 
 		// Verify post_author_is_following is false (represented as empty string "" in the JS output).
@@ -499,10 +499,10 @@ class NotificationsBadgesTest extends TestCase {
 		global $edit_flow, $post, $pagenow, $typenow;
 
 		// Set up the admin context for a post edit screen.
-		$original_pagenow  = $pagenow;
-		$original_typenow  = $typenow;
-		$pagenow           = 'post.php';
-		$typenow           = 'post';
+		$original_pagenow = $pagenow;
+		$original_typenow = $typenow;
+		$pagenow          = 'post.php';
+		$typenow          = 'post';
 
 		// Create a post with a specific author.
 		$post_id = self::factory()->post->create(
@@ -529,8 +529,8 @@ class NotificationsBadgesTest extends TestCase {
 		$localized_data = $wp_scripts->get_data( 'edit-flow-notifications-js', 'data' );
 
 		// Restore original globals.
-		$pagenow  = $original_pagenow;
-		$typenow  = $original_typenow;
+		$pagenow = $original_pagenow;
+		$typenow = $original_typenow;
 		set_current_screen( 'front' );
 
 		// Verify post_author_is_following is true (wp_localize_script outputs "1" for true).

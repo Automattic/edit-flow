@@ -116,7 +116,7 @@ class StoryBudgetTest extends TestCase {
 		// Users filters need to be set (they're set by default)
 		$edit_flow->story_budget->update_user_filters();
 
-		$new_filters['start_date'] = '2019-12-01';
+		$new_filters['start_date']  = '2019-12-01';
 		$new_filters['number_days'] = 10;
 
 		$users_filters = $edit_flow->story_budget->update_user_filters_from_form_date_range_change( $user, $new_filters );
@@ -126,13 +126,13 @@ class StoryBudgetTest extends TestCase {
 	}
 
 	/**
-	* Test that calendar has default custom statuses
-	*/
+	 * Test that calendar has default custom statuses
+	 */
 	public function test_calendar_custom_statuses() {
 		global $edit_flow;
 
 		$statuses = array_map(
-			function( $status ) {
+			function ( $status ) {
 				return $status->name;
 			},
 			$edit_flow->calendar->get_calendar_post_stati()
@@ -160,7 +160,7 @@ class StoryBudgetTest extends TestCase {
 		$edit_flow->custom_status->add_custom_status( $new_custom_status['term'], $new_custom_status['args'] );
 
 		$statuses = array_map(
-			function( $status ) {
+			function ( $status ) {
 				return $status->name;
 			},
 			$edit_flow->calendar->get_calendar_post_stati()

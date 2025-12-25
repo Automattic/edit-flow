@@ -62,7 +62,7 @@ abstract class AjaxTestCase extends TestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		$_POST = array();
-		$_GET = array();
+		$_GET  = array();
 		unset( $GLOBALS['post'] );
 		unset( $GLOBALS['comment'] );
 		remove_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1, 1 );
@@ -76,6 +76,7 @@ abstract class AjaxTestCase extends TestCase {
 	 * Mimic the ajax handling of admin-ajax.php
 	 * Capture the output via output buffering, and if there is any, store
 	 * it in $this->_last_response.
+	 *
 	 * @param string $action
 	 */
 	protected function _handleAjax( $action ) {
@@ -93,12 +94,14 @@ abstract class AjaxTestCase extends TestCase {
 
 		// Save the output
 		$buffer = ob_get_clean();
-		if ( !empty( $buffer ) )
+		if ( ! empty( $buffer ) ) {
 			$this->_last_response = $buffer;
+		}
 	}
 
 	/**
 	 * Return our callback handler
+	 *
 	 * @return callback
 	 */
 	public function getDieHandler() {
@@ -118,6 +121,7 @@ abstract class AjaxTestCase extends TestCase {
 	 * <code>
 	 * $this->setExpectedException( 'WPAjaxDieContinueException', 'something contained in $message' );
 	 * </code>
+	 *
 	 * @param string $message
 	 */
 	public function dieHandler( $message ) {

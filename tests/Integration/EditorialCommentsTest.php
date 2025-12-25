@@ -388,7 +388,7 @@ class EditorialCommentsTest extends TestCase {
 				'post_status' => 'draft',
 			)
 		);
-		$user = get_user_by( 'id', self::$admin_user_id );
+		$user    = get_user_by( 'id', self::$admin_user_id );
 
 		$comment_id = wp_insert_comment(
 			array(

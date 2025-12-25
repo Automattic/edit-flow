@@ -11,7 +11,9 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 }
 
 /**
- * Manage Edit Flow custom statuses.
+ * WP-CLI commands to manage Edit Flow custom statuses.
+ *
+ * @package EditFlow
  */
 class EF_Custom_Status_CLI extends WP_CLI_Command {
 
@@ -183,7 +185,7 @@ class EF_Custom_Status_CLI extends WP_CLI_Command {
 		global $wpdb;
 
 		if ( ! empty( $post_type ) ) {
-			// Migrate only specific post type.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Bulk update for CLI migration command.
 			$result = $wpdb->query(
 				$wpdb->prepare(
 					"UPDATE {$wpdb->posts} SET post_status = %s WHERE post_status = %s AND post_type = %s",
@@ -193,7 +195,7 @@ class EF_Custom_Status_CLI extends WP_CLI_Command {
 				)
 			);
 		} else {
-			// Migrate all post types.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Bulk update for CLI migration command.
 			$result = $wpdb->query(
 				$wpdb->prepare(
 					"UPDATE {$wpdb->posts} SET post_status = %s WHERE post_status = %s",
@@ -297,6 +299,7 @@ class EF_Custom_Status_CLI extends WP_CLI_Command {
 	private function get_post_count_for_status( $status ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- CLI count query, caching not needed.
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = %s",

@@ -74,7 +74,7 @@ class NotificationsSubscriptionTest extends TestCase {
 		$post_id = self::factory()->post->create(
 			array( 'post_author' => self::$admin_user_id )
 		);
-		$user = get_user_by( 'id', self::$editor_user_id );
+		$user    = get_user_by( 'id', self::$editor_user_id );
 
 		$result = $edit_flow->notifications->user_can_be_notified( $user, $post_id );
 
@@ -90,7 +90,7 @@ class NotificationsSubscriptionTest extends TestCase {
 		$post_id = self::factory()->post->create(
 			array( 'post_author' => self::$author_user_id )
 		);
-		$user = get_user_by( 'id', self::$author_user_id );
+		$user    = get_user_by( 'id', self::$author_user_id );
 
 		$result = $edit_flow->notifications->user_can_be_notified( $user, $post_id );
 
@@ -109,7 +109,7 @@ class NotificationsSubscriptionTest extends TestCase {
 				'post_status' => 'publish',
 			)
 		);
-		$user = get_user_by( 'id', self::$author_user_id );
+		$user    = get_user_by( 'id', self::$author_user_id );
 
 		$result = $edit_flow->notifications->user_can_be_notified( $user, $post_id );
 
