@@ -45,10 +45,10 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		$this->assertFalse( is_wp_error( $usergroup ) );
 
 		// Set up the AJAX request
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup->term_id;
-		$_POST['name'] = 'Updated Group Name';
-		$_POST['description'] = 'Updated description';
+		$_POST['name']         = 'Updated Group Name';
+		$_POST['description']  = 'Updated description';
 
 		try {
 			$this->_handleAjax( 'inline_save_usergroup' );
@@ -85,9 +85,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		) );
 
 		// Set up the AJAX request with invalid nonce
-		$_POST['inline_edit'] = 'invalid_nonce';
+		$_POST['inline_edit']  = 'invalid_nonce';
 		$_POST['usergroup_id'] = $usergroup->term_id;
-		$_POST['name'] = 'Updated Group Name';
+		$_POST['name']         = 'Updated Group Name';
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -116,9 +116,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		wp_set_current_user( $subscriber_user_id );
 
 		// Set up the AJAX request
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup->term_id;
-		$_POST['name'] = 'Updated Group Name';
+		$_POST['name']         = 'Updated Group Name';
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -136,7 +136,7 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 
 		// Set up the AJAX request without usergroup_id
 		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
-		$_POST['name'] = 'New Group Name';
+		$_POST['name']        = 'New Group Name';
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -161,9 +161,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		) );
 
 		// Set up the AJAX request with empty name
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup->term_id;
-		$_POST['name'] = '';
+		$_POST['name']         = '';
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -188,9 +188,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		) );
 
 		// Set up the AJAX request with name exceeding 40 characters
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup->term_id;
-		$_POST['name'] = str_repeat( 'a', 41 ); // 41 characters
+		$_POST['name']         = str_repeat( 'a', 41 ); // 41 characters
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -220,9 +220,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 		) );
 
 		// Try to update usergroup2 with usergroup1's name
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup2->term_id;
-		$_POST['name'] = 'Group One';
+		$_POST['name']         = 'Group One';
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );
@@ -255,9 +255,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 
 		// Try to update usergroup2 with a name that would create the same slug as usergroup1
 		// "Test  Group" (with extra space) is different name but sanitize_title() creates "test-group"
-		$_POST['inline_edit'] = wp_create_nonce( 'usergroups-inline-edit-nonce' );
+		$_POST['inline_edit']  = wp_create_nonce( 'usergroups-inline-edit-nonce' );
 		$_POST['usergroup_id'] = $usergroup2->term_id;
-		$_POST['name'] = 'Test  Group'; // Different name, same slug when sanitized
+		$_POST['name']         = 'Test  Group'; // Different name, same slug when sanitized
 
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'inline_save_usergroup' );

@@ -57,9 +57,9 @@ class NotificationsTest extends TestCase {
 		$edit_flow->notifications->module->options->always_notify_admin = 'on';
 
 		$post = array(
-			'post_author' => self::$admin_user_id,
-			'post_content' => rand_str(),
-			'post_title' => rand_str(),
+			'post_author'   => self::$admin_user_id,
+			'post_content'  => rand_str(),
+			'post_title'    => rand_str(),
 			'post_date_gmt' => '2016-04-29 12:00:00',
 		);
 
@@ -96,9 +96,9 @@ class NotificationsTest extends TestCase {
 		$edit_flow->notifications->module->options->always_notify_admin = 'on';
 
 		$post = array(
-			'post_author' => self::$admin_user_id,
-			'post_content' => rand_str(),
-			'post_title' => rand_str(),
+			'post_author'   => self::$admin_user_id,
+			'post_content'  => rand_str(),
+			'post_title'    => rand_str(),
 			'post_date_gmt' => '2016-04-29 12:00:00',
 		);
 

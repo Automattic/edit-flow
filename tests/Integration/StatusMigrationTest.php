@@ -176,8 +176,14 @@ class StatusMigrationTest extends TestCase {
 	 */
 	public function test_get_post_count_for_status_counts_all_post_types() {
 		// Create posts of different types with same status.
-		$this->factory()->post->create( array( 'post_status' => 'pitch', 'post_type' => 'post' ) );
-		$this->factory()->post->create( array( 'post_status' => 'pitch', 'post_type' => 'page' ) );
+		$this->factory()->post->create( array(
+			'post_status' => 'pitch',
+			'post_type'   => 'post',
+		) );
+		$this->factory()->post->create( array(
+			'post_status' => 'pitch',
+			'post_type'   => 'page',
+		) );
 
 		$count = $this->custom_status->get_post_count_for_status( 'pitch' );
 

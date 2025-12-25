@@ -1,4 +1,9 @@
 <?php
+/**
+ * View for editing a custom status.
+ *
+ * @package EditFlow
+ */
 
 defined( 'ABSPATH' ) || exit();
 

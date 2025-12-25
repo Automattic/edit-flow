@@ -1,24 +1,42 @@
 <?php
 /**
- * A notepad for the dashboard
+ * Dashboard Notepad Widget for Edit Flow.
+ *
+ * @package EditFlow
  */
 
+/**
+ * A notepad for the dashboard.
+ */
 class EF_Dashboard_Notepad_Widget {
 
 	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 	const notepad_post_type = 'dashboard-note';
 
+	/**
+	 * Capability required to edit the notepad.
+	 *
+	 * @var string
+	 */
 	public $edit_cap = 'edit_others_posts';
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
-		// Silence is golden
+		// Silence is golden.
 	}
 
+	/**
+	 * Initialize the widget.
+	 *
+	 * @return void
+	 */
 	public function init() {
 
 		register_post_type( self::notepad_post_type, array(
 			'rewrite' => false,
-			'label' => __( 'Dashboard Note', 'edit-flow' ),
+			'label'   => __( 'Dashboard Note', 'edit-flow' ),
 		));
 
 		$this->edit_cap = apply_filters( 'ef_dashboard_notepad_edit_cap', $this->edit_cap );
@@ -45,7 +63,8 @@ class EF_Dashboard_Notepad_Widget {
 		}
 
 		$note_data = array(
-			'post_content' => isset( $_POST['note'] ) ? wp_filter_nohtml_kses( $_POST['note'] ) : '',
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_filter_nohtml_kses is a valid sanitization function.
+			'post_content' => isset( $_POST['note'] ) ? wp_filter_nohtml_kses( wp_unslash( $_POST['note'] ) ) : '',
 			'post_type'    => self::notepad_post_type,
 			'post_status'  => 'draft',
 			'post_author'  => get_current_user_id(),
@@ -68,18 +87,18 @@ class EF_Dashboard_Notepad_Widget {
 	public function notepad_widget() {
 
 		$args = array(
-			'posts_per_page'   => 1,
-			'post_status'      => 'draft',
-			'post_type'        => self::notepad_post_type,
+			'posts_per_page' => 1,
+			'post_status'    => 'draft',
+			'post_type'      => self::notepad_post_type,
 		);
 
-		$posts = get_posts( $args );
+		$posts        = get_posts( $args );
 		$current_note = ( ! empty( $posts[0]->post_content ) ) ? $posts[0]->post_content : '';
-		$current_id = ( ! empty( $posts[0]->ID ) ) ? $posts[0]->ID : 0;
+		$current_id   = ( ! empty( $posts[0]->ID ) ) ? $posts[0]->ID : 0;
 		$current_post = ( ! empty( $posts[0] ) ) ? $posts[0] : false;
 
 		if ( $current_post ) {
-			// translators: %1$s is the author name, %2$s is the date the note was last updated
+			// translators: %1$s is the author name, %2$s is the date the note was last updated.
 			$last_updated = '<span id="dashboard-notepad-last-updated">' . sprintf( __( '%1$s last updated on %2$s', 'edit-flow' ), get_user_by( 'id', $current_post->post_author )->display_name, get_the_modified_time( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $current_post ) ) . '</span>';
 		} else {
 			$last_updated = '';

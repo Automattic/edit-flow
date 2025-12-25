@@ -317,7 +317,7 @@ class CalendarModuleTest extends TestCase {
 				'post_status' => 'publish',
 			)
 		);
-		$post = get_post( $post_id );
+		$post    = get_post( $post_id );
 
 		$result = $edit_flow->calendar->current_user_can_modify_post( $post );
 
@@ -344,9 +344,9 @@ class CalendarModuleTest extends TestCase {
 		update_option( 'start_of_week', 1 ); // Monday
 
 		// January 30, 2025 (Thursday)
-		$date           = '2025-01-30';
-		$beginning      = $edit_flow->calendar->get_beginning_of_week( $date );
-		$ending         = $edit_flow->calendar->get_ending_of_week( $date );
+		$date      = '2025-01-30';
+		$beginning = $edit_flow->calendar->get_beginning_of_week( $date );
+		$ending    = $edit_flow->calendar->get_ending_of_week( $date );
 
 		// Week should span January to February
 		$this->assertEquals( '2025-01-27', $beginning ); // Monday Jan 27
@@ -362,9 +362,9 @@ class CalendarModuleTest extends TestCase {
 		update_option( 'start_of_week', 1 ); // Monday
 
 		// January 1, 2025 (Wednesday)
-		$date           = '2025-01-01';
-		$beginning      = $edit_flow->calendar->get_beginning_of_week( $date );
-		$ending         = $edit_flow->calendar->get_ending_of_week( $date );
+		$date      = '2025-01-01';
+		$beginning = $edit_flow->calendar->get_beginning_of_week( $date );
+		$ending    = $edit_flow->calendar->get_ending_of_week( $date );
 
 		// Week should span December 2024 to January 2025
 		$this->assertEquals( '2024-12-30', $beginning ); // Monday Dec 30

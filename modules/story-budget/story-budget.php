@@ -1,24 +1,65 @@
 <?php
 /**
- * class EF_Story_Budget
+ * Story Budget module for Edit Flow.
+ *
  * This class displays a budgeting system for an editorial desk's publishing workflow.
  *
+ * @package EditFlow
  * @author sbressler
+ */
+
+/**
+ * Story Budget module class for Edit Flow.
  */
 class EF_Story_Budget extends EF_Module {
 
+	/**
+	 * Taxonomy used for the story budget.
+	 *
+	 * @var string
+	 */
 	public $taxonomy_used = 'category';
 
+	/**
+	 * The module object.
+	 *
+	 * @var object
+	 */
 	public $module;
 
+	/**
+	 * Number of columns to display.
+	 *
+	 * @var int
+	 */
 	public $num_columns = 0;
 
+	/**
+	 * Maximum number of columns allowed.
+	 *
+	 * @var int
+	 */
 	public $max_num_columns;
 
+	/**
+	 * Whether there are no matching posts.
+	 *
+	 * @var bool
+	 */
 	public $no_matching_posts = true;
 
+	/**
+	 * Terms to display.
+	 *
+	 * @var array
+	 */
 	public $terms = array();
 
+	/**
+	 * User filters.
+	 *
+	 * @var array
+	 */
 	public $user_filters;
 
 	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
@@ -30,22 +71,37 @@ class EF_Story_Budget extends EF_Module {
 	// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
 	const default_num_columns = 1;
 
+	/**
+	 * Whether to show excerpts.
+	 *
+	 * @var bool
+	 */
 	public $show_excerpts = false;
 
+	/**
+	 * Whether to hide empty terms.
+	 *
+	 * @var bool
+	 */
 	public $hide_empty_terms = false;
 
+	/**
+	 * Term columns configuration.
+	 *
+	 * @var array
+	 */
 	private $term_columns;
 
 	/**
-	 * Register the module with Edit Flow but don't do anything else
+	 * Register the module with Edit Flow but don't do anything else.
 	 */
 	public function __construct() {
 
 		$this->module_url = $this->get_module_url( __FILE__ );
-		// Register the module with Edit Flow
+		// Register the module with Edit Flow.
 		$args         = array(
 			'title'                => __( 'Story Budget', 'edit-flow' ),
-			// translators: %s is a link to the story budget page
+			// translators: %s is a link to the story budget page.
 			'short_description'    => sprintf( __( 'View the status of all your content <a href="%s">at a glance</a>.', 'edit-flow' ), admin_url( 'index.php?page=story-budget' ) ),
 			'extended_description' => __( 'Use the story budget to see how content on your site is progressing. Filter by specific categories or date ranges to see details about each post in progress.', 'edit-flow' ),
 			'module_url'           => $this->module_url,
@@ -61,7 +117,7 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
-	 * Initialize the rest of the stuff in the class if the module is active
+	 * Initialize the rest of the stuff in the class if the module is active.
 	 */
 	public function init() {
 
@@ -75,24 +131,24 @@ class EF_Story_Budget extends EF_Module {
 		$this->hide_empty_terms = $this->get_hide_empty_terms();
 		$this->max_num_columns  = apply_filters( 'ef_story_budget_max_num_columns', 3 );
 
-		// Filter to allow users to pick a taxonomy other than 'category' for sorting their posts
+		// Filter to allow users to pick a taxonomy other than 'category' for sorting their posts.
 		$this->taxonomy_used = apply_filters( 'ef_story_budget_taxonomy_used', $this->taxonomy_used );
 
 		add_action( 'admin_init', array( $this, 'handle_form_date_range_change' ) );
 		add_action( 'admin_init', array( $this, 'handle_filter_reset' ) );
 		add_action( 'admin_init', array( $this, 'add_screen_options_panel' ) );
 		// Register the columns of data appearing on every term. This is hooked into admin_init
-		// so other Edit Flow modules can register their filters if needed
+		// so other Edit Flow modules can register their filters if needed.
 		add_action( 'admin_init', array( $this, 'register_term_columns' ) );
 
 		add_action( 'admin_menu', array( $this, 'action_admin_menu' ) );
-		// Load necessary scripts and stylesheets
+		// Load necessary scripts and stylesheets.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'action_enqueue_admin_styles' ) );
 	}
 
 	/**
-	 * Give users the appropriate permissions to view the story budget the first time the module is loaded
+	 * Give users the appropriate permissions to view the story budget the first time the module is loaded.
 	 *
 	 * @since 0.7
 	 */
@@ -110,25 +166,23 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
-	 * Upgrade our data in case we need to
+	 * Upgrade our data in case we need to.
 	 *
 	 * @since 0.7
+	 *
+	 * @param string $previous_version Previous plugin version.
 	 */
 	public function upgrade( $previous_version ) {
 		global $edit_flow;
 
-		// Upgrade path to v0.7
+		// Upgrade path to v0.7.
 		if ( version_compare( $previous_version, '0.7', '<' ) ) {
-			// Migrate whether the story budget was enabled or not and clean up old option
-			if ( $enabled = get_option( 'edit_flow_story_budget_enabled' ) ) {
-				$enabled = 'on';
-			} else {
-				$enabled = 'off';
-			}
+			// Migrate whether the story budget was enabled or not and clean up old option.
+			$enabled = get_option( 'edit_flow_story_budget_enabled' ) ? 'on' : 'off';
 			$edit_flow->update_module_option( $this->module->name, 'enabled', $enabled );
 			delete_option( 'edit_flow_story_budget_enabled' );
 
-			// Technically we've run this code before so we don't want to auto-install new data
+			// Technically we've run this code before so we don't want to auto-install new data.
 			$edit_flow->update_module_option( $this->module->name, 'loaded_once', true );
 		}
 	}
@@ -199,6 +253,8 @@ class EF_Story_Budget extends EF_Module {
 	 * Handle a request to reset filters.
 	 *
 	 * @since 0.10
+	 *
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Resetting filters is a safe operation.
 	 */
 	public function handle_filter_reset() {
 		if ( ! isset( $_GET['page'] ) || 'story-budget' !== $_GET['page'] ) {
@@ -228,9 +284,10 @@ class EF_Story_Budget extends EF_Module {
 		wp_safe_redirect( menu_page_url( $this->module->slug, false ) );
 		exit;
 	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	/**
-	 * Handle a form submission to change the user's date range on the budget
+	 * Handle a form submission to change the user's date range on the budget.
 	 *
 	 * @since 0.7
 	 */
@@ -239,6 +296,7 @@ class EF_Story_Budget extends EF_Module {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'change-date' ) ) {
 			wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 		}
@@ -265,14 +323,18 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
-	 * Handles updating the users
+	 * Handles updating the users.
+	 *
+	 * @param WP_User $current_user The current user.
+	 * @param array   $new_filters  The new filters to apply.
+	 * @return array The updated filters.
 	 */
 	public function update_user_filters_from_form_date_range_change( $current_user, $new_filters ) {
 		$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
 
-		// Default start date value
+		// Default start date value.
 		if ( isset( $new_filters['start_date'] ) ) {
-			// Validate that it's a legitimate date
+			// Validate that it's a legitimate date.
 			$valid_date = DateTime::createFromFormat( 'Y-m-d', $new_filters['start_date'] );
 
 			if ( false === $valid_date ) {
@@ -281,7 +343,7 @@ class EF_Story_Budget extends EF_Module {
 				$start_date = $valid_date->format( 'Y-m-d' );
 			}
 
-			// Set the start_date filter (to new value or default)
+			// Set the start_date filter (to new value or default).
 			$existing_filters['start_date'] = $start_date;
 		}
 
@@ -302,7 +364,7 @@ class EF_Story_Budget extends EF_Module {
 		if ( empty( $this->num_columns ) ) {
 			$current_user      = wp_get_current_user();
 			$this->num_columns = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'screen_columns', true );
-			// If usermeta didn't have a value already, use a default value and insert into DB
+			// If usermeta didn't have a value already, use a default value and insert into DB.
 			if ( empty( $this->num_columns ) ) {
 				$this->num_columns = self::default_num_columns;
 				$this->save_column_prefs( array( self::usermeta_key_prefix . 'screen_columns' => $this->num_columns ) );
@@ -363,6 +425,8 @@ class EF_Story_Budget extends EF_Module {
 
 	/**
 	 * Save the current user's screen preferences.
+	 *
+	 * @param array $posted_fields The posted fields.
 	 */
 	public function save_column_prefs( $posted_fields ) {
 		$current_user = wp_get_current_user();
@@ -390,14 +454,14 @@ class EF_Story_Budget extends EF_Module {
 	 */
 	public function story_budget() {
 
-		// Update the current user's filters with the variables set in $_GET
+		// Update the current user's filters with the variables set in $_GET.
 		$this->user_filters = $this->update_user_filters();
 
 		if ( ! empty( $this->user_filters[ $this->taxonomy_used ] ) ) {
 			$terms   = array();
 			$terms[] = get_term( $this->user_filters[ $this->taxonomy_used ], $this->taxonomy_used );
 		} else {
-			// Get all of the terms from the taxonomy, regardless whether there are published posts
+			// Get all of the terms from the taxonomy, regardless whether there are published posts.
 			$terms = get_terms( array(
 				'taxonomy'   => $this->taxonomy_used,
 				'orderby'    => 'name',
@@ -406,7 +470,8 @@ class EF_Story_Budget extends EF_Module {
 				'parent'     => 0,
 			));
 		}
-		$this->terms = apply_filters( 'ef_story_budget_filter_terms', $terms ); // allow for reordering or any other filtering of terms
+		// Allow for reordering or any other filtering of terms.
+		$this->terms = apply_filters( 'ef_story_budget_filter_terms', $terms );
 
 		$wrap_classes = 'wrap';
 		if ( $this->show_excerpts ) {
@@ -478,10 +543,11 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
-	 * Get all of the posts for a given term based on filters
+	 * Get all of the posts for a given term based on filters.
 	 *
-	 * @param object $term The term we're getting posts for
-	 * @return array $term_posts An array of post objects for the term
+	 * @param object $term The term we're getting posts for.
+	 * @param array  $args Optional. Additional query arguments.
+	 * @return array $term_posts An array of post objects for the term.
 	 */
 	public function get_posts_for_term( $term, $args = null ) {
 
@@ -492,11 +558,12 @@ class EF_Story_Budget extends EF_Module {
 		);
 		$args     = array_merge( $defaults, $args );
 
-		// Filter to the term and any children if it's hierarchical
-		$arg_terms         = array(
+		// Filter to the term and any children if it's hierarchical.
+		$arg_terms = array(
 			$term->term_id,
 		);
-		$arg_terms         = array_merge( $arg_terms, get_term_children( $term->term_id, $this->taxonomy_used ) );
+		$arg_terms = array_merge( $arg_terms, get_term_children( $term->term_id, $this->taxonomy_used ) );
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Required for category/term filtering.
 		$args['tax_query'] = array(
 			array(
 				'taxonomy' => $this->taxonomy_used,
@@ -518,7 +585,7 @@ class EF_Story_Budget extends EF_Module {
 			$args['post_status'] .= implode( ',', wp_list_pluck( $post_stati, 'name' ) );
 		}
 
-		// Filter by post_author if it's set
+		// Filter by post_author if it's set.
 		if ( '0' === $args['author'] ) {
 			unset( $args['author'] );
 		}
@@ -533,7 +600,7 @@ class EF_Story_Budget extends EF_Module {
 			'inclusive' => true,
 		);
 
-		// Filter for an end user to implement any of their own query args
+		// Filter for an end user to implement any of their own query args.
 		$args = apply_filters( 'ef_story_budget_posts_query_args', $args );
 
 		$term_posts_query_results = new WP_Query( $args );
@@ -558,7 +625,7 @@ class EF_Story_Budget extends EF_Module {
 		global $wpdb;
 		$posts = $this->get_posts_for_term( $term, $this->user_filters );
 		if ( ! empty( $posts ) ) {
-			// Don't display the message for $no_matching_posts
+			// Don't display the message for $no_matching_posts.
 			$this->no_matching_posts = false;
 		}
 
@@ -615,7 +682,7 @@ class EF_Story_Budget extends EF_Module {
 			<?php
 			foreach ( (array) $this->term_columns as $key => $name ) {
 				$class = ( 'title' === $key ) ? ' class="post-title"' : '';
-				echo '<td' . $class . '>';
+				echo '<td' . esc_attr( $class ) . '>';
 				if ( method_exists( $this, 'term_column_' . $key ) ) {
 					$method = 'term_column_' . $key;
 					echo wp_kses_post( $this->$method( $post, $parent_term ) );
@@ -635,14 +702,14 @@ class EF_Story_Budget extends EF_Module {
 	 *
 	 * @since 0.7
 	 *
-	 * @param object $post The post we're displaying
-	 * @param string $column_name Name of the column, as registered with register_term_columns
-	 * @param object $parent_term The parent term for the term column
-	 * @return string $output Output value for the term column
+	 * @param object $post The post we're displaying.
+	 * @param string $column_name Name of the column, as registered with register_term_columns.
+	 * @param object $parent_term The parent term for the term column.
+	 * @return string $output Output value for the term column.
 	 */
 	public function term_column_default( $post, $column_name, $parent_term ) {
 
-		// Hook for other modules to get data into columns
+		// Hook for other modules to get data into columns.
 		$column_value = null;
 		$column_value = apply_filters( 'ef_story_budget_term_column_value', $column_name, $post, $parent_term );
 		if ( ! is_null( $column_value ) && $column_value != $column_name ) {
@@ -653,11 +720,9 @@ class EF_Story_Budget extends EF_Module {
 			case 'status':
 				$status_name = get_post_status_object( $post->post_status );
 				return $status_name->label;
-				break;
 			case 'author':
 				$post_author = get_userdata( $post->post_author );
 				return $post_author->display_name;
-				break;
 			case 'post_date':
 				$output = get_the_time( get_option( 'date_format' ), $post->ID );
 				// Only show time if it's not midnight (indicating a specific time was set).
@@ -667,18 +732,22 @@ class EF_Story_Budget extends EF_Module {
 				}
 				return $output;
 			case 'post_modified':
-				// translators: %s is a human-readable time difference
+				// translators: %s is a human-readable time difference.
+				// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested, WordPress.WP.I18n.MissingTranslatorsComment -- Used for relative time display; translator comment is above.
 				return sprintf( esc_html__( '%s ago', 'edit-flow' ), human_time_diff( get_the_time( 'U', $post->ID ), current_time( 'timestamp' ) ) );
-				break;
 			default:
 				break;
 		}
 	}
 
 	/**
-	 * Prepare the data for the title term column
+	 * Prepare the data for the title term column.
 	 *
 	 * @since 0.7
+	 *
+	 * @param object $post        The post object.
+	 * @param object $parent_term The parent term for the column.
+	 * @return string The HTML output for the title column.
 	 */
 	public function term_column_title( $post, $parent_term ) {
 		$post_title = _draft_or_post_title( $post->ID );
@@ -691,7 +760,7 @@ class EF_Story_Budget extends EF_Module {
 			$output = '<strong>' . esc_html( $post_title ) . '</strong>';
 		}
 
-		// Post excerpt/details (toggleable)
+		// Post excerpt/details (toggleable).
 		$output .= '<div class="post-details">';
 		if ( current_user_can( 'read_post', $post->ID ) ) {
 			if ( post_password_required( $post ) ) {
@@ -700,13 +769,13 @@ class EF_Story_Budget extends EF_Module {
 				$output .= '<p class="post-excerpt">' . esc_html( wp_strip_all_tags( $post->post_excerpt ) ) . '</p>';
 			} else {
 				$excerpt_length = apply_filters( 'ef_story_budget_excerpt_length', 20 );
-				$excerpt_more   = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+				$excerpt_more   = apply_filters( 'excerpt_more', ' [&hellip;]' );
 				$output        .= '<p class="post-excerpt">' . wp_trim_words( wp_strip_all_tags( $post->post_content ), $excerpt_length, $excerpt_more ) . '</p>';
 			}
 		}
 		$output .= '</div>';
 
-		// Edit or Trash or View
+		// Edit or Trash or View.
 		$output      .= '<div class="row-actions">';
 		$item_actions = array();
 		if ( $can_edit_post ) {
@@ -716,12 +785,12 @@ class EF_Story_Budget extends EF_Module {
 			$item_actions['trash'] = '<a class="submitdelete" title="' . __( 'Move this item to the Trash', 'edit-flow' ) . '" href="' . get_delete_post_link( $post->ID ) . '">' . __( 'Trash', 'edit-flow' ) . '</a>';
 		}
 
-		// Display a View or a Preview link depending on whether the post has been published or not
+		// Display a View or a Preview link depending on whether the post has been published or not.
 		if ( in_array( $post->post_status, array( 'publish' ) ) ) {
-			// translators: %s is the post title
+			// translators: %s is the post title.
 			$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
 		} elseif ( $can_edit_post ) {
-			// translators: %s is the post title
+			// translators: %s is the post title.
 			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
 		}
 
@@ -740,33 +809,37 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
-	 * Print any messages that should appear based on the action performed
+	 * Print any messages that should appear based on the action performed.
 	 */
 	public function print_messages() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Display-only, no state changes.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Integer cast provides sanitization.
 		?>
 
 		<?php
 		if ( isset( $_GET['trashed'] ) || isset( $_GET['untrashed'] ) ) {
 			echo '<div id="trashed-message" class="updated"><p>';
 
-			// Following mostly stolen from edit.php
+			// Following mostly stolen from edit.php.
 
 			if ( isset( $_GET['trashed'] ) && (int) $_GET['trashed'] ) {
-				// translators: %d is the number of posts trashed
-				printf( esc_html( _n( 'Item moved to the trash.', '%d items moved to the trash.', $_GET['trashed'] ), number_format_i18n( $_GET['trashed'] ) ) );
-				$ids = isset( $_GET['ids'] ) ? $_GET['ids'] : 0;
+				// translators: %d is the number of posts trashed.
+				printf( esc_html( _n( '%d item moved to the trash.', '%d items moved to the trash.', (int) $_GET['trashed'], 'edit-flow' ) ), esc_html( number_format_i18n( (int) $_GET['trashed'] ) ) );
+				$ids = isset( $_GET['ids'] ) ? sanitize_text_field( wp_unslash( $_GET['ids'] ) ) : 0;
 				echo ' <a href="' . esc_url( wp_nonce_url( "edit.php?post_type=post&doaction=undo&action=untrash&ids=$ids", 'bulk-posts' ) ) . '">' . esc_html__( 'Undo', 'edit-flow' ) . '</a><br />';
 				unset( $_GET['trashed'] );
 			}
 
 			if ( isset( $_GET['untrashed'] ) && (int) $_GET['untrashed'] ) {
-				// translators: %d is the number of posts restored from the trash
-				printf( esc_html( _n( 'Item restored from the Trash.', '%d items restored from the Trash.', $_GET['untrashed'] ), number_format_i18n( $_GET['untrashed'] ) ) );
+				// translators: %d is the number of posts restored from the trash.
+				printf( esc_html( _n( '%d item restored from the Trash.', '%d items restored from the Trash.', (int) $_GET['untrashed'], 'edit-flow' ) ), esc_html( number_format_i18n( (int) $_GET['untrashed'] ) ) );
 				unset( $_GET['undeleted'] );
 			}
 
 			echo '</p></div>';
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	}
 
 	/**
@@ -819,7 +892,7 @@ class EF_Story_Budget extends EF_Module {
 		$current_user_filters = array();
 		$current_user_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
 
-		// If any of the $_GET vars are missing, then use the current user filter
+		// If any of the $_GET vars are missing, then use the current user filter.
 		foreach ( $user_filters as $key => $value ) {
 			if ( is_null( $value ) && ! empty( $current_user_filters[ $key ] ) ) {
 				$user_filters[ $key ] = $current_user_filters[ $key ];
@@ -852,7 +925,7 @@ class EF_Story_Budget extends EF_Module {
 		$user_filters = array();
 		$user_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
 
-		// If usermeta didn't have filters already, insert defaults into DB
+		// If usermeta didn't have filters already, insert defaults into DB.
 		if ( empty( $user_filters ) ) {
 			$user_filters = $this->update_user_filters();
 		}
@@ -860,12 +933,14 @@ class EF_Story_Budget extends EF_Module {
 	}
 
 	/**
+	 * Get a sanitized parameter from the $_GET superglobal.
 	 *
-	 * @param string $param The parameter to look for in $_GET
-	 * @return null if the parameter is not set in $_GET, empty string if the parameter is empty in $_GET,
-	 *         or a sanitized version of the parameter from $_GET if set and not empty
+	 * @param string $param The parameter to look for in $_GET.
+	 * @return null|string Null if the parameter is not set, empty string if empty,
+	 *                     or a sanitized version of the parameter if set and not empty.
 	 */
 	public function filter_get_param( $param ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only filter retrieval.
 		// Sure, this could be done in one line. But we're cooler than that: let's make it more readable!
 		if ( ! isset( $_GET[ $param ] ) ) {
 			return null;
@@ -874,8 +949,14 @@ class EF_Story_Budget extends EF_Module {
 		}
 
 		return sanitize_key( $_GET[ $param ] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
+	/**
+	 * Get the available filter names for the story budget.
+	 *
+	 * @return array The filter names.
+	 */
 	public function story_budget_filters() {
 		$select_filter_names = array();
 
@@ -886,6 +967,13 @@ class EF_Story_Budget extends EF_Module {
 		return apply_filters( 'ef_story_budget_filter_names', $select_filter_names );
 	}
 
+	/**
+	 * Output the filter options for the story budget.
+	 *
+	 * @param string $select_id   The ID of the select element.
+	 * @param string $select_name The name of the select element.
+	 * @param array  $filters     The current filter values.
+	 */
 	public function story_budget_filter_options( $select_id, $select_name, $filters ) {
 		switch ( $select_id ) {
 			case 'post_status':
@@ -909,10 +997,10 @@ class EF_Story_Budget extends EF_Module {
 				if ( taxonomy_exists( $this->taxonomy_used ) ) {
 					$taxonomy_obj = get_taxonomy( $this->taxonomy_used );
 					echo '<label for="cat">';
-					// translators: %s is the taxonomy name (e.g., "category", "tag")
+					// translators: %s is the taxonomy name (e.g., "category", "tag").
 					echo '<span class="screen-reader-text">' . esc_html( sprintf( __( 'Filter by %s', 'edit-flow' ), $taxonomy_obj->labels->singular_name ) ) . '</span>';
 					$dropdown_args = array(
-						// translators: %s is the taxonomy name (e.g., "categories", "tags")
+						// translators: %s is the taxonomy name (e.g., "categories", "tags").
 						'show_option_all' => sprintf( __( 'View all %s', 'edit-flow' ), strtolower( $taxonomy_obj->labels->name ) ),
 						'hide_empty'      => 0,
 						'hierarchical'    => $taxonomy_obj->hierarchical,

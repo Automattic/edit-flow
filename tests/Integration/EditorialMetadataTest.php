@@ -31,8 +31,8 @@ class EditorialMetadataTest extends TestCase {
 	}
 
 	/**
-	* Test that editorial metadata for date is saved
-	*/
+	 * Test that editorial metadata for date is saved
+	 */
 	function test_save_metabox_with_date() {
 		global $edit_flow;
 
@@ -58,8 +58,8 @@ class EditorialMetadataTest extends TestCase {
 	}
 
 	/**
-	* Test that editorial metadata for date is saved
-	*/
+	 * Test that editorial metadata for date is saved
+	 */
 	function test_save_metabox_with_empty_date() {
 		global $edit_flow;
 
@@ -85,8 +85,8 @@ class EditorialMetadataTest extends TestCase {
 	}
 
 	/**
-	* Test that editorial metadata for date is saved
-	*/
+	 * Test that editorial metadata for date is saved
+	 */
 	function test_save_metabox_with_invalid_date() {
 		global $edit_flow;
 

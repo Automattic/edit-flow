@@ -33,17 +33,17 @@ class CalendarTest extends TestCase {
 	}
 
 	/**
-	* Test that calendar has default custom statuses
-	*/
+	 * Test that calendar has default custom statuses
+	 */
 	public function test_calendar_custom_statuses() {
 		global $edit_flow;
 
-        $statuses = array_map(
-            function( $status ) {
-                return $status->name;
-            },
-            $edit_flow->calendar->get_calendar_post_stati()
-        );
+		$statuses = array_map(
+			function ( $status ) {
+				return $status->name;
+			},
+			$edit_flow->calendar->get_calendar_post_stati()
+		);
 
 		$this->assertContains( 'future', $statuses );
 		$this->assertContains( 'pitch', $statuses );
@@ -62,17 +62,17 @@ class CalendarTest extends TestCase {
 				'description' => 'description',
 				'position'    => 6,
 			),
-        );
+		);
 
-        $edit_flow->custom_status->add_custom_status( $new_custom_status['term'], $new_custom_status['args'] );
+		$edit_flow->custom_status->add_custom_status( $new_custom_status['term'], $new_custom_status['args'] );
 
-        $statuses = array_map(
-            function( $status ) {
-                return $status->name;
-            },
-            $edit_flow->calendar->get_calendar_post_stati()
-        );
+		$statuses = array_map(
+			function ( $status ) {
+				return $status->name;
+			},
+			$edit_flow->calendar->get_calendar_post_stati()
+		);
 
-        $this->assertContains( 'future', $statuses );
+		$this->assertContains( 'future', $statuses );
 	}
 }

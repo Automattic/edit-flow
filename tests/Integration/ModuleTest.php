@@ -54,7 +54,7 @@ class ModuleTest extends TestCase {
 
 		$user = new WP_User( self::$admin_user_id );
 
-		//Verify before flush
+		// Verify before flush
 		$this->assertTrue( $user->has_cap( 'edit_usergroups' ), 'User did not have role edit_usergroups' );
 
 		$this->_flush_roles();
