@@ -29,10 +29,6 @@
 					return inlineEditMetadataTerm.save( this );
 				}
 			} );
-
-			$( '#posts-filter input[type="submit"]' ).on( 'mousedown', function ( e ) {
-				t.revert();
-			} );
 		},
 
 		toggle( el ) {

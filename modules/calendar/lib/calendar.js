@@ -1,5 +1,22 @@
 const dispatch = wp.data.dispatch;
 
+/**
+ * Safely dispatch an action to the edit-flow/calendar store.
+ * Returns a no-op object if the store isn't registered yet.
+ */
+function getCalendarDispatch() {
+	const calendarStore = dispatch( 'edit-flow/calendar' );
+	if ( calendarStore ) {
+		return calendarStore;
+	}
+	// Return no-op functions if store isn't available
+	return {
+		setCalendarIsLoading: () => {},
+		setPostSaved: () => {},
+		clearCalendarSnackbarMessage: () => {},
+	};
+}
+
 jQuery( document ).ready( function ( $ ) {
 	$( 'a.show-more' ).on( 'click', function () {
 		const parent = $( this ).closest( 'td.day-unit' );
@@ -13,7 +30,7 @@ jQuery( document ).ready( function ( $ ) {
 	 * html given the input type
 	 */
 	$( '.day-unit' ).on( 'click', '.editable-value', function ( event ) {
-		//Reset anything that was currently being edited.
+		// Reset anything that was currently being edited.
 		reset_editorial_metadata();
 		const t = this;
 		const $editable_el = $( this ).addClass( 'hidden' ).next( '.editable-html' );
@@ -34,7 +51,7 @@ jQuery( document ).ready( function ( $ ) {
 			.removeClass( 'hidden' );
 	} );
 
-	//Save the editorial metadata we've changed
+	// Save the editorial metadata we've changed
 	$( '.day-unit' ).on( 'click', 'a#save-editorial-metadata', function () {
 		const post_id = $( this ).attr( 'class' ).replace( 'post-', '' );
 		save_editorial_metadata( post_id );
@@ -117,10 +134,10 @@ jQuery( document ).ready( function ( $ ) {
 	 * Somewhat hackish way to close overlays automagically when you click outside an overlay
 	 */
 	$( document ).on( 'click', function ( event ) {
-		//Did we click on a list item? How do we figure that out?
-		//First let's see if we directly clicked on a .day-item
+		// Did we click on a list item? How do we figure that out?
+		// First let's see if we directly clicked on a .day-item
 		let target = $( event.target );
-		//Case where we've clicked on the list item directly
+		// Case where we've clicked on the list item directly
 		if ( target.hasClass( 'day-item' ) ) {
 			if ( target.hasClass( 'active' ) ) {
 				return;
@@ -139,7 +156,7 @@ jQuery( document ).ready( function ( $ ) {
 			return;
 		}
 
-		//Case where we've clicked in the list item
+		// Case where we've clicked in the list item
 		target = target.closest( '.day-item' );
 		if ( target.length ) {
 			if ( target.hasClass( 'day-item' ) ) {
@@ -193,6 +210,7 @@ jQuery( document ).ready( function ( $ ) {
 		items: 'li.day-item.sortable',
 		connectWith: 'td.day-unit ul',
 		placeholder: 'ui-state-highlight',
+		cancel: '.item-overlay, .item-overlay *, .post-insert-overlay, .post-insert-overlay *',
 		start( event, ui ) {
 			$( this ).disableSelection();
 			edit_flow_calendar_close_overlays();
@@ -213,11 +231,13 @@ jQuery( document ).ready( function ( $ ) {
 			) {
 				let post_id = $( ui.item ).attr( 'id' ).split( '-' );
 				post_id = post_id[ post_id.length - 1 ];
-				const prev_date = $( this ).closest( '.day-unit' ).attr( 'id' );
-				const next_date = $( ui.item ).closest( '.day-unit' ).attr( 'id' );
+				const prev_date_id = $( this ).closest( '.day-unit' ).attr( 'id' );
+				const prev_date = prev_date_id.substr( 'date-'.length );
+				const next_date_id = $( ui.item ).closest( '.day-unit' ).attr( 'id' );
+				const next_date = next_date_id.substr( 'date-'.length );
 				const nonce = $( document ).find( '#ef-calendar-modify' ).val();
 				$( '.edit-flow-message' ).remove();
-				dispatch( 'edit-flow/calendar' ).setCalendarIsLoading( true );
+				getCalendarDispatch().setCalendarIsLoading( true );
 				// $('li.ajax-actions .waiting').show();
 				// make ajax request
 				const params = {
@@ -232,10 +252,10 @@ jQuery( document ).ready( function ( $ ) {
 						clearTimeout( snackbarMessageTimeout );
 					}
 
-					dispatch( 'edit-flow/calendar' ).setPostSaved( response.message );
+					getCalendarDispatch().setPostSaved( response.message );
 
 					snackbarMessageTimeout = setTimeout( () => {
-						dispatch( 'edit-flow/calendar' ).clearCalendarSnackbarMessage();
+						getCalendarDispatch().clearCalendarSnackbarMessage();
 					}, 2500 );
 
 					setTimeout( edit_flow_calendar_hide_message, 10000 );
@@ -289,11 +309,11 @@ jQuery( document ).ready( function ( $ ) {
 				EFQuickPublish.$current_date_square = $this.parent();
 			}
 
-			//Get our form content
+			// Get our form content
 			const $new_post_form_content =
 				EFQuickPublish.$current_date_square.find( '.post-insert-dialog' );
 
-			//Inject the form (it will automatically be removed on click-away because of its 'item-overlay' class)
+			// Inject the form (it will automatically be removed on click-away because of its 'item-overlay' class)
 			EFQuickPublish.$new_post_form = $new_post_form_content
 				.clone()
 				.addClass( 'item-overlay post-insert-overlay' )
@@ -351,11 +371,11 @@ jQuery( document ).ready( function ( $ ) {
 					},
 					success( response, textStatus, XMLHttpRequest ) {
 						if ( response.status == 'success' ) {
-							//The response message on success is the html for the a post list item
+							// The response message on success is the html for the a post list item
 							const $new_post = $( response.message );
 
 							if ( redirect_to_draft ) {
-								//If user clicked on the 'edit post' link, let's send them to the new post
+								// If user clicked on the 'edit post' link, let's send them to the new post
 								const edit_url = $new_post.find( '.item-actions .edit a' ).attr( 'href' );
 								window.location = edit_url;
 							} else {

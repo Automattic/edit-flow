@@ -1,110 +1,50 @@
-var MiniCssExtractPlugin = require('mini-css-extract-plugin');
-var debug = process.env.NODE_ENV !== 'production';
-var glob = require("glob");
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
-const entries = glob.sync("./blocks/src/**/block.js").reduce((acc, item) => {
-  const name = item.replace( /blocks\/src\/(.*)\/block.js/, '$1' )
-  acc[ name ] = item;
-  return acc;
-}, {});
+// The calendar-react entry needs @wordpress packages bundled (not externalized)
+// because the calendar page loads outside the block editor context where these
+// globals aren't guaranteed to be available. This includes all @wordpress packages
+// and their transitive dependencies (like react/jsx-runtime used by the automatic
+// JSX transform).
+const shouldBundleRequest = ( request ) => {
+	// Bundle all @wordpress packages
+	if ( request.startsWith( '@wordpress/' ) ) {
+		return true;
+	}
+	// Bundle react/jsx-runtime (used by automatic JSX transform)
+	if ( request === 'react/jsx-runtime' || request === 'react/jsx-dev-runtime' ) {
+		return true;
+	}
+	return false;
+};
 
-// @todo
-var extractEditorSCSS = new MiniCssExtractPlugin({
-  filename: './[name].editor.build.css'
-});
+// Replace the default DependencyExtractionWebpackPlugin with a configured one
+// Return false to explicitly prevent externalization of bundled packages
+const plugins = defaultConfig.plugins.map( ( plugin ) => {
+	if ( plugin.constructor.name === 'DependencyExtractionWebpackPlugin' ) {
+		return new DependencyExtractionWebpackPlugin( {
+			requestToExternal( request ) {
+				// Return false to bundle these packages instead of externalizing
+				if ( shouldBundleRequest( request ) ) {
+					return false;
+				}
+			},
+			requestToHandle( request ) {
+				// Return false to not add script handles for bundled packages
+				if ( shouldBundleRequest( request ) ) {
+					return false;
+				}
+			},
+		} );
+	}
+	return plugin;
+} );
 
-var extractBlockSCSS = new MiniCssExtractPlugin({
-  filename: './[name].style.build.css'
-});
-
-var plugins = [extractEditorSCSS, extractBlockSCSS];
-
-var scssConfig = [
-  'css-loader',
-  'sass-loader',
-];
-
-module.exports = [
-  {
-    context: __dirname,
-    devtool: debug ? 'source-map' : null,
-    mode: debug ? 'development' : 'production',
-    // entry: './blocks/src/blocks.js',
-    entry: entries,
-    output: {
-      path: __dirname + '/blocks/dist/',
-      filename: "[name].build.js"
-    },
-    externals: {
-      'react': 'React',
-      'react-dom': 'ReactDOM'
-    },
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader'
-            }
-          ]
-        },
-        {
-          test: /editor\.scss$/,
-          exclude: /node_modules/,
-          // use: extractEditorSCSS.extract(scssConfig)
-          use: [ MiniCssExtractPlugin.loader, ...scssConfig ],
-        },
-        {
-          test: /style\.scss$/,
-          exclude: /node_modules/,
-          // use: extractBlockSCSS.extract(scssConfig)
-          use: [ MiniCssExtractPlugin.loader, ...scssConfig ],
-        }
-      ]
-    },
-    plugins: plugins
-  },
-  {
-    context: __dirname,
-    devtool: debug ? 'source-map' : null,
-    mode: debug ? 'development' : 'production',
-    entry: {
-      'calendar.react': __dirname + '/modules/calendar/lib/react/calendar.react.js',
-    },
-    output: {
-      path: __dirname + '/modules/calendar/lib/dist',
-      filename: "[name].build.js"
-    },
-    externals: {
-      'react': 'React',
-      'react-dom': 'ReactDOM',
-      'moment': 'moment',
-      '@wordpress/i18n': 'wp.i18n',
-      '@wordpress/components': 'wp.components',
-      '@wordpress/url': 'wp.url',
-      '@wordpress/data': 'wp.data'
-    },
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'babel-loader'
-            }
-          ]
-        },
-        {
-          test: /style\.react\.scss$/,
-          exclude: /node_modules/,
-          // use: extractBlockSCSS.extract(scssConfig)
-          use: [ MiniCssExtractPlugin.loader, ...scssConfig ],
-        },
-      ]
-    },
-    plugins: plugins
-  }
-];
+module.exports = {
+	...defaultConfig,
+	entry: {
+		'custom-status-block': './modules/custom-status/lib/custom-status-block.js',
+		'calendar-react': './modules/calendar/lib/react/calendar.react.js',
+	},
+	plugins,
+};

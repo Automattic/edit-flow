@@ -58,56 +58,35 @@ Summarize the upgrade and add it to the "Upgrade Notice" section in both `README
 
 Push up the readme and version changes to a new PR and merge.
 
-6. Tag the release on GitHub.
+6. Create the release on GitHub.
 
-```
-git tag <version> -a
-git push origin --tags
-```
+Go to the repository's Releases page, click "Draft a new release", create a new tag (e.g., `1.0.0`), and publish the release. This triggers the automated deployment workflow.
 
 ### Publishing
 
-1. Sync to local SVN checkout.
+Publishing is automated via GitHub Actions. When you create a GitHub Release:
 
-There's a handy script that does this for you:
+1. **Create GitHub Release**
 
-```
-./bin/prepare-svn-release.sh
-```
+   Go to the repository's Releases page and click "Draft a new release". Create a new tag (e.g., `1.0.0`) and publish the release.
 
-It will checkout the SVN repo and rsync over the necessary files (it skips any development-related ones flagged in the `.svnignore` file).
+2. **Automated deployment**
 
-2.  Validate the staged changes.
+   The `.github/workflows/deploy.yml` workflow will:
+   - Build JavaScript assets (`npm ci && npm run build`)
+   - Deploy to WordPress.org SVN
+   - Attach a zip file to the GitHub Release
 
-We should make sure that the changes are what we expect. The script will prompt you to do this.
+   The workflow uses the `.distignore` file to exclude development files from the distribution.
 
-```
-svn status
-svn diff
-```
+3. **Test**
 
-Verify that there aren't any changes that we didn't see or any rogue files we don't expect (those should be added to `.svnignore` in a separate PR).
+   From a test site, download the latest version and make sure things work as expected.
 
-3. Add / remove files.
+   For a quick-and-easy test site, use https://jurassic.ninja
 
-If there are new or removed files, add/remove them as needed.
+4. **Celebrate**
 
-4. Commit.
+   We're done! High five! Go enjoy a beverage/dessert/guilty pleasure of your choice!
 
-```
-svn commit
-```
-
-Add a message that indicates what version number we're releasing.
-
-5. Test.
-
-From a test site, download the latest version and make sure things work as expected.
-
-For a quick-and-easy test site, use https://jurassic.ninja
-
-6. Celebrate.
-
-We're done! High five! Go enjoy a beverage/dessert/guilty pleasure of your choice!
-
-But, keep an eye on the GitHub issues and the WP.org Support Forums (https://wordpress.org/support/plugin/edit-flow/) for any feedback and issues that may have been introduced with this new release.
+   But, keep an eye on the GitHub issues and the WP.org Support Forums (https://wordpress.org/support/plugin/edit-flow/) for any feedback and issues that may have been introduced with this new release.

@@ -6,13 +6,8 @@
 import { SelectControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-
-// Get rid of this eventually
-const BUTTON_TYPE_PROPS =
-	parseFloat( EF_CALENDAR.WP_VERSION ) >= 5.4 ? { isSecondary: true } : { isDefault: true };
 
 /**
  * Internal Dependencies
@@ -72,7 +67,6 @@ class CalendarFilters extends React.Component {
 											key={ `ef-calendar-filter-${ filter.name }` }
 										>
 											<SelectControl
-												className={ 'label-screen-reader-text' } // Replaced by `hideLabelFromVision` prop in later versions
 												key={ filter.name }
 												name={ filter.name }
 												label={ filter.label }
@@ -84,6 +78,8 @@ class CalendarFilters extends React.Component {
 														value: newValue,
 													} )
 												}
+												__next40pxDefaultSize={ true }
+												__nextHasNoMarginBottom={ true }
 											/>
 										</div>
 									);
@@ -95,7 +91,8 @@ class CalendarFilters extends React.Component {
 										>
 											<ComboBox
 												key={ filter.name }
-												className="ef-calendar-filter-combobox label-screen-reader-text"
+												className="ef-calendar-filter-combobox"
+												inputId={ `ef-calendar-filter-${ filter.name }` }
 												inputLabel={ filter.inputLabel }
 												buttonOpenLabel={ filter.buttonOpenLabel }
 												buttonCloseLabel={ filter.buttonCloseLabel }
@@ -149,11 +146,11 @@ class CalendarFilters extends React.Component {
 							}
 						} ) }
 						<div className="ef-calendar-filters-buttons">
-							<Button type="submit" isPrimary={ true }>
+							<Button type="submit" isPrimary={ true } __next40pxDefaultSize={ true }>
 								{ __( 'Apply', 'edit-flow' ) }
 							</Button>
 							<Button
-								type="button'"
+								type="button"
 								href={ addQueryArgs(
 									pageUrl,
 									filters.reduce( ( acc, filter ) => {
@@ -164,7 +161,8 @@ class CalendarFilters extends React.Component {
 									}, {} )
 								) }
 								name="ef-calendar-reset-filters"
-								{ ...BUTTON_TYPE_PROPS }
+								isSecondary={ true }
+								__next40pxDefaultSize={ true }
 							>
 								{ __( 'Reset', 'edit-flow' ) }
 							</Button>

@@ -40,12 +40,28 @@
 	margin-top: 5px;
 }
 
+/* Badge base styles */
+.ef-post_following_list li .ef-user-subscribe-actions span[class^="post_following_list-"] {
+	margin-right: 8px;
+	border: solid 2px;
+	padding: 2px 6px;
+	font-size: 11px;
+	border-radius: 3px;
+	white-space: nowrap;
+}
+
+/* Warning badges (red) */
 .ef-post_following_list li .ef-user-subscribe-actions .post_following_list-no_email,
 .ef-post_following_list li .ef-user-subscribe-actions .post_following_list-no_access {
-	margin-right: 10px;
-	border: solid 2px #DC3232;
+	border-color: #DC3232;
 	color: #DC3232;
-	padding: 4px;
+}
+
+/* Neutral badges (grey) */
+.ef-post_following_list li .ef-user-subscribe-actions .post_following_list-post_author,
+.ef-post_following_list li .ef-user-subscribe-actions .post_following_list-auto_subscribed {
+	border-color: #787c82;
+	color: #787c82;
 }
 
 #ef-post_following_box {

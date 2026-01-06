@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit-flow" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+	<description>Custom ruleset for Edit Flow plugin.</description>
+
+	<!-- For help in understanding this file: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
+	<!-- For help in using PHPCS: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
+
+	<!-- What to scan -->
+	<file>.</file>
+	<!-- Ignoring Files and Folders:
+		https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#ignoring-files-and-folders -->
+	<exclude-pattern>/node_modules/</exclude-pattern>
+	<exclude-pattern>/vendor/</exclude-pattern>
+	<exclude-pattern>/build/</exclude-pattern>
+	<!-- Third-party library for screen options, do not modify -->
+	<exclude-pattern>common/php/screen-options\.php</exclude-pattern>
+
+	<!-- How to scan -->
+	<!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
+	<!-- Annotated ruleset: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
+	<!-- Show sniff and progress -->
+	<arg value="sp"/>
+	<!-- Strip the file paths down to the relevant bit -->
+	<arg name="basepath" value="./"/>
+	<!-- Show results with colors -->
+	<arg name="colors"/>
+	<!-- Limit to PHP files -->
+	<arg name="extensions" value="php"/>
+	<!-- Enables parallel processing when available for faster results. -->
+	<arg name="parallel" value="8"/>
+
+	<!-- Rules: Check PHP version compatibility - see
+		https://github.com/PHPCompatibility/PHPCompatibilityWP -->
+	<rule ref="PHPCompatibilityWP"/>
+	<!-- For help in understanding this testVersion:
+		https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
+	<config name="testVersion" value="7.4-"/>
+
+	<!-- Rules: WordPress Coding Standards - see
+		https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards -->
+	<!-- WordPress-Extra includes WordPress-Core -->
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Docs"/>
+	<!-- For help in understanding these custom sniff properties:
+		https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties -->
+	<config name="minimum_supported_wp_version" value="6.4"/>
+
+	<!-- Rules: WordPress VIP - see
+		https://github.com/Automattic/VIP-Coding-Standards -->
+	<rule ref="WordPress-VIP-Go">
+		<!-- These disallow anonymous functions as action callbacks -->
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
+
+		<!-- Allow short array syntax -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
+
+		<!-- Do not enforce 'class-' prefix -->
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+
+		<!-- Allow short ternaries -->
+		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+
+		<!-- Generates too many false positives -->
+		<exclude name="WordPress.WP.CapitalPDangit.Misspelled" />
+
+		<!-- We use trigger_error extensively -->
+		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
+
+		<!-- Standard WP_CLI_Command is fine for non-VIP-specific plugins -->
+		<exclude name="WordPressVIPMinimum.Classes.RestrictedExtendClasses.wp_cli" />
+
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<!-- Minimum prefix length is 4 characters - "ef_" is too short -->
+			<!-- This matches: edit_flow_function(), EditFlow, Edit_Flow_Class -->
+			<property name="prefixes" type="array">
+				<element value="edit_flow"/>
+				<element value="EditFlow"/>
+				<element value="EDIT_FLOW"/>
+			</property>
+		</properties>
+	</rule>
+	<!-- Legacy "EF_" prefix for classes is established and cannot be changed -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound">
+		<severity>0</severity>
+	</rule>
+	<!-- Legacy "ef_" prefix for hooks is established and cannot be changed -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound">
+		<severity>0</severity>
+	</rule>
+	<!-- Legacy "ef_" prefix for functions is established and cannot be changed -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound">
+		<severity>0</severity>
+	</rule>
+	<!-- Legacy "_ef_" prefix for internal variables is established and cannot be changed -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound">
+		<severity>0</severity>
+	</rule>
+	<!-- Legacy "EF_" prefix for constants is established and cannot be changed -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="edit-flow"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing">
+		<properties>
+			<property name="blank_line_check" value="true"/>
+		</properties>
+	</rule>
+
+	<!-- Test-specific exclusions -->
+	<!-- Tests use Automattic\EditFlow\Tests namespace, not plugin prefix -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use camelCase for PHPUnit compatibility and test fixtures -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Test class/method documentation is not required -->
+	<rule ref="Squiz.Commenting.ClassComment.Missing">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.VariableComment">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may need to override global variables for setup -->
+	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use runtime configuration functions -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_set">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't need security escaping -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may use underscore-prefixed properties/methods (PHPUnit convention) -->
+	<rule ref="PSR2.Classes.PropertyDeclaration.Underscore">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may have unused function parameters (required by PHPUnit signatures) -->
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use flush_rewrite_rules for setup -->
+	<rule ref="WordPressVIPMinimum.Functions.RestrictedFunctions.flush_rewrite_rules_flush_rewrite_rules">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may use wp_mail for testing email functionality -->
+	<rule ref="WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may use constant() dynamically -->
+	<rule ref="WordPressVIPMinimum.Constants.ConstantString.NotCheckingConstantName">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't require i18n text domain -->
+	<rule ref="WordPress.WP.I18n.MissingArgDomain">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Inline comment formatting is relaxed in tests -->
+	<rule ref="Squiz.Commenting.InlineComment.InvalidEndChar">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may need visibility on methods but not strict enforcement -->
+	<rule ref="Squiz.Scope.MethodScope.Missing">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use file_get_contents for fixtures -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can output directly -->
+	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests may use switch_to_blog for multisite testing -->
+	<rule ref="WordPressVIPMinimum.Functions.RestrictedFunctions.switch_to_blog_switch_to_blog">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't need nonce verification -->
+	<rule ref="WordPress.Security.NonceVerification">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't need input validation/sanitisation -->
+	<rule ref="WordPress.Security.ValidatedSanitizedInput">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use ini_set for configuration -->
+	<rule ref="WordPress.PHP.IniSet">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use direct database queries -->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use custom capabilities -->
+	<rule ref="WordPress.WP.Capabilities.Unknown">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use file_get_contents for remote data in testing -->
+	<rule ref="WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsRemoteFile">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't require param comments -->
+	<rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests don't require @throws tag -->
+	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Tests can use putenv for configuration -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Allow commented out code in tests (often used for reference/debugging) -->
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Test files use PascalCase naming (PHPUnit convention) -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+	<!-- Legacy main file uses underscore (WordPress.org plugin slug requirement) -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>edit_flow\.php</exclude-pattern>
+	</rule>
+	<!-- Third-party screen options library uses class + helper function pattern -->
+	<rule ref="Universal.Files.SeparateFunctionsFromOO.Mixed">
+		<exclude-pattern>common/php/screen-options\.php</exclude-pattern>
+	</rule>
+	<!-- Main plugin file uses class + global convenience function pattern -->
+	<rule ref="Universal.Files.SeparateFunctionsFromOO.Mixed">
+		<exclude-pattern>edit_flow\.php</exclude-pattern>
+	</rule>
+	<!-- Third-party screen options library uses non-standard class naming -->
+	<rule ref="PEAR.NamingConventions.ValidClassName">
+		<exclude-pattern>common/php/screen-options\.php</exclude-pattern>
+	</rule>
+	<!-- Legacy edit_flow class name (backwards compatibility requirement) -->
+	<rule ref="PEAR.NamingConventions.ValidClassName">
+		<exclude-pattern>edit_flow\.php</exclude-pattern>
+	</rule>
+	<!-- Editorial modules intentionally use date() with local timezone for scheduling/metadata display -->
+	<rule ref="WordPress.DateTime.RestrictedFunctions.date_date">
+		<exclude-pattern>modules/calendar/calendar\.php</exclude-pattern>
+		<exclude-pattern>modules/editorial-metadata/editorial-metadata\.php</exclude-pattern>
+		<exclude-pattern>modules/notifications/notifications\.php</exclude-pattern>
+		<exclude-pattern>modules/story-budget/story-budget\.php</exclude-pattern>
+	</rule>
+	<!-- Tests can use date() for test data setup -->
+	<rule ref="WordPress.DateTime.RestrictedFunctions.date_date">
+		<exclude-pattern>/tests/</exclude-pattern>
+	</rule>
+
+</ruleset>

@@ -1,42 +1,110 @@
 name: E2E and JS tests
 
-on: push
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - develop
+      - main
+
+# Disable all permissions by default; grant minimal permissions per job
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  build:
+    name: Build and Lint
     runs-on: ubuntu-latest
-    continue-on-error: false
-
-    strategy:
-      fail-fast: true
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up NodeJS 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: '20'
           cache: npm
 
-      - name: Build Edit Flow
-        run: |
-          npm ci
-          npm run build
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Install WordPress with wp-env
-        run: npm run wp-env start
+      - name: Build assets
+        run: npm run build
+
+      - name: Verify built assets exist
+        run: |
+          echo "Checking custom-status assets..."
+          test -f build/custom-status-block.js || (echo "Missing: build/custom-status-block.js" && exit 1)
+          test -f build/custom-status-block.css || (echo "Missing: build/custom-status-block.css" && exit 1)
+
+          echo "Checking calendar assets..."
+          test -f build/calendar-react.js || (echo "Missing: build/calendar-react.js" && exit 1)
+          test -f build/calendar-react.css || (echo "Missing: build/calendar-react.css" && exit 1)
+
+          echo "All expected assets present!"
+
+      - name: Report asset sizes
+        run: |
+          echo "### Asset Sizes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| custom-status-block.js | $(du -h build/custom-status-block.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| calendar-react.js | $(du -h build/calendar-react.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
 
       - name: Run Lint JS
         run: npm run lint-js
 
-      - name: Run Jest tests
-        run: npm run test-jest
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: build-artifacts
+          path: build/
+          retention-days: 1
 
-      - name: Run E2E tests
-        run: npm run test-e2e
+  test:
+    name: E2E and Jest tests
+    # Pin to ubuntu-22.04 for Playwright compatibility
+    # ubuntu-latest (24.04) has library version mismatches with Playwright's WebKit dependencies
+    runs-on: ubuntu-22.04
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up NodeJS 20
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: build-artifacts
+          path: build/
+
+      - name: Install Playwright browsers and system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Install WordPress with wp-env
+        run: npm run wp-env start
+
+      - name: Run tests
+        run: npm run test

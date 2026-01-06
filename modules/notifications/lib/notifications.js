@@ -6,30 +6,51 @@ jQuery( document ).ready( function ( $ ) {
 		post_id: $( '#post_ID' ).val(),
 	};
 
-	const toggle_warning_badges = function ( container, response ) {
-		// Remove any existing badges
-		if ( $( container ).siblings( 'span' ).length ) {
-			$( container ).siblings( 'span' ).remove();
+	const localization =
+		typeof ef_notifications_localization !== 'undefined' ? ef_notifications_localization : {};
+
+	/**
+	 * Disable the post author checkbox if auto-subscribe is enabled.
+	 * The checkbox is disabled because unchecking it would have no effect -
+	 * the post author will be re-subscribed automatically on save.
+	 */
+	const maybe_disable_post_author_checkbox = function () {
+		if ( ! localization.post_author_id || ! localization.post_author_auto_subscribe ) {
+			return;
 		}
 
-		// "No Access" If this user was flagged as not having access
-		const user_has_no_access = response.data.subscribers_with_no_access.includes(
-			parseInt( $( container ).val() )
-		);
+		const $checkbox = $( '#ef-selected-users-' + localization.post_author_id );
+		if ( $checkbox.length ) {
+			$checkbox.prop( 'disabled', true );
+			$checkbox.attr( 'title', localization.auto_subscribed );
+		}
+	};
+
+	// Initialize: disable post author checkbox if needed.
+	maybe_disable_post_author_checkbox();
+
+	const toggle_warning_badges = function ( container, response ) {
+		const userId = parseInt( $( container ).val(), 10 );
+		const $actionsDiv = $( container ).parent();
+
+		// Remove existing warning badges (but keep Post Author and Auto-subscribed badges).
+		$actionsDiv.find( '.post_following_list-no_access, .post_following_list-no_email' ).remove();
+
+		// "No Access" If this user was flagged as not having access.
+		const user_has_no_access = response.data.subscribers_with_no_access.includes( userId );
 		if ( user_has_no_access ) {
-			var span = $( '<span />' ).addClass( 'post_following_list-no_access' );
-			span.text( ef_notifications_localization.no_access );
-			$( container ).parent().prepend( span );
+			const span = $( '<span />' ).addClass( 'post_following_list-no_access' );
+			span.text( localization.no_access );
+			$actionsDiv.prepend( span );
 			warning_background = true;
 		}
-		// "No Email" If this user was flagged as not having an email
-		const user_has_no_email = response.data.subscribers_with_no_email.includes(
-			parseInt( $( container ).val() )
-		);
+
+		// "No Email" If this user was flagged as not having an email.
+		const user_has_no_email = response.data.subscribers_with_no_email.includes( userId );
 		if ( user_has_no_email ) {
-			var span = $( '<span />' ).addClass( 'post_following_list-no_email' );
-			span.text( ef_notifications_localization.no_email );
-			$( container ).parent().prepend( span );
+			const span = $( '<span />' ).addClass( 'post_following_list-no_email' );
+			span.text( localization.no_email );
+			$actionsDiv.prepend( span );
 			warning_background = true;
 		}
 	};
@@ -87,4 +108,18 @@ jQuery( document ).ready( function ( $ ) {
 			} );
 		}
 	);
+
+	// TODO: Should change this to _not_ use JQuery
+	const webhookUrl = $( 'input#webhook_url' ).closest( 'tr' );
+	const sendToWebhook = $( 'select#send_to_webhook' );
+	if ( sendToWebhook.val() === 'off' ) {
+		webhookUrl.hide();
+	}
+	sendToWebhook.on( 'change', function () {
+		if ( $( this ).val() === 'off' ) {
+			webhookUrl.hide();
+		} else {
+			webhookUrl.show();
+		}
+	} );
 } );

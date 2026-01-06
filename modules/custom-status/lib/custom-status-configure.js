@@ -29,10 +29,6 @@
 					return inlineEditCustomStatus.save( this );
 				}
 			} );
-
-			$( '#posts-filter input[type="submit"]' ).on( 'mousedown', function ( e ) {
-				t.revert();
-			} );
 		},
 
 		toggle( el ) {
@@ -155,7 +151,7 @@
 
 jQuery( document ).ready( function () {
 	jQuery( '.delete-status a' ).on( 'click', function () {
-		if ( ! confirm( ef_confirm_delete_status_string ) ) {
+		if ( ! confirm( __ef_localize_custom_status_configure.delete_status_string ) ) {
 			return false;
 		}
 	} );
