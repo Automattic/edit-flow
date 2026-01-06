@@ -2,6 +2,7 @@
 /.git/
 /.github/
 /.claude/
+/.wordpress-org/
 /.phpunit.cache/
 /artifacts/
 /bin/
