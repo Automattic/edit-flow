@@ -954,7 +954,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 					if ( '0000' == date( 'Hi', $pm_value ) ) {
 						$pm_value = $date;
 					} else {
-						// translators: 1: date, 2: time.
+						/* translators: 1: date, 2: time */
 						$pm_value = sprintf( __( '%1$s at %2$s', 'edit-flow' ), $date, $time );
 					}
 					$output = esc_html( $pm_value );
