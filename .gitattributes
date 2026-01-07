@@ -1,0 +1,44 @@
+# Directories
+/.claude/ export-ignore
+/.github/ export-ignore
+/.phpunit.cache/ export-ignore
+/.wordpress-org/ export-ignore
+/artifacts/ export-ignore
+/dist/ export-ignore
+/node_modules/ export-ignore
+/tests/ export-ignore
+/vendor/ export-ignore
+
+# Development configuration
+.distignore export-ignore
+.editorconfig export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+.nvmrc export-ignore
+.phpcs.xml.dist export-ignore
+.prettierignore export-ignore
+.prettierrc export-ignore
+.svnignore export-ignore
+.wp-env.json export-ignore
+.wp-env.override.json export-ignore
+
+# Build tooling
+babel.config.js export-ignore
+eslint.config.js export-ignore
+jest.config.js export-ignore
+playwright.config.js export-ignore
+webpack.config.js export-ignore
+
+# Package management
+composer.json export-ignore
+composer.lock export-ignore
+package.json export-ignore
+package-lock.json export-ignore
+
+# Documentation (not needed in plugin distribution)
+CHANGELOG.md export-ignore
+CONTRIBUTING.md export-ignore
+SECURITY.md export-ignore
+
+# Test configuration
+phpunit.xml.dist export-ignore

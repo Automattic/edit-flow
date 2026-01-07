@@ -4,7 +4,7 @@
  * Plugin URI: http://editflow.org/
  * Description: Remixing the WordPress admin for better editorial workflow options.
  * Author: Daniel Bachhuber, Scott Bressler, Mohammad Jangda, Automattic, and others
- * Version: 0.10.1
+ * Version: 0.10.2
  * Requires at least: 6.4
  * Requires PHP: 7.4
  * License: GPLv2 or later

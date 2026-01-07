@@ -6,7 +6,7 @@ Tags: workflow, editorial, editorial calendar, custom status, newsroom
 Requires at least: 6.4  
 Requires PHP: 7.4  
 Tested up to: 6.9  
-Stable tag: 0.10.1  
+Stable tag: 0.10.2  
 
 Redefining your editorial workflow.
 

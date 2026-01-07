@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Edit Flow 0.10.1\n"
+"Project-Id-Version: Edit Flow 0.10.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/edit-flow\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-07T14:44:56+00:00\n"
+"POT-Creation-Date: 2026-01-07T16:12:56+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: edit-flow\n"
@@ -347,8 +347,8 @@ msgstr ""
 #: modules/dashboard/dashboard.php:276
 #: modules/dashboard/dashboard.php:296
 #: modules/dashboard/dashboard.php:324
-#: modules/notifications/notifications.php:1467
-#: modules/notifications/notifications.php:1486
+#: modules/notifications/notifications.php:1472
+#: modules/notifications/notifications.php:1491
 msgid "Disabled"
 msgstr ""
 
@@ -357,8 +357,8 @@ msgstr ""
 #: modules/dashboard/dashboard.php:277
 #: modules/dashboard/dashboard.php:297
 #: modules/dashboard/dashboard.php:325
-#: modules/notifications/notifications.php:1468
-#: modules/notifications/notifications.php:1487
+#: modules/notifications/notifications.php:1473
+#: modules/notifications/notifications.php:1492
 msgid "Enabled"
 msgstr ""
 
@@ -931,7 +931,7 @@ msgid "No users or groups were notified."
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:241
-#: modules/notifications/notifications.php:883
+#: modules/notifications/notifications.php:888
 msgid "Notified"
 msgstr ""
 
@@ -1146,7 +1146,7 @@ msgstr ""
 
 #. translators: 1: date, 2: time
 #: modules/editorial-metadata/editorial-metadata.php:958
-#: modules/notifications/notifications.php:1577
+#: modules/notifications/notifications.php:1582
 #, php-format
 msgid "%1$s at %2$s"
 msgstr ""
@@ -1401,217 +1401,217 @@ msgstr ""
 msgid "Nonce check failed. Please ensure you can add users or user groups to a post."
 msgstr ""
 
-#: modules/notifications/notifications.php:700
+#: modules/notifications/notifications.php:705
 msgid "WordPress Scheduler"
-msgstr ""
-
-#. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:731
-#, php-format
-msgid "[%1$s] New %2$s Created: \"%3$s\""
-msgstr ""
-
-#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:733
-#, php-format
-msgid "A new %1$s (#%2$s \"%3$s\") was created by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:736
 #, php-format
-msgid "[%1$s] %2$s Trashed: \"%3$s\""
+msgid "[%1$s] New %2$s Created: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
 #: modules/notifications/notifications.php:738
 #, php-format
-msgid "%1$s #%2$s \"%3$s\" was moved to the trash by %4$s %5$s"
+msgid "A new %1$s (#%2$s \"%3$s\") was created by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:741
 #, php-format
-msgid "[%1$s] %2$s Restored (from Trash): \"%3$s\""
+msgid "[%1$s] %2$s Trashed: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
 #: modules/notifications/notifications.php:743
 #, php-format
-msgid "%1$s #%2$s \"%3$s\" was restored from trash by %4$s %5$s"
+msgid "%1$s #%2$s \"%3$s\" was moved to the trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:746
 #, php-format
-msgid "[%1$s] %2$s Scheduled: \"%3$s\""
+msgid "[%1$s] %2$s Restored (from Trash): \"%3$s\""
 msgstr ""
 
-#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email 6. scheduled date
+#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
 #: modules/notifications/notifications.php:748
 #, php-format
-msgid "%1$s #%2$s \"%3$s\" was scheduled by %4$s %5$s.  It will be published on %6$s"
+msgid "%1$s #%2$s \"%3$s\" was restored from trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:751
 #, php-format
-msgid "[%1$s] %2$s Published: \"%3$s\""
+msgid "[%1$s] %2$s Scheduled: \"%3$s\""
 msgstr ""
 
-#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
+#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email 6. scheduled date
 #: modules/notifications/notifications.php:753
 #, php-format
-msgid "%1$s #%2$s \"%3$s\" was published by %4$s %5$s"
+msgid "%1$s #%2$s \"%3$s\" was scheduled by %4$s %5$s.  It will be published on %6$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:756
 #, php-format
-msgid "[%1$s] %2$s Unpublished: \"%3$s\""
+msgid "[%1$s] %2$s Published: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
 #: modules/notifications/notifications.php:758
 #, php-format
-msgid "%1$s #%2$s \"%3$s\" was unpublished by %4$s %5$s"
+msgid "%1$s #%2$s \"%3$s\" was published by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
 #: modules/notifications/notifications.php:761
 #, php-format
-msgid "[%1$s] %2$s Status Changed for \"%3$s\""
+msgid "[%1$s] %2$s Unpublished: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
 #: modules/notifications/notifications.php:763
 #, php-format
+msgid "%1$s #%2$s \"%3$s\" was unpublished by %4$s %5$s"
+msgstr ""
+
+#. translators: 1: site name, 2: post type, 3. post title
+#: modules/notifications/notifications.php:766
+#, php-format
+msgid "[%1$s] %2$s Status Changed for \"%3$s\""
+msgstr ""
+
+#. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
+#: modules/notifications/notifications.php:768
+#, php-format
 msgid "Status was changed for %1$s #%2$s \"%3$s\" by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: date, 2: time, 3: timezone
-#: modules/notifications/notifications.php:767
+#: modules/notifications/notifications.php:772
 #, php-format
 msgid "This action was taken on %1$s at %2$s %3$s"
 msgstr ""
 
 #. translators: 1: old status, 2: new status
-#: modules/notifications/notifications.php:772
+#: modules/notifications/notifications.php:777
 #, php-format
 msgid "%1$s => %2$s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:778
+#: modules/notifications/notifications.php:783
 #, php-format
 msgid "== %s Details =="
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:780
+#: modules/notifications/notifications.php:785
 #, php-format
 msgid "Title: %s"
 msgstr ""
 
 #. translators: 1: author name, 2: author email
-#: modules/notifications/notifications.php:783
+#: modules/notifications/notifications.php:788
 #, php-format
 msgid "Author: %1$s (%2$s)"
 msgstr ""
 
-#: modules/notifications/notifications.php:805
-#: modules/notifications/notifications.php:901
+#: modules/notifications/notifications.php:810
+#: modules/notifications/notifications.php:906
 msgid "== Actions =="
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:807
-#: modules/notifications/notifications.php:905
+#: modules/notifications/notifications.php:812
+#: modules/notifications/notifications.php:910
 #, php-format
 msgid "Add editorial comment: %s"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:809
-#: modules/notifications/notifications.php:907
+#: modules/notifications/notifications.php:814
+#: modules/notifications/notifications.php:912
 #, php-format
 msgid "Edit: %s"
 msgstr ""
 
 #. translators: 1: view link
-#: modules/notifications/notifications.php:811
-#: modules/notifications/notifications.php:909
+#: modules/notifications/notifications.php:816
+#: modules/notifications/notifications.php:914
 #, php-format
 msgid "View: %s"
 msgstr ""
 
 #. translators: 1: user name, 2: post type, 3: post id, 4: edit link, 5: post title, 6: old status, 7: new status
-#: modules/notifications/notifications.php:819
+#: modules/notifications/notifications.php:824
 #, php-format
 msgid "*%1$s* changed the status of *%2$s #%3$s - <%4$s|%5$s>* from *%6$s* to *%7$s*"
 msgstr ""
 
 #. translators: 1: blog name, 2: post title
-#: modules/notifications/notifications.php:871
+#: modules/notifications/notifications.php:876
 #, php-format
 msgid "[%1$s] New Editorial Comment: \"%2$s\""
 msgstr ""
 
 #. translators: 1: post id, 2: post title, 3. post type
-#: modules/notifications/notifications.php:874
+#: modules/notifications/notifications.php:879
 #, php-format
 msgid "A new editorial comment was added to %3$s #%1$s \"%2$s\""
 msgstr ""
 
 #. translators: 1: comment author, 2: author email, 3: date, 4: time
-#: modules/notifications/notifications.php:876
+#: modules/notifications/notifications.php:881
 #, php-format
 msgid "%1$s (%2$s) said on %3$s at %4$s:"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:903
+#: modules/notifications/notifications.php:908
 #, php-format
 msgid "Reply: %s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:912
+#: modules/notifications/notifications.php:917
 #, php-format
 msgid "You can see all editorial comments on this %s here: "
 msgstr ""
 
 #. translators: 1: comment author, 2: post type, 3: post id, 4: edit link, 5: post title, 6: comment content
-#: modules/notifications/notifications.php:921
+#: modules/notifications/notifications.php:926
 #, php-format
 msgid "*%1$s* left a comment on *%2$s #%3$s - <%4$s|%5$s>*"
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:939
+#: modules/notifications/notifications.php:944
 #, php-format
 msgid "You are receiving this email because you are subscribed to \"%s\"."
 msgstr ""
 
 #. translators: 1: date
-#: modules/notifications/notifications.php:943
+#: modules/notifications/notifications.php:948
 #, php-format
 msgid "This email was sent %s."
 msgstr ""
 
-#: modules/notifications/notifications.php:1444
+#: modules/notifications/notifications.php:1449
 msgid "Post types for notifications:"
 msgstr ""
 
-#: modules/notifications/notifications.php:1445
+#: modules/notifications/notifications.php:1450
 msgid "Always notify blog admin"
 msgstr ""
 
-#: modules/notifications/notifications.php:1446
+#: modules/notifications/notifications.php:1451
 msgid "Send to Webhook"
 msgstr ""
 
-#: modules/notifications/notifications.php:1447
+#: modules/notifications/notifications.php:1452
 msgid "Webhook URL"
 msgstr ""
 
