@@ -122,6 +122,67 @@ class NotificationsClassicEditorTest extends TestCase {
 	}
 
 	/**
+	 * Test that saving a post via wp_update_post does not fail due to revision nonce mismatch.
+	 *
+	 * When WordPress saves a post, it creates a revision which triggers transition_post_status
+	 * with a different post ID (the revision ID). The nonce was created for the original post,
+	 * so if save_post_subscriptions doesn't skip revisions, the nonce check will fail.
+	 *
+	 * @ticket https://wordpress.org/support/topic/upgrading-to-0-10-0-breaks-funtionality-for-editor-role/
+	 */
+	public function test_save_post_with_revision_does_not_fail_nonce_check() {
+		// Create a post.
+		$post_id = self::factory()->post->create(
+			array(
+				'post_author' => self::$editor_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Simulate Classic Editor POST request with a valid nonce for the original post.
+		$_POST['_wpnonce']          = wp_create_nonce( 'update-post_' . $post_id );
+		$_POST['ef-save_followers'] = '1';
+		$_POST['ef-selected-users'] = array( self::$editor_user_id );
+
+		// Track if wp_die was called.
+		$wp_die_called = false;
+
+		add_filter(
+			'wp_die_handler',
+			function () use ( &$wp_die_called ) {
+				return function ( $message ) use ( &$wp_die_called ) {
+					$wp_die_called = true;
+					throw new \Exception( 'wp_die called: ' . $message );
+				};
+			}
+		);
+
+		// Update the post which triggers the full save lifecycle including revision creation.
+		// This will fire transition_post_status for both the post AND the revision.
+		// The revision has a different ID, so without the revision skip fix, nonce check fails.
+		$exception_thrown = false;
+		try {
+			wp_update_post(
+				array(
+					'ID'           => $post_id,
+					'post_content' => 'Updated content to trigger revision',
+				)
+			);
+		} catch ( \Exception $e ) {
+			$exception_thrown = true;
+		}
+
+		$this->assertFalse(
+			$wp_die_called,
+			'wp_update_post should not trigger wp_die - save_post_subscriptions must skip revisions to avoid nonce mismatch'
+		);
+		$this->assertFalse(
+			$exception_thrown,
+			'wp_update_post threw an exception due to wp_die being called during revision save'
+		);
+	}
+
+	/**
 	 * Test that the nonce verification uses the correct action string.
 	 *
 	 * WordPress Classic Editor uses 'update-post_{$post_id}' for the edit form nonce.
