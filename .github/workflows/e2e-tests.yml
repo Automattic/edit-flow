@@ -1,4 +1,4 @@
-name: E2E and JS tests
+name: E2E Tests
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
       - 'webpack.config.js'
       - '.wp-env.json'
       - 'tests/e2e/**'
-      - '.github/workflows/e2e-and-js-tests.yml'
+      - '.github/workflows/e2e-tests.yml'
   pull_request:
     branches: [develop, main]
     paths:
@@ -29,7 +29,7 @@ on:
       - 'webpack.config.js'
       - '.wp-env.json'
       - 'tests/e2e/**'
-      - '.github/workflows/e2e-and-js-tests.yml'
+      - '.github/workflows/e2e-tests.yml'
   workflow_dispatch:
 
 # Disable all permissions by default; grant minimal permissions per job
@@ -41,7 +41,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build and Lint
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,9 +85,6 @@ jobs:
           echo "| custom-status-block.js | $(du -h build/custom-status-block.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
           echo "| calendar-react.js | $(du -h build/calendar-react.js | cut -f1) |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Run Lint JS
-        run: npm run lint-js
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -96,7 +93,7 @@ jobs:
           retention-days: 1
 
   test:
-    name: E2E and Jest tests
+    name: E2E Tests
     # Pin to ubuntu-22.04 for Playwright compatibility
     # ubuntu-latest (24.04) has library version mismatches with Playwright's WebKit dependencies
     runs-on: ubuntu-22.04
@@ -131,5 +128,5 @@ jobs:
       - name: Install WordPress with wp-env
         run: npm run wp-env start
 
-      - name: Run tests
-        run: npm run test
+      - name: Run E2E tests
+        run: npm run test-e2e
