@@ -584,7 +584,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			global $edit_flow;
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
-			if ( ! empty( $_POST['_wpnonce'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'editpost' ) ) {
+			if ( ! empty( $_POST['_wpnonce'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post->ID ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
 			}
 
