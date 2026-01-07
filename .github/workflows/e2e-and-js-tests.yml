@@ -1,11 +1,36 @@
 name: E2E and JS tests
 
 on:
-  pull_request:
   push:
-    branches-ignore:
-      - develop
-      - main
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
+      - '**.scss'
+      - '**.css'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'webpack.config.js'
+      - '.wp-env.json'
+      - 'tests/e2e/**'
+      - '.github/workflows/e2e-and-js-tests.yml'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
+      - '**.scss'
+      - '**.css'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'webpack.config.js'
+      - '.wp-env.json'
+      - 'tests/e2e/**'
+      - '.github/workflows/e2e-and-js-tests.yml'
+  workflow_dispatch:
 
 # Disable all permissions by default; grant minimal permissions per job
 permissions: {}

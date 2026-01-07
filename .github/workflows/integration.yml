@@ -1,11 +1,24 @@
 name: Integration Tests
 
 on:
-  pull_request:
   push:
-    branches-ignore:
-      - develop
-      - main
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml.dist'
+      - '.wp-env.json'
+      - '.github/workflows/integration.yml'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml.dist'
+      - '.wp-env.json'
+      - '.github/workflows/integration.yml'
+  workflow_dispatch:
 
 # Disable all permissions by default; grant minimal permissions per job
 permissions: {}
