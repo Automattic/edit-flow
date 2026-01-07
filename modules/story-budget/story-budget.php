@@ -732,9 +732,8 @@ class EF_Story_Budget extends EF_Module {
 				}
 				return $output;
 			case 'post_modified':
-				// translators: %s is a human-readable time difference.
-				// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested, WordPress.WP.I18n.MissingTranslatorsComment -- Used for relative time display; translator comment is above.
-				return sprintf( esc_html__( '%s ago', 'edit-flow' ), human_time_diff( get_the_time( 'U', $post->ID ), current_time( 'timestamp' ) ) );
+				// translators: %s: human-readable time difference.
+				return sprintf( esc_html__( '%s ago', 'edit-flow' ), human_time_diff( get_the_time( 'U', $post->ID ), current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Used for relative time display.
 			default:
 				break;
 		}
@@ -787,10 +786,10 @@ class EF_Story_Budget extends EF_Module {
 
 		// Display a View or a Preview link depending on whether the post has been published or not.
 		if ( in_array( $post->post_status, array( 'publish' ) ) ) {
-			// translators: %s is the post title.
+			/* translators: %s: post title */
 			$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
 		} elseif ( $can_edit_post ) {
-			// translators: %s is the post title.
+			/* translators: %s: post title */
 			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
 		}
 

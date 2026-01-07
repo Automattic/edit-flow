@@ -75,7 +75,11 @@ const CalendarDateChangeButtons = ( { numberOfWeeks, beginningOfWeek, pageUrl, f
 				<Button
 					{ ...BUTTON_TYPE_PROPS }
 					className="ef-calendar-date-change-button"
-					title={ sprintf( __( 'Backwards %d weeks', 'edit-flow' ), numberOfWeeks ) }
+					title={ sprintf(
+						/* translators: %d: number of weeks */
+						__( 'Backwards %d weeks', 'edit-flow' ),
+						numberOfWeeks
+					) }
 					href={ moveBackByWeeks( numberOfWeeks, beginningOfWeek, pageUrl, filterValues ) }
 				>
 					{ __( '«', 'edit-flow' ) }
@@ -111,7 +115,11 @@ const CalendarDateChangeButtons = ( { numberOfWeeks, beginningOfWeek, pageUrl, f
 				<Button
 					{ ...BUTTON_TYPE_PROPS }
 					className="ef-calendar-date-change-button"
-					title={ sprintf( __( 'Forward %d weeks', 'edit-flow' ), numberOfWeeks ) }
+					title={ sprintf(
+						/* translators: %d: number of weeks */
+						__( 'Forward %d weeks', 'edit-flow' ),
+						numberOfWeeks
+					) }
 					href={ moveFowardByWeeks( numberOfWeeks, beginningOfWeek, pageUrl, filterValues ) }
 				>
 					{ __( '»', 'edit-flow' ) }

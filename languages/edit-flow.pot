@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Edit Flow 0.10.0\n"
+"Project-Id-Version: Edit Flow 0.10.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/edit-flow\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-04T15:47:38+00:00\n"
+"POT-Creation-Date: 2026-01-07T14:44:56+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: edit-flow\n"
@@ -175,7 +175,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: modules/calendar/calendar.php:827
-#: modules/story-budget/story-budget.php:829
+#: modules/story-budget/story-budget.php:828
 msgid "Undo"
 msgstr ""
 
@@ -188,10 +188,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: modules/calendar/calendar.php:952
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:96
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:99
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:100
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:103
 #: modules/calendar/lib/dist/calendar.react.build.js:851
 #: modules/calendar/lib/dist/calendar.react.build.js:854
 msgid "Today"
@@ -242,7 +241,7 @@ msgstr ""
 #: modules/custom-status/custom-status.php:354
 #: modules/custom-status/custom-status.php:2196
 #: modules/editorial-metadata/editorial-metadata.php:1954
-#: modules/story-budget/story-budget.php:782
+#: modules/story-budget/story-budget.php:781
 #: modules/user-groups/user-groups.php:1318
 msgid "Edit"
 msgstr ""
@@ -253,39 +252,35 @@ msgstr ""
 
 #: modules/calendar/calendar.php:1122
 #: modules/custom-status/views/configure.php:52
-#: modules/story-budget/story-budget.php:785
+#: modules/story-budget/story-budget.php:784
 msgid "Trash"
 msgstr ""
 
 #. translators: %s: post title
-#. translators: %s is the post title.
 #: modules/calendar/calendar.php:1126
 #: modules/custom-status/custom-status.php:2013
-#: modules/story-budget/story-budget.php:794
+#: modules/story-budget/story-budget.php:793
 #, php-format
 msgid "Preview &#8220;%s&#8221;"
 msgstr ""
 
 #. translators: %s: post title
-#. translators: %s is the post title.
 #: modules/calendar/calendar.php:1126
 #: modules/custom-status/custom-status.php:2013
-#: modules/story-budget/story-budget.php:794
+#: modules/story-budget/story-budget.php:793
 msgid "Preview"
 msgstr ""
 
 #. translators: %s: post title
-#. translators: %s is the post title.
 #: modules/calendar/calendar.php:1129
-#: modules/story-budget/story-budget.php:791
+#: modules/story-budget/story-budget.php:790
 #, php-format
 msgid "View &#8220;%s&#8221;"
 msgstr ""
 
 #. translators: %s: post title
-#. translators: %s is the post title.
 #: modules/calendar/calendar.php:1129
-#: modules/story-budget/story-budget.php:791
+#: modules/story-budget/story-budget.php:790
 msgid "View"
 msgstr ""
 
@@ -303,16 +298,14 @@ msgstr ""
 
 #: modules/calendar/calendar.php:1221
 #: modules/story-budget/story-budget.php:243
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:79
 #: modules/calendar/lib/dist/calendar.react.build.js:6279
 msgid "Author"
 msgstr ""
 
 #: modules/calendar/calendar.php:1229
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:109
 #: modules/calendar/lib/dist/calendar.react.build.js:6309
 msgid "Post Type"
@@ -354,8 +347,8 @@ msgstr ""
 #: modules/dashboard/dashboard.php:276
 #: modules/dashboard/dashboard.php:296
 #: modules/dashboard/dashboard.php:324
-#: modules/notifications/notifications.php:1456
-#: modules/notifications/notifications.php:1475
+#: modules/notifications/notifications.php:1467
+#: modules/notifications/notifications.php:1486
 msgid "Disabled"
 msgstr ""
 
@@ -364,8 +357,8 @@ msgstr ""
 #: modules/dashboard/dashboard.php:277
 #: modules/dashboard/dashboard.php:297
 #: modules/dashboard/dashboard.php:325
-#: modules/notifications/notifications.php:1457
-#: modules/notifications/notifications.php:1476
+#: modules/notifications/notifications.php:1468
+#: modules/notifications/notifications.php:1487
 msgid "Enabled"
 msgstr ""
 
@@ -849,7 +842,7 @@ msgid "Edit Custom Statuses"
 msgstr ""
 
 #: modules/dashboard/dashboard.php:244
-#: modules/story-budget/story-budget.php:782
+#: modules/story-budget/story-budget.php:781
 msgid "Edit this post"
 msgstr ""
 
@@ -938,7 +931,7 @@ msgid "No users or groups were notified."
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:241
-#: modules/notifications/notifications.php:872
+#: modules/notifications/notifications.php:883
 msgid "Notified"
 msgstr ""
 
@@ -1151,10 +1144,9 @@ msgstr ""
 msgid "This editorial metadata type is not yet supported."
 msgstr ""
 
-#. translators: 1: date, 2: time.
 #. translators: 1: date, 2: time
 #: modules/editorial-metadata/editorial-metadata.php:958
-#: modules/notifications/notifications.php:1566
+#: modules/notifications/notifications.php:1577
 #, php-format
 msgid "%1$s at %2$s"
 msgstr ""
@@ -1409,217 +1401,217 @@ msgstr ""
 msgid "Nonce check failed. Please ensure you can add users or user groups to a post."
 msgstr ""
 
-#: modules/notifications/notifications.php:689
+#: modules/notifications/notifications.php:700
 msgid "WordPress Scheduler"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:720
+#: modules/notifications/notifications.php:731
 #, php-format
 msgid "[%1$s] New %2$s Created: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:722
+#: modules/notifications/notifications.php:733
 #, php-format
 msgid "A new %1$s (#%2$s \"%3$s\") was created by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:725
+#: modules/notifications/notifications.php:736
 #, php-format
 msgid "[%1$s] %2$s Trashed: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:727
+#: modules/notifications/notifications.php:738
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was moved to the trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:730
+#: modules/notifications/notifications.php:741
 #, php-format
 msgid "[%1$s] %2$s Restored (from Trash): \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:732
+#: modules/notifications/notifications.php:743
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was restored from trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:735
+#: modules/notifications/notifications.php:746
 #, php-format
 msgid "[%1$s] %2$s Scheduled: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email 6. scheduled date
-#: modules/notifications/notifications.php:737
+#: modules/notifications/notifications.php:748
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was scheduled by %4$s %5$s.  It will be published on %6$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:740
+#: modules/notifications/notifications.php:751
 #, php-format
 msgid "[%1$s] %2$s Published: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:742
+#: modules/notifications/notifications.php:753
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was published by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:745
+#: modules/notifications/notifications.php:756
 #, php-format
 msgid "[%1$s] %2$s Unpublished: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:747
+#: modules/notifications/notifications.php:758
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was unpublished by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:750
+#: modules/notifications/notifications.php:761
 #, php-format
 msgid "[%1$s] %2$s Status Changed for \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:752
+#: modules/notifications/notifications.php:763
 #, php-format
 msgid "Status was changed for %1$s #%2$s \"%3$s\" by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: date, 2: time, 3: timezone
-#: modules/notifications/notifications.php:756
+#: modules/notifications/notifications.php:767
 #, php-format
 msgid "This action was taken on %1$s at %2$s %3$s"
 msgstr ""
 
 #. translators: 1: old status, 2: new status
-#: modules/notifications/notifications.php:761
+#: modules/notifications/notifications.php:772
 #, php-format
 msgid "%1$s => %2$s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:767
+#: modules/notifications/notifications.php:778
 #, php-format
 msgid "== %s Details =="
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:769
+#: modules/notifications/notifications.php:780
 #, php-format
 msgid "Title: %s"
 msgstr ""
 
 #. translators: 1: author name, 2: author email
-#: modules/notifications/notifications.php:772
+#: modules/notifications/notifications.php:783
 #, php-format
 msgid "Author: %1$s (%2$s)"
 msgstr ""
 
-#: modules/notifications/notifications.php:794
-#: modules/notifications/notifications.php:890
+#: modules/notifications/notifications.php:805
+#: modules/notifications/notifications.php:901
 msgid "== Actions =="
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:796
-#: modules/notifications/notifications.php:894
+#: modules/notifications/notifications.php:807
+#: modules/notifications/notifications.php:905
 #, php-format
 msgid "Add editorial comment: %s"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:798
-#: modules/notifications/notifications.php:896
+#: modules/notifications/notifications.php:809
+#: modules/notifications/notifications.php:907
 #, php-format
 msgid "Edit: %s"
 msgstr ""
 
 #. translators: 1: view link
-#: modules/notifications/notifications.php:800
-#: modules/notifications/notifications.php:898
+#: modules/notifications/notifications.php:811
+#: modules/notifications/notifications.php:909
 #, php-format
 msgid "View: %s"
 msgstr ""
 
 #. translators: 1: user name, 2: post type, 3: post id, 4: edit link, 5: post title, 6: old status, 7: new status
-#: modules/notifications/notifications.php:808
+#: modules/notifications/notifications.php:819
 #, php-format
 msgid "*%1$s* changed the status of *%2$s #%3$s - <%4$s|%5$s>* from *%6$s* to *%7$s*"
 msgstr ""
 
 #. translators: 1: blog name, 2: post title
-#: modules/notifications/notifications.php:860
+#: modules/notifications/notifications.php:871
 #, php-format
 msgid "[%1$s] New Editorial Comment: \"%2$s\""
 msgstr ""
 
 #. translators: 1: post id, 2: post title, 3. post type
-#: modules/notifications/notifications.php:863
+#: modules/notifications/notifications.php:874
 #, php-format
 msgid "A new editorial comment was added to %3$s #%1$s \"%2$s\""
 msgstr ""
 
 #. translators: 1: comment author, 2: author email, 3: date, 4: time
-#: modules/notifications/notifications.php:865
+#: modules/notifications/notifications.php:876
 #, php-format
 msgid "%1$s (%2$s) said on %3$s at %4$s:"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:892
+#: modules/notifications/notifications.php:903
 #, php-format
 msgid "Reply: %s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:901
+#: modules/notifications/notifications.php:912
 #, php-format
 msgid "You can see all editorial comments on this %s here: "
 msgstr ""
 
 #. translators: 1: comment author, 2: post type, 3: post id, 4: edit link, 5: post title, 6: comment content
-#: modules/notifications/notifications.php:910
+#: modules/notifications/notifications.php:921
 #, php-format
 msgid "*%1$s* left a comment on *%2$s #%3$s - <%4$s|%5$s>*"
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:928
+#: modules/notifications/notifications.php:939
 #, php-format
 msgid "You are receiving this email because you are subscribed to \"%s\"."
 msgstr ""
 
 #. translators: 1: date
-#: modules/notifications/notifications.php:932
+#: modules/notifications/notifications.php:943
 #, php-format
 msgid "This email was sent %s."
 msgstr ""
 
-#: modules/notifications/notifications.php:1433
+#: modules/notifications/notifications.php:1444
 msgid "Post types for notifications:"
 msgstr ""
 
-#: modules/notifications/notifications.php:1434
+#: modules/notifications/notifications.php:1445
 msgid "Always notify blog admin"
 msgstr ""
 
-#: modules/notifications/notifications.php:1435
+#: modules/notifications/notifications.php:1446
 msgid "Send to Webhook"
 msgstr ""
 
-#: modules/notifications/notifications.php:1436
+#: modules/notifications/notifications.php:1447
 msgid "Webhook URL"
 msgstr ""
 
@@ -1702,8 +1694,7 @@ msgid "Title"
 msgstr ""
 
 #: modules/story-budget/story-budget.php:242
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:70
 #: modules/calendar/lib/dist/calendar.react.build.js:6270
 msgid "Status"
@@ -1763,21 +1754,22 @@ msgstr ""
 msgid "There are no posts for this term in the range or filter specified."
 msgstr ""
 
-#: modules/story-budget/story-budget.php:737
+#. translators: %s: human-readable time difference.
+#: modules/story-budget/story-budget.php:736
 #, php-format
 msgid "%s ago"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:767
+#: modules/story-budget/story-budget.php:766
 msgid "There is no excerpt because this is a protected post."
 msgstr ""
 
-#: modules/story-budget/story-budget.php:785
+#: modules/story-budget/story-budget.php:784
 msgid "Move this item to the Trash"
 msgstr ""
 
 #. translators: %d is the number of posts trashed.
-#: modules/story-budget/story-budget.php:827
+#: modules/story-budget/story-budget.php:826
 #, php-format
 msgid "%d item moved to the trash."
 msgid_plural "%d items moved to the trash."
@@ -1785,54 +1777,53 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d is the number of posts restored from the trash.
-#: modules/story-budget/story-budget.php:835
+#: modules/story-budget/story-budget.php:834
 #, php-format
 msgid "%d item restored from the Trash."
 msgid_plural "%d items restored from the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/story-budget/story-budget.php:864
+#: modules/story-budget/story-budget.php:863
 msgid "Filter"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:866
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: modules/story-budget/story-budget.php:865
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar-filters/index.js:167
 #: modules/calendar/lib/dist/calendar.react.build.js:6026
 msgid "Reset"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:983
+#: modules/story-budget/story-budget.php:982
 msgid "Filter by status"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:985
+#: modules/story-budget/story-budget.php:984
 msgid "View all statuses"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:990
+#: modules/story-budget/story-budget.php:989
 msgid "Unpublished"
 msgstr ""
 
 #. translators: %s is the taxonomy name (e.g., "category", "tag").
-#: modules/story-budget/story-budget.php:1001
+#: modules/story-budget/story-budget.php:1000
 #, php-format
 msgid "Filter by %s"
 msgstr ""
 
 #. translators: %s is the taxonomy name (e.g., "categories", "tags").
-#: modules/story-budget/story-budget.php:1004
+#: modules/story-budget/story-budget.php:1003
 #, php-format
 msgid "View all %s"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:1018
+#: modules/story-budget/story-budget.php:1017
 msgid "Filter by author"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:1020
+#: modules/story-budget/story-budget.php:1019
 msgid "View all users"
 msgstr ""
 
@@ -1999,150 +1990,131 @@ msgid "Users in Group"
 msgstr ""
 
 #. translators: accessibility text
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:78
+#. translators: %d: number of weeks
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:80
 #: modules/calendar/lib/dist/calendar.react.build.js:833
 #, js-format
 msgid "Backwards %d weeks"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:81
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:85
 #: modules/calendar/lib/dist/calendar.react.build.js:836
 msgid "«"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:88
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:92
 #: modules/calendar/lib/dist/calendar.react.build.js:843
 msgid "Backwards 1 week"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:91
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:95
 #: modules/calendar/lib/dist/calendar.react.build.js:846
 msgid "‹"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:104
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:108
 #: modules/calendar/lib/dist/calendar.react.build.js:859
 msgid "Forward 1 week"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:107
+#: build/calendar-react.js:3
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:111
 #: modules/calendar/lib/dist/calendar.react.build.js:862
 msgid "›"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:114
+#. translators: %d: number of weeks
+#: build/calendar-react.js:4
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:120
 #: modules/calendar/lib/dist/calendar.react.build.js:869
 #, js-format
 msgid "Forward %d weeks"
 msgstr ""
 
-#: build/calendar-react.js:2
-#: modules/calendar/lib/dist/calendar.react.build.js:2
-#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:117
+#: build/calendar-react.js:4
+#: modules/calendar/lib/react/calendar-date-change-buttons/index.js:125
 #: modules/calendar/lib/dist/calendar.react.build.js:872
 msgid "»"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar-filters/index.js:150
 #: modules/calendar/lib/dist/calendar.react.build.js:6009
 msgid "Apply"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:71
 #: modules/calendar/lib/dist/calendar.react.build.js:6271
 msgid "All statuses"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:80
 #: modules/calendar/lib/dist/calendar.react.build.js:6280
 msgid "Open user menu"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:81
 #: modules/calendar/lib/dist/calendar.react.build.js:6281
 msgid "Close user menu"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:82
 #: modules/calendar/lib/dist/calendar.react.build.js:6282
 msgid "Clear user selection"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:83
 #: modules/calendar/lib/dist/calendar.react.build.js:6283
 msgid "Select a user"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:91
 #: modules/calendar/lib/dist/calendar.react.build.js:6291
 msgid "Category"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:92
 #: modules/calendar/lib/dist/calendar.react.build.js:6292
 msgid "Open category menu"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:93
 #: modules/calendar/lib/dist/calendar.react.build.js:6293
 msgid "Close category menu"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:94
 #: modules/calendar/lib/dist/calendar.react.build.js:6294
 msgid "Clear category selection"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:95
 #: modules/calendar/lib/dist/calendar.react.build.js:6295
 msgid "Select a category"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:110
 #: modules/calendar/lib/dist/calendar.react.build.js:6310
 msgid "All types"
 msgstr ""
 
-#: build/calendar-react.js:9
-#: modules/calendar/lib/dist/calendar.react.build.js:2
+#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:120
 #: modules/calendar/lib/dist/calendar.react.build.js:6320
 msgid "Number of weeks"
