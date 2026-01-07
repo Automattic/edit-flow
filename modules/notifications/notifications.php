@@ -594,13 +594,18 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		public function save_post_subscriptions( $new_status, $old_status, $post ) {
 			global $edit_flow;
 
+			// Skip revisions and autosaves - they have different post IDs which would fail nonce verification.
+			if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
+				return;
+			}
+
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
 			if ( ! empty( $_POST['_wpnonce'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post->ID ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
 			}
 
 			// Only if has edit_post_subscriptions cap.
-			if ( ( ! wp_is_post_revision( $post ) && ! wp_is_post_autosave( $post ) ) && isset( $_POST['ef-save_followers'] ) && current_user_can( $this->edit_post_subscriptions_cap ) ) {
+			if ( isset( $_POST['ef-save_followers'] ) && current_user_can( $this->edit_post_subscriptions_cap ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
 				$users = isset( $_POST['ef-selected-users'] ) ? $_POST['ef-selected-users'] : [];
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.

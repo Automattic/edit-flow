@@ -5,9 +5,7 @@
 /.wordpress-org/
 /.phpunit.cache/
 /artifacts/
-/bin/
 /dist/
-/documentation/
 /node_modules/
 /tests/
 /vendor/
@@ -41,7 +39,6 @@ package-lock.json
 # Documentation (not needed in plugin distribution)
 CHANGELOG.md
 CONTRIBUTING.md
-PUBLISHING.md
 SECURITY.md
 
 # Test configuration
