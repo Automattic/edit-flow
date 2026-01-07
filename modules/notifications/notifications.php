@@ -532,6 +532,17 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			$groups_enabled = $this->module_enabled( 'user_groups' ) && in_array( get_post_type( $post_id ), $this->get_post_types_for_module( $edit_flow->user_groups->module ) );
 			if ( 'following_usergroups[]' === $_POST['ef_notifications_name'] && $groups_enabled ) {
 				$this->save_post_following_usergroups( $post, $user_group_ids );
+
+				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+					// User groups don't have individual warning badges like users do,
+					// but we still need to return a success response.
+					wp_send_json_success(
+						[
+							'subscribers_with_no_access' => [],
+							'subscribers_with_no_email'  => [],
+						]
+					);
+				}
 			}
 
 			wp_die();

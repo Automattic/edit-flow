@@ -1,0 +1,273 @@
+<?php
+/**
+ * Notifications AJAX integration tests.
+ *
+ * Tests for the AJAX save functionality in the notifications module.
+ *
+ * @package Automattic\EditFlow\Tests\Integration
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\EditFlow\Tests\Integration;
+
+use WPAjaxDieContinueException;
+use WPAjaxDieStopException;
+
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
+class NotificationsAjaxTest extends AjaxTestCase {
+
+	protected static $admin_user_id;
+	protected static $editor_user_id;
+
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$admin_user_id  = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$editor_user_id = $factory->user->create( array( 'role' => 'editor' ) );
+	}
+
+	public static function wpTearDownAfterClass() {
+		self::delete_user( self::$admin_user_id );
+		self::delete_user( self::$editor_user_id );
+	}
+
+	protected function setUp(): void {
+		parent::setUp();
+
+		require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
+
+		// Ensure notifications module is initialized with capabilities.
+		global $edit_flow;
+		$edit_flow->notifications->install();
+	}
+
+	/**
+	 * Test: AJAX save notifications for users returns success JSON.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_users_returns_json_success(): void {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		// Create a post.
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Set up the AJAX request for saving users.
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'ef-selected-users[]';
+		$_POST['user_group_ids']        = array( self::$admin_user_id, self::$editor_user_id );
+
+		try {
+			$this->_handleAjax( 'save_notifications' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify we got a response.
+		$this->assertNotEmpty( $this->_last_response, 'AJAX should return a response for user subscriptions' );
+
+		// Verify it's valid JSON.
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertTrue( $response['success'], 'Response should indicate success' );
+		$this->assertArrayHasKey( 'subscribers_with_no_access', $response['data'] );
+		$this->assertArrayHasKey( 'subscribers_with_no_email', $response['data'] );
+	}
+
+	/**
+	 * Test: AJAX save notifications for user groups returns success JSON.
+	 *
+	 * This was a bug where user groups AJAX save would return an empty response,
+	 * causing the UI to not update properly.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_usergroups_returns_json_success(): void {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		// Create a post.
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Create a user group.
+		$usergroup = $edit_flow->user_groups->add_usergroup(
+			array(
+				'name'        => 'Test Notification Group',
+				'description' => 'A group for testing notifications',
+			)
+		);
+
+		$this->assertNotInstanceOf( 'WP_Error', $usergroup, 'User group should be created successfully' );
+
+		// Set up the AJAX request for saving user groups.
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'following_usergroups[]';
+		$_POST['user_group_ids']        = array( $usergroup->term_id );
+
+		try {
+			$this->_handleAjax( 'save_notifications' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify we got a response (this was the bug - user groups returned empty).
+		$this->assertNotEmpty( $this->_last_response, 'AJAX should return a response for user group subscriptions' );
+
+		// Verify it's valid JSON.
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertTrue( $response['success'], 'Response should indicate success' );
+		$this->assertArrayHasKey( 'subscribers_with_no_access', $response['data'] );
+		$this->assertArrayHasKey( 'subscribers_with_no_email', $response['data'] );
+
+		// Verify the user group was saved.
+		$following_groups = $edit_flow->notifications->get_following_usergroups( $post_id, 'ids' );
+		$this->assertContains( $usergroup->term_id, $following_groups, 'User group should be saved as following' );
+
+		// Clean up.
+		$edit_flow->user_groups->delete_usergroup( $usergroup->term_id );
+	}
+
+	/**
+	 * Test: AJAX save notifications fails with invalid nonce.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_fails_with_invalid_nonce(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create();
+
+		$_POST['_nonce']                = 'invalid_nonce';
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'ef-selected-users[]';
+		$_POST['user_group_ids']        = array( self::$admin_user_id );
+
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'save_notifications' );
+	}
+
+	/**
+	 * Test: AJAX save notifications fails without edit_post_subscriptions capability.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_fails_without_capability(): void {
+		// Create a subscriber user (no edit_post_subscriptions cap).
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		$post_id = $this->factory->post->create();
+
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'ef-selected-users[]';
+		$_POST['user_group_ids']        = array( self::$admin_user_id );
+
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'save_notifications' );
+	}
+
+	/**
+	 * Test: AJAX save correctly persists user subscriptions.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_persists_user_subscriptions(): void {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Initially, no followers.
+		$initial_followers = $edit_flow->notifications->get_following_users( $post_id, 'id' );
+		$this->assertEmpty( $initial_followers );
+
+		// Save users via AJAX.
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'ef-selected-users[]';
+		$_POST['user_group_ids']        = array( self::$admin_user_id, self::$editor_user_id );
+
+		try {
+			$this->_handleAjax( 'save_notifications' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify the subscriptions were saved.
+		$followers = $edit_flow->notifications->get_following_users( $post_id, 'id' );
+		$this->assertContains( self::$admin_user_id, $followers );
+		$this->assertContains( self::$editor_user_id, $followers );
+	}
+
+	/**
+	 * Test: AJAX save correctly persists user group subscriptions.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_persists_usergroup_subscriptions(): void {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Create user groups.
+		$group1 = $edit_flow->user_groups->add_usergroup( array( 'name' => 'Test Group 1' ) );
+		$group2 = $edit_flow->user_groups->add_usergroup( array( 'name' => 'Test Group 2' ) );
+
+		// Initially, no following groups.
+		$initial_groups = $edit_flow->notifications->get_following_usergroups( $post_id, 'ids' );
+		$this->assertEmpty( $initial_groups );
+
+		// Save user groups via AJAX.
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'following_usergroups[]';
+		$_POST['user_group_ids']        = array( $group1->term_id, $group2->term_id );
+
+		try {
+			$this->_handleAjax( 'save_notifications' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify the subscriptions were saved.
+		$following_groups = $edit_flow->notifications->get_following_usergroups( $post_id, 'ids' );
+		$this->assertContains( $group1->term_id, $following_groups );
+		$this->assertContains( $group2->term_id, $following_groups );
+
+		// Clean up.
+		$edit_flow->user_groups->delete_usergroup( $group1->term_id );
+		$edit_flow->user_groups->delete_usergroup( $group2->term_id );
+	}
+}
