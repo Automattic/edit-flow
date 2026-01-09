@@ -270,4 +270,109 @@ class NotificationsAjaxTest extends AjaxTestCase {
 		$edit_flow->user_groups->delete_usergroup( $group1->term_id );
 		$edit_flow->user_groups->delete_usergroup( $group2->term_id );
 	}
+
+	/**
+	 * Test: handle_user_post_subscription requires a nonce.
+	 *
+	 * This tests the fix for the nonce check logic. Previously the check was:
+	 * `if ( ! empty( $_GET['_wpnonce'] ) && ! wp_verify_nonce(...) )`
+	 * which allowed requests without any nonce to pass through.
+	 *
+	 * The fix changes it to:
+	 * `if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce(...) )`
+	 * which requires a valid nonce.
+	 *
+	 * @ticket https://github.com/Automattic/edit-flow/issues/882
+	 * @covers EF_Notifications::handle_user_post_subscription
+	 */
+	public function test_handle_user_post_subscription_requires_nonce(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create();
+
+		// Make request WITHOUT a nonce - this should fail now.
+		$_GET['post_id'] = $post_id;
+		$_GET['method']  = 'follow';
+		// Intentionally NOT setting $_GET['_wpnonce']
+
+		// print_ajax_response outputs JSON before dying, so we get WPAjaxDieContinueException.
+		try {
+			$this->_handleAjax( 'ef_notifications_user_post_subscription' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify error response.
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertEquals( 'error', $response['status'], 'Response should indicate error when nonce is missing' );
+	}
+
+	/**
+	 * Test: handle_user_post_subscription fails with invalid nonce.
+	 *
+	 * @ticket https://github.com/Automattic/edit-flow/issues/882
+	 * @covers EF_Notifications::handle_user_post_subscription
+	 */
+	public function test_handle_user_post_subscription_fails_with_invalid_nonce(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create();
+
+		$_GET['_wpnonce'] = 'invalid_nonce';
+		$_GET['post_id']  = $post_id;
+		$_GET['method']   = 'follow';
+
+		// print_ajax_response outputs JSON before dying, so we get WPAjaxDieContinueException.
+		try {
+			$this->_handleAjax( 'ef_notifications_user_post_subscription' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify error response.
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertEquals( 'error', $response['status'], 'Response should indicate error when nonce is invalid' );
+	}
+
+	/**
+	 * Test: handle_user_post_subscription succeeds with valid nonce.
+	 *
+	 * @ticket https://github.com/Automattic/edit-flow/issues/882
+	 * @covers EF_Notifications::handle_user_post_subscription
+	 */
+	public function test_handle_user_post_subscription_succeeds_with_valid_nonce(): void {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$_GET['_wpnonce'] = wp_create_nonce( 'ef_notifications_user_post_subscription' );
+		$_GET['post_id']  = $post_id;
+		$_GET['method']   = 'follow';
+
+		try {
+			$this->_handleAjax( 'ef_notifications_user_post_subscription' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		// Verify we got a success response.
+		$this->assertNotEmpty( $this->_last_response, 'AJAX should return a response' );
+
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertEquals( 'success', $response['status'], 'Response should indicate success' );
+
+		// Verify the user is now following the post.
+		$following_users = $edit_flow->notifications->get_following_users( $post_id, 'id' );
+		$this->assertContains( self::$admin_user_id, $following_users, 'User should be following the post' );
+	}
 }

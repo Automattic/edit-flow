@@ -554,8 +554,9 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 		 * @since 0.8
 		 */
 		public function handle_user_post_subscription() {
+			// Require a valid nonce for this AJAX request.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
-			if ( ! empty( $_GET['_wpnonce'] ) && ! wp_verify_nonce( $_GET['_wpnonce'], 'ef_notifications_user_post_subscription' ) ) {
+			if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'ef_notifications_user_post_subscription' ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
 			}
 
@@ -599,21 +600,30 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				return;
 			}
 
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
-			if ( ! empty( $_POST['_wpnonce'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post->ID ) ) {
-				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
+			// Only process if Edit Flow's followers form was submitted.
+			if ( ! isset( $_POST['ef-save_followers'] ) ) {
+				return;
 			}
 
-			// Only if has edit_post_subscriptions cap.
-			if ( isset( $_POST['ef-save_followers'] ) && current_user_can( $this->edit_post_subscriptions_cap ) ) {
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
-				$users = isset( $_POST['ef-selected-users'] ) ? $_POST['ef-selected-users'] : [];
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
-				$usergroups = isset( $_POST['following_usergroups'] ) ? $_POST['following_usergroups'] : [];
-				$this->save_post_following_users( $post, $users );
-				if ( $this->module_enabled( 'user_groups' ) && in_array( $this->get_current_post_type(), $this->get_post_types_for_module( $edit_flow->user_groups->module ) ) ) {
-					$this->save_post_following_usergroups( $post, $usergroups );
-				}
+			// Check capability.
+			if ( ! current_user_can( $this->edit_post_subscriptions_cap ) ) {
+				return;
+			}
+
+			// Verify Edit Flow's own nonce. Return early if missing or invalid - don't die,
+			// as this hook fires on all post transitions including non-admin contexts.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+			if ( ! isset( $_POST['ef_notifications_nonce'] ) || ! wp_verify_nonce( $_POST['ef_notifications_nonce'], 'save_user_usergroups' ) ) {
+				return;
+			}
+
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
+			$users = isset( $_POST['ef-selected-users'] ) ? $_POST['ef-selected-users'] : [];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
+			$usergroups = isset( $_POST['following_usergroups'] ) ? $_POST['following_usergroups'] : [];
+			$this->save_post_following_users( $post, $users );
+			if ( $this->module_enabled( 'user_groups' ) && in_array( $this->get_current_post_type(), $this->get_post_types_for_module( $edit_flow->user_groups->module ) ) ) {
+				$this->save_post_following_usergroups( $post, $usergroups );
 			}
 		}
 
