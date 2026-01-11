@@ -1,3 +1,4 @@
+const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
@@ -20,7 +21,7 @@ const shouldBundleRequest = ( request ) => {
 
 // Replace the default DependencyExtractionWebpackPlugin with a configured one
 // Return false to explicitly prevent externalization of bundled packages
-const plugins = defaultConfig.plugins.map( ( plugin ) => {
+const calendarPlugins = defaultConfig.plugins.map( ( plugin ) => {
 	if ( plugin.constructor.name === 'DependencyExtractionWebpackPlugin' ) {
 		return new DependencyExtractionWebpackPlugin( {
 			requestToExternal( request ) {
@@ -40,11 +41,33 @@ const plugins = defaultConfig.plugins.map( ( plugin ) => {
 	return plugin;
 } );
 
-module.exports = {
+// Custom status block runs in the block editor where @wordpress packages are
+// available as globals, so use default externalization behavior.
+const customStatusBlockConfig = {
 	...defaultConfig,
 	entry: {
 		'custom-status-block': './modules/custom-status/lib/custom-status-block.js',
+	},
+	output: {
+		...defaultConfig.output,
+		path: path.resolve( __dirname, 'build' ),
+		clean: false,
+	},
+};
+
+// Calendar React needs @wordpress packages bundled since it runs outside
+// the block editor context.
+const calendarReactConfig = {
+	...defaultConfig,
+	entry: {
 		'calendar-react': './modules/calendar/lib/react/calendar.react.js',
 	},
-	plugins,
+	output: {
+		...defaultConfig.output,
+		path: path.resolve( __dirname, 'build' ),
+		clean: false,
+	},
+	plugins: calendarPlugins,
 };
+
+module.exports = [ customStatusBlockConfig, calendarReactConfig ];

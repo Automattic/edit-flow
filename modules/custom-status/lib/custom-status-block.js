@@ -1,9 +1,11 @@
 import './editor.scss';
 import './style.scss';
 
+import { SelectControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { subscribe, dispatch, select } from '@wordpress/data';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { PluginPostStatusInfo } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
