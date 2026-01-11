@@ -1,0 +1,48 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/wp-admin/index.php?page=calendar",
+	"preferredVersions": {
+		"php": "8.2",
+		"wp": "latest"
+	},
+	"phpExtensionBundles": [
+		"kitchen-sink"
+	],
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "edit-flow"
+			},
+			"options": {
+				"activate": true
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php /* Initialize Edit Flow modules and capabilities */ require_once 'wordpress/wp-load.php'; if ( function_exists( 'EditFlow' ) ) { if ( isset( EditFlow()->custom_status ) ) { EditFlow()->custom_status->install(); } if ( isset( EditFlow()->calendar ) ) { EditFlow()->calendar->install(); } } $role = get_role( 'administrator' ); if ( $role ) { $role->add_cap( 'ef_view_calendar' ); } ?>"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php /* Create editor user */ require_once 'wordpress/wp-load.php'; $user_id = wp_create_user( 'editor', 'password', 'editor@example.com' ); if ( ! is_wp_error( $user_id ) ) { $user = new WP_User( $user_id ); $user->set_role( 'editor' ); update_user_meta( $user_id, 'first_name', 'Sarah' ); update_user_meta( $user_id, 'last_name', 'Editor' ); wp_update_user( array( 'ID' => $user_id, 'display_name' => 'Sarah Editor' ) ); } ?>"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php /* Create writer user */ require_once 'wordpress/wp-load.php'; $user_id = wp_create_user( 'writer', 'password', 'writer@example.com' ); if ( ! is_wp_error( $user_id ) ) { $user = new WP_User( $user_id ); $user->set_role( 'author' ); update_user_meta( $user_id, 'first_name', 'James' ); update_user_meta( $user_id, 'last_name', 'Writer' ); wp_update_user( array( 'ID' => $user_id, 'display_name' => 'James Writer' ) ); } ?>"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php /* Create sample posts with various statuses */ require_once 'wordpress/wp-load.php'; $writer = get_user_by( 'login', 'writer' ); $editor = get_user_by( 'login', 'editor' ); wp_insert_post( array( 'post_title' => 'New Feature: AI-Powered Content Suggestions', 'post_content' => 'This article explores how AI can help content creators brainstorm and refine their ideas.', 'post_status' => 'pitch', 'post_author' => $writer->ID, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+3 days' ) ), ) ); wp_insert_post( array( 'post_title' => 'Guide to Remote Team Collaboration', 'post_content' => 'Remote work has transformed how editorial teams collaborate.', 'post_status' => 'assigned', 'post_author' => $writer->ID, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+5 days' ) ), ) ); $progress_post = wp_insert_post( array( 'post_title' => '10 Tips for Better Editorial Workflows', 'post_content' => 'Streamlining your editorial workflow can save hours each week.', 'post_status' => 'in-progress', 'post_author' => $writer->ID, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+1 day' ) ), ) ); update_option( 'ef_demo_progress_post_id', $progress_post ); wp_insert_post( array( 'post_title' => 'The Future of Digital Publishing', 'post_content' => 'Digital publishing continues to evolve rapidly.', 'post_status' => 'pending', 'post_author' => $editor->ID, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+2 days' ) ), ) ); wp_insert_post( array( 'post_title' => 'Interview: Leading Through Change', 'post_content' => 'In this exclusive interview, we speak with industry leaders.', 'post_status' => 'draft', 'post_author' => 1, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+7 days' ) ), ) ); wp_insert_post( array( 'post_title' => 'Weekly Roundup: Content Strategy Insights', 'post_content' => 'This week in content strategy: new research on reader engagement.', 'post_status' => 'future', 'post_author' => $editor->ID, 'post_date' => date( 'Y-m-d H:i:s', strtotime( '+4 days' ) ), ) ); ?>"
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php /* Add editorial comments to demonstrate collaboration */ require_once 'wordpress/wp-load.php'; $post_id = get_option( 'ef_demo_progress_post_id' ); if ( $post_id ) { $editor = get_user_by( 'login', 'editor' ); $writer = get_user_by( 'login', 'writer' ); wp_insert_comment( array( 'comment_post_ID' => $post_id, 'comment_content' => 'Great start! Could you expand on tip #3 about visual calendars?', 'comment_type' => 'editorial-comment', 'user_id' => $editor->ID, 'comment_author' => $editor->display_name, 'comment_author_email' => $editor->user_email, 'comment_approved' => 'editorial-comment', ) ); wp_insert_comment( array( 'comment_post_ID' => $post_id, 'comment_content' => 'Thanks Sarah! I will add a calendar screenshot and expand that section.', 'comment_type' => 'editorial-comment', 'user_id' => $writer->ID, 'comment_author' => $writer->display_name, 'comment_author_email' => $writer->user_email, 'comment_approved' => 'editorial-comment', ) ); delete_option( 'ef_demo_progress_post_id' ); } ?>"
+		},
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		}
+	]
+}
