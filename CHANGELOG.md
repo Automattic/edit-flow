@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2026-01-12
+
+### Added
+
+* feat: add WordPress Playground blueprint for live preview by @GaryJones in [#885](https://github.com/Automattic/Edit-Flow/pull/885)
+
+### Fixed
+
+* fix: prevent Edit Flow nonce checks from killing unrelated forms by @GaryJones in [#883](https://github.com/Automattic/Edit-Flow/pull/883)
+* fix: add missing imports for Extended Post Status block editor panel by @GaryJones in [#884](https://github.com/Automattic/Edit-Flow/pull/884)
+
+### Documentation
+
+* docs: move Development section from README to CONTRIBUTING by @GaryJones in [#880](https://github.com/Automattic/Edit-Flow/pull/880)
+
+### Maintenance
+
+* ci: optimise CI workflows with path filters and split tests by @GaryJones in [#881](https://github.com/Automattic/Edit-Flow/pull/881)
+* test: add integration test for revision nonce handling by @GaryJones in [#879](https://github.com/Automattic/Edit-Flow/pull/879)
+
 ## [0.10.2] - 2026-01-07
 
 ### Fixed
@@ -395,6 +415,7 @@ This is a major update with significant bug fixes, new features, and modernised 
 
 * Ability to assign custom statuses to posts.
 
+[0.10.3]: https://github.com/Automattic/Edit-Flow/compare/0.10.2...0.10.3
 [0.10.2]: https://github.com/Automattic/Edit-Flow/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/Automattic/Edit-Flow/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/Automattic/Edit-Flow/compare/0.9.9...0.10.0
