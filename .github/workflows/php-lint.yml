@@ -1,11 +1,22 @@
 name: PHP Lint
 
 on:
-  pull_request:
   push:
-    branches-ignore:
-      - develop
-      - main
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.phpcs.xml.dist'
+      - '.github/workflows/php-lint.yml'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.phpcs.xml.dist'
+      - '.github/workflows/php-lint.yml'
+  workflow_dispatch:
 
 # Disable all permissions by default; grant minimal permissions per job
 permissions: {}
