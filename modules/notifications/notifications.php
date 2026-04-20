@@ -484,7 +484,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			$post    = get_post( $post_id );
 
 			$valid_post = ! is_null( $post ) && ! wp_is_post_revision( $post_id ) && ! wp_is_post_autosave( $post_id );
-			if ( ! isset( $_POST['ef_notifications_name'] ) || ! $valid_post || ! current_user_can( $this->edit_post_subscriptions_cap ) ) {
+			if ( ! isset( $_POST['ef_notifications_name'] ) || ! $valid_post || ! current_user_can( $this->edit_post_subscriptions_cap ) || ! current_user_can( 'edit_post', $post_id ) ) {
 				wp_die();
 			}
 
@@ -569,6 +569,10 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 
 			if ( ! $post ) {
 				$this->print_ajax_response( 'error', $this->module->messages['missing-post'] );
+			}
+
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
 			}
 
 			if ( isset( $_GET['method'] ) && 'follow' == $_GET['method'] ) {
