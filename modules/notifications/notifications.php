@@ -573,6 +573,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
+				return;
 			}
 
 			if ( isset( $_GET['method'] ) && 'follow' == $_GET['method'] ) {
