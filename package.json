@@ -58,7 +58,7 @@
   "dependencies": {
     "classnames": "^2.5.1",
     "downshift": "^9.3.2",
-    "match-sorter": "^8.2.0",
+    "match-sorter": "^8.3.0",
     "prop-types": "^15.8.1"
   }
 }
