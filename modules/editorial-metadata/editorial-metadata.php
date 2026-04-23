@@ -1454,8 +1454,8 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				wp_die();
 			} else {
 				/* Translators: 1: the name of the term that could not be found */
-				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the term: <strong>%s</strong>', 'edit-flow' ), $metadata_name ) );
-				wp_die( wp_kses( $change_error->get_error_message() ) );
+				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the term: <strong>%s</strong>', 'edit-flow' ), esc_html( $metadata_name ) ) );
+				wp_die( wp_kses( $change_error->get_error_message(), array( 'strong' => array() ) ) );
 			}
 		}
 
