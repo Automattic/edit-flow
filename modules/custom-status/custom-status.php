@@ -888,6 +888,10 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_die( esc_html( $this->module->messages['invalid-permissions'] ) );
+			}
+
 			// Validate and sanitize the form data.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized with sanitize_text_field().
 			$status_name = isset( $_POST['status_name'] ) ? sanitize_text_field( trim( $_POST['status_name'] ) ) : '';
