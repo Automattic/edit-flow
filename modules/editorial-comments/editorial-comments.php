@@ -366,12 +366,14 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				// Set current time.
 				$time = current_time( 'mysql', $gmt = 0 );
 
-				// Set comment data.
+				// Set comment data. wp_insert_comment() runs every value through
+				// wpdb->prepare() internally, so callers must not pre-escape;
+				// doing so stores the literal escape sequences in the database.
 				$data = array(
 					'comment_post_ID'      => (int) $post_id,
-					'comment_author'       => esc_sql( $current_user->display_name ),
-					'comment_author_email' => esc_sql( $current_user->user_email ),
-					'comment_author_url'   => esc_sql( $current_user->user_url ),
+					'comment_author'       => $current_user->display_name,
+					'comment_author_email' => $current_user->user_email,
+					'comment_author_url'   => $current_user->user_url,
 					'comment_content'      => wp_kses( $comment_content, array(
 						'a'          => array(
 							'href'  => array(),
@@ -390,12 +392,10 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 					'comment_type'         => self::comment_type,
 					'comment_parent'       => (int) $parent,
 					'user_id'              => (int) $user_ID,
-					// This is just used for logging in the DB, and it's been escaped as well.
-					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					'comment_author_IP'    => isset( $_SERVER['REMOTE_ADDR'] ) ? esc_sql( $_SERVER['REMOTE_ADDR'] ) : '',
-					// This is just used for logging in the DB, and it's been escaped as well.
-					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					'comment_agent'        => isset( $_SERVER['HTTP_USER_AGENT'] ) ? esc_sql( $_SERVER['HTTP_USER_AGENT'] ) : '',
+					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__REMOTE_ADDR__
+					'comment_author_IP'    => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
+					// phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
+					'comment_agent'        => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
 					'comment_date'         => $time,
 					'comment_date_gmt'     => $time,
 					// Set to -1?
