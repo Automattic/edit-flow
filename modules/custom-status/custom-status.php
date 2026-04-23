@@ -136,6 +136,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_filter( 'wp_insert_post_data', [ $this, 'fix_custom_status_timestamp' ], 10, 2 );
 			add_filter( 'wp_insert_post_data', [ $this, 'maybe_keep_post_name_empty' ], 10, 2 );
 			add_filter( 'wp_insert_post_data', [ $this, 'update_post_date_on_publish_from_custom_status' ], 10, 2 );
+			add_action( 'rest_api_init', [ $this, 'register_rest_api_filters' ] );
 			add_filter( 'pre_wp_unique_post_slug', [ $this, 'fix_unique_post_slug' ], 10, 6 );
 			add_filter( 'preview_post_link', [ $this, 'fix_preview_link_part_one' ] );
 			add_filter( 'post_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
@@ -1622,6 +1623,78 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			$data['post_date_gmt'] = current_time( 'mysql', true );
 
 			return $data;
+		}
+
+		/**
+		 * Register REST API filters for every post type that supports custom statuses.
+		 *
+		 * @since 0.10.4
+		 */
+		public function register_rest_api_filters() {
+			$post_types = $this->get_post_types_for_module( $this->module );
+			foreach ( $post_types as $post_type ) {
+				add_filter( "rest_prepare_{$post_type}", [ $this, 'fix_custom_status_rest_date_gmt' ], 10, 2 );
+			}
+		}
+
+		/**
+		 * Return null for date and date_gmt in REST responses for posts in a
+		 * custom status whose GMT date has not been explicitly set.
+		 *
+		 * WP core's WP_REST_Posts_Controller::prepare_item_for_response() only returns
+		 * null for date_gmt when a post's status is 'draft' or 'pending'. Custom
+		 * statuses fall through to the branch that converts post_date_gmt of
+		 * '0000-00-00 00:00:00' into a concrete ISO 8601 date derived from post_date.
+		 *
+		 * Even nulling date_gmt alone is insufficient: Gutenberg's
+		 * isEditedPostDateFloating selector hardcodes the status whitelist to
+		 * 'draft'/'auto-draft'/'pending', so for a custom status it short-circuits
+		 * to false and the Publish field falls back to formatting the concrete date.
+		 * Nulling date as well pushes Gutenberg's label renderer into its
+		 * "Immediately" branch (which triggers when date itself is null) without
+		 * needing to modify core.
+		 *
+		 * The saved post_date in the database is untouched: Gutenberg only sends
+		 * changed fields on save, so a nulled date in the response does not
+		 * propagate back unless the user actively edits the schedule.
+		 *
+		 * @since 0.10.4
+		 *
+		 * @see https://github.com/Automattic/edit-flow/issues/925
+		 *
+		 * @param \WP_REST_Response $response The response object.
+		 * @param \WP_Post          $post     Post object.
+		 * @return \WP_REST_Response
+		 */
+		public function fix_custom_status_rest_date_gmt( $response, $post ) {
+			if ( ! $response instanceof \WP_REST_Response ) {
+				return $response;
+			}
+
+			if ( '0000-00-00 00:00:00' !== $post->post_date_gmt ) {
+				return $response;
+			}
+
+			$status_slugs = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+			if ( ! in_array( $post->post_status, $status_slugs, true ) ) {
+				return $response;
+			}
+
+			$data = $response->get_data();
+			if ( ! is_array( $data ) ) {
+				return $response;
+			}
+
+			if ( array_key_exists( 'date_gmt', $data ) ) {
+				$data['date_gmt'] = null;
+			}
+			if ( array_key_exists( 'date', $data ) ) {
+				$data['date'] = null;
+			}
+
+			$response->set_data( $data );
+
+			return $response;
 		}
 
 		/**
