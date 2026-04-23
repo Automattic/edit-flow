@@ -169,4 +169,46 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 		$this->expectException( WPAjaxDieStopException::class );
 		$this->_handleAjax( 'editflow_ajax_insert_comment' );
 	}
+
+	/**
+	 * Test: Author display name with a special character is stored verbatim.
+	 *
+	 * Regression: the handler previously passed the display name through
+	 * esc_sql() before handing it to wp_insert_comment(), which itself escapes
+	 * via $wpdb->prepare(). The double escape meant a name like "O'Brien" was
+	 * persisted as "O\'Brien".
+	 */
+	public function test_insert_comment_does_not_double_escape_author_name(): void {
+		$author_user_id = $this->factory->user->create( array(
+			'role'         => 'author',
+			'display_name' => "O'Brien",
+		) );
+		wp_set_current_user( $author_user_id );
+
+		$post_id = $this->factory->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => $author_user_id,
+		) );
+
+		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['post_id'] = $post_id;
+		$_POST['parent']  = 0;
+		$_POST['content'] = 'Comment from O\'Brien';
+
+		global $current_user, $user_ID;
+		$current_user = wp_get_current_user();
+		$user_ID      = $author_user_id;
+
+		try {
+			$this->_handleAjax( 'editflow_ajax_insert_comment' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		preg_match( '/<comment id=\'(\d+)\'/', $this->_last_response, $matches );
+		$this->assertNotEmpty( $matches, 'Comment ID should be extracted from response.' );
+
+		$comment = get_comment( (int) $matches[1] );
+		$this->assertSame( "O'Brien", $comment->comment_author, 'Author should be stored verbatim without escape sequences.' );
+	}
 }
