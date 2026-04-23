@@ -542,7 +542,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						$formatted_post = array(
 							'BEGIN'         => 'VEVENT',
 							'UID'           => $post->guid,
-							'SUMMARY'       => $this->do_ics_escaping( apply_filters( 'the_title', $post->post_title ) ) . ' - ' . $post_status_obj->label,
+							'SUMMARY'       => $this->do_ics_escaping( apply_filters( 'the_title', $post->post_title ) ) . ' - ' . $this->do_ics_escaping( $post_status_obj->label ),
 							'DTSTART'       => $start_date,
 							'DTEND'         => $end_date,
 							'LAST-MODIFIED' => $last_modified,
@@ -554,7 +554,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						$formatted_post['DESCRIPTION'] = '';
 						if ( ! empty( $information_fields ) ) {
 							foreach ( $information_fields as $key => $values ) {
-								$formatted_post['DESCRIPTION'] .= $values['label'] . ': ' . $values['value'] . '\n';
+								$formatted_post['DESCRIPTION'] .= $this->do_ics_escaping( $values['label'] ) . ': ' . $this->do_ics_escaping( $values['value'] ) . '\n';
 							}
 							$formatted_post['DESCRIPTION'] = rtrim( $formatted_post['DESCRIPTION'] );
 						}
@@ -626,16 +626,20 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		}
 
 		/**
-		 * Perform the encoding necessary for ICS feed text.
+		 * Perform the encoding necessary for ICS feed text per RFC 5545, section 3.3.11.
+		 *
+		 * The backslash must be escaped first, otherwise the backslashes introduced
+		 * by the subsequent replacements would themselves be escaped a second time.
 		 *
 		 * @param string $text The string that needs to be escaped.
 		 * @return string The string after escaping for ICS.
 		 * @since 0.8
 		 */
 		public function do_ics_escaping( $text ) {
-			$text = str_replace( ',', '\,', $text );
-			$text = str_replace( ';', '\:', $text );
 			$text = str_replace( '\\', '\\\\', $text );
+			$text = str_replace( array( "\r\n", "\r", "\n" ), '\n', $text );
+			$text = str_replace( ';', '\;', $text );
+			$text = str_replace( ',', '\,', $text );
 			return $text;
 		}
 
