@@ -1781,17 +1781,21 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$metadata_types = array_keys( EditFlow()->editorial_metadata->get_supported_metadata_types() );
 
 			// Update an editorial metadata field.
-			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below before use.
-			$metadata_term           = isset( $_POST['metadata_term'] ) ? $_POST['metadata_term'] : '';
-			$metadata_type           = isset( $_POST['metadata_type'] ) ? $_POST['metadata_type'] : '';
-			$incoming_metadata_value = isset( $_POST['metadata_value'] ) ? $_POST['metadata_value'] : '';
-			// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$metadata_term = isset( $_POST['metadata_term'] ) ? sanitize_text_field( wp_unslash( $_POST['metadata_term'] ) ) : '';
+			$metadata_type = isset( $_POST['metadata_type'] ) ? sanitize_text_field( wp_unslash( $_POST['metadata_type'] ) ) : '';
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is sanitized below based on metadata type.
+			$incoming_metadata_value = isset( $_POST['metadata_value'] ) ? wp_unslash( $_POST['metadata_value'] ) : '';
 
-			if ( isset( $_POST['metadata_type'] ) && in_array( $_POST['metadata_type'], $metadata_types ) ) {
-				$post_meta_key = sanitize_text_field( '_ef_editorial_meta_' . $_POST['metadata_type'] . '_' . $metadata_term );
+			if ( in_array( $metadata_type, $metadata_types, true ) ) {
+				// Validate the term slug refers to an existing editorial metadata term before using it in a meta key.
+				if ( '' === $metadata_term || ! EditFlow()->editorial_metadata->get_editorial_metadata_term_by( 'slug', $metadata_term ) ) {
+					$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+				}
+
+				$post_meta_key = '_ef_editorial_meta_' . $metadata_type . '_' . $metadata_term;
 
 				// Javascript date parsing is terrible, so use strtotime in PHP.
-				if ( 'date' == $metadata_type ) {
+				if ( 'date' === $metadata_type ) {
 					$metadata_value = strtotime( sanitize_text_field( $incoming_metadata_value ) );
 				} else {
 					$metadata_value = sanitize_text_field( $incoming_metadata_value );
@@ -1800,8 +1804,12 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				update_post_meta( $post->ID, $post_meta_key, $metadata_value );
 				$response = 'success';
 			} else {
-				switch ( $_POST['metadata_type'] ) {
+				switch ( $metadata_type ) {
 					case 'taxonomy':
+						// Validate that the term refers to a taxonomy registered for this post type.
+						if ( '' === $metadata_term || ! in_array( $metadata_term, get_object_taxonomies( $post->post_type ), true ) ) {
+							$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+						}
 						$response = wp_set_post_terms( $post->ID, $incoming_metadata_value, $metadata_term );
 						break;
 					default:
