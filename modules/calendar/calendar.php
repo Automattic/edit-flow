@@ -819,25 +819,44 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			<?php
 				// Handle posts that have been trashed or untrashed.
-				// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- These GET params are set by WordPress core's trash/untrash actions.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended -- These GET params are set by WordPress core's trash/untrash actions.
 			if ( isset( $_GET['trashed'] ) || isset( $_GET['untrashed'] ) ) {
 				echo '<div id="trashed-message" class="updated"><p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				if ( isset( $_GET['trashed'] ) && (int) $_GET['trashed'] ) {
+					$trashed_count = (int) $_GET['trashed'];
 					/* translators: %d: number of posts trashed */
-					echo esc_html( sprintf( _n( '%d post moved to the trash.', '%d posts moved to the trash.', $_GET['trashed'], 'edit-flow' ), number_format_i18n( $_GET['trashed'] ) ) );
-					$ids       = isset( $_GET['ids'] ) ? $_GET['ids'] : 0;
-					$pid       = explode( ',', $ids );
-					$post_type = get_post_type( $pid[0] );
-					echo ' <a href="' . esc_url( wp_nonce_url( "edit.php?post_type=$post_type&doaction=undo&action=untrash&ids=$ids", 'bulk-posts' ) ) . '">' . esc_html__( 'Undo', 'edit-flow' ) . '</a><br />';
+					echo esc_html( sprintf( _n( '%d post moved to the trash.', '%d posts moved to the trash.', $trashed_count, 'edit-flow' ), number_format_i18n( $trashed_count ) ) );
+
+					// Only build an Undo link from strictly-numeric ids; a
+					// user-crafted value must not be able to inject extra
+					// query arguments into the resulting URL.
+					$ids_raw  = isset( $_GET['ids'] ) ? sanitize_text_field( wp_unslash( $_GET['ids'] ) ) : '';
+					$pid_list = array_values( array_filter( array_map( 'absint', explode( ',', $ids_raw ) ) ) );
+					if ( ! empty( $pid_list ) ) {
+						$post_type = get_post_type( $pid_list[0] );
+						if ( $post_type && post_type_exists( $post_type ) ) {
+							$undo_url = add_query_arg(
+								array(
+									'post_type' => $post_type,
+									'doaction'  => 'undo',
+									'action'    => 'untrash',
+									'ids'       => implode( ',', $pid_list ),
+								),
+								admin_url( 'edit.php' )
+							);
+							echo ' <a href="' . esc_url( wp_nonce_url( $undo_url, 'bulk-posts' ) ) . '">' . esc_html__( 'Undo', 'edit-flow' ) . '</a><br />';
+						}
+					}
 					unset( $_GET['trashed'] );
 				}
 				if ( isset( $_GET['untrashed'] ) && (int) $_GET['untrashed'] ) {
+					$untrashed_count = (int) $_GET['untrashed'];
 					/* translators: %d: number of posts restored */
-					echo esc_html( sprintf( _n( '%d post restored from the Trash.', '%d posts restored from the Trash.', $_GET['untrashed'], 'edit-flow' ), number_format_i18n( $_GET['untrashed'] ) ) );
-					unset( $_GET['undeleted'] );
+					echo esc_html( sprintf( _n( '%d post restored from the Trash.', '%d posts restored from the Trash.', $untrashed_count, 'edit-flow' ), number_format_i18n( $untrashed_count ) ) );
+					unset( $_GET['untrashed'] );
 				}
 				echo '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			}
 			?>
 
