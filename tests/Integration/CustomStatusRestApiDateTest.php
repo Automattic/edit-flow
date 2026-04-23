@@ -14,10 +14,12 @@ use EF_Custom_Status;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
- * Test that the REST API returns null for date_gmt on posts in a custom status
- * whose GMT date has not been explicitly set, matching WP core's handling of
- * 'draft' and 'pending'. This ensures the block editor shows "Immediately"
- * rather than a concrete date in the Publish field.
+ * Test that the REST API returns null for date and date_gmt on posts in a
+ * custom status whose GMT date has not been explicitly set. Nulling date_gmt
+ * matches WP core's handling of 'draft' and 'pending'; nulling date in
+ * addition is required because Gutenberg's isEditedPostDateFloating selector
+ * hardcodes the status whitelist and would otherwise render the concrete
+ * date in the Publish field instead of "Immediately".
  */
 class CustomStatusRestApiDateTest extends TestCase {
 
@@ -47,10 +49,10 @@ class CustomStatusRestApiDateTest extends TestCase {
 	}
 
 	/**
-	 * A post in a custom status with no GMT date set should serialise
-	 * date_gmt as null so the block editor shows "Immediately".
+	 * A post in a custom status with no GMT date set should serialise both
+	 * date and date_gmt as null so the block editor shows "Immediately".
 	 */
-	public function test_custom_status_post_returns_null_date_gmt() {
+	public function test_custom_status_post_returns_null_dates() {
 		$post_id = self::factory()->post->create(
 			array(
 				'post_status' => 'pitch',
@@ -66,14 +68,16 @@ class CustomStatusRestApiDateTest extends TestCase {
 		$data = $this->fetch_rest_item( $post_id );
 
 		$this->assertArrayHasKey( 'date_gmt', $data );
+		$this->assertArrayHasKey( 'date', $data );
 		$this->assertNull( $data['date_gmt'], 'date_gmt should be null for custom status posts with no GMT date.' );
+		$this->assertNull( $data['date'], 'date should be null so Gutenberg renders "Immediately".' );
 	}
 
 	/**
-	 * A published post should keep its concrete date_gmt — our filter must
+	 * A published post should keep its concrete dates — our filter must
 	 * not interfere with posts that have real GMT dates.
 	 */
-	public function test_published_post_retains_concrete_date_gmt() {
+	public function test_published_post_retains_concrete_dates() {
 		$post_id = self::factory()->post->create(
 			array(
 				'post_status' => 'publish',
@@ -85,6 +89,7 @@ class CustomStatusRestApiDateTest extends TestCase {
 		$data = $this->fetch_rest_item( $post_id );
 
 		$this->assertNotNull( $data['date_gmt'], 'Published posts should serialise a concrete date_gmt.' );
+		$this->assertNotNull( $data['date'], 'Published posts should serialise a concrete date.' );
 	}
 
 	/**
@@ -127,6 +132,7 @@ class CustomStatusRestApiDateTest extends TestCase {
 		$data = $this->fetch_rest_item( $post_id );
 
 		$this->assertNotNull( $data['date_gmt'], 'Explicit GMT date should be preserved even for custom statuses.' );
+		$this->assertNotNull( $data['date'], 'Explicit date should be preserved even for custom statuses.' );
 	}
 
 	/**

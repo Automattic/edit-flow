@@ -1638,18 +1638,25 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		/**
-		 * Return null for date_gmt in REST responses for posts in a custom status
-		 * whose GMT date has not been explicitly set.
+		 * Return null for date and date_gmt in REST responses for posts in a
+		 * custom status whose GMT date has not been explicitly set.
 		 *
 		 * WP core's WP_REST_Posts_Controller::prepare_item_for_response() only returns
-		 * null for date_gmt when a post's status is 'draft' or 'pending'. For any
-		 * other status — including Edit Flow's custom statuses — core converts
-		 * post_date_gmt of '0000-00-00 00:00:00' into a concrete ISO 8601 date derived
-		 * from post_date. The block editor then shows that concrete date in the
-		 * Publish field instead of "Immediately".
+		 * null for date_gmt when a post's status is 'draft' or 'pending'. Custom
+		 * statuses fall through to the branch that converts post_date_gmt of
+		 * '0000-00-00 00:00:00' into a concrete ISO 8601 date derived from post_date.
 		 *
-		 * This filter restores parity with core's draft/pending behaviour so the
-		 * sidebar accurately reflects that the post has no scheduled publish time.
+		 * Even nulling date_gmt alone is insufficient: Gutenberg's
+		 * isEditedPostDateFloating selector hardcodes the status whitelist to
+		 * 'draft'/'auto-draft'/'pending', so for a custom status it short-circuits
+		 * to false and the Publish field falls back to formatting the concrete date.
+		 * Nulling date as well pushes Gutenberg's label renderer into its
+		 * "Immediately" branch (which triggers when date itself is null) without
+		 * needing to modify core.
+		 *
+		 * The saved post_date in the database is untouched: Gutenberg only sends
+		 * changed fields on save, so a nulled date in the response does not
+		 * propagate back unless the user actively edits the schedule.
 		 *
 		 * @since 0.10.4
 		 *
@@ -1674,10 +1681,18 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			}
 
 			$data = $response->get_data();
-			if ( is_array( $data ) && array_key_exists( 'date_gmt', $data ) ) {
-				$data['date_gmt'] = null;
-				$response->set_data( $data );
+			if ( ! is_array( $data ) ) {
+				return $response;
 			}
+
+			if ( array_key_exists( 'date_gmt', $data ) ) {
+				$data['date_gmt'] = null;
+			}
+			if ( array_key_exists( 'date', $data ) ) {
+				$data['date'] = null;
+			}
+
+			$response->set_data( $data );
 
 			return $response;
 		}
