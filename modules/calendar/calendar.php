@@ -826,8 +826,8 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					// Only build an Undo link from strictly-numeric ids; a
 					// user-crafted value must not be able to inject extra
 					// query arguments into the resulting URL.
-					$ids_raw  = isset( $_GET['ids'] ) ? wp_unslash( $_GET['ids'] ) : '';
-					$pid_list = array_values( array_filter( array_map( 'absint', explode( ',', (string) $ids_raw ) ) ) );
+					$ids_raw  = isset( $_GET['ids'] ) ? sanitize_text_field( wp_unslash( $_GET['ids'] ) ) : '';
+					$pid_list = array_values( array_filter( array_map( 'absint', explode( ',', $ids_raw ) ) ) );
 					if ( ! empty( $pid_list ) ) {
 						$post_type = get_post_type( $pid_list[0] );
 						if ( $post_type && post_type_exists( $post_type ) ) {
