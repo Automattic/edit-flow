@@ -557,8 +557,8 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				wp_die();
 			} else {
 				// translators: %s is the name of the user group.
-				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the user group: <strong>%s</strong>', 'edit-flow' ), $name ) );
-				wp_die( wp_kses( $change_error->get_error_message(), 'strong' ) );
+				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the user group: <strong>%s</strong>', 'edit-flow' ), esc_html( $name ) ) );
+				wp_die( wp_kses( $change_error->get_error_message(), array( 'strong' => array() ) ) );
 			}
 		}
 

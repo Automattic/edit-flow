@@ -1342,8 +1342,8 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				wp_die();
 			} else {
 				/* translators: 1: the status's name */
-				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the status: <strong>%s</strong>', 'edit-flow' ), $status_name ) );
-				wp_die( wp_kses( $change_error->get_error_message(), 'strong' ) );
+				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the status: <strong>%s</strong>', 'edit-flow' ), esc_html( $status_name ) ) );
+				wp_die( wp_kses( $change_error->get_error_message(), array( 'strong' => array() ) ) );
 			}
 		}
 
