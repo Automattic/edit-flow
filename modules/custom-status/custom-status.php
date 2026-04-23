@@ -136,6 +136,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_filter( 'wp_insert_post_data', [ $this, 'fix_custom_status_timestamp' ], 10, 2 );
 			add_filter( 'wp_insert_post_data', [ $this, 'maybe_keep_post_name_empty' ], 10, 2 );
 			add_filter( 'wp_insert_post_data', [ $this, 'update_post_date_on_publish_from_custom_status' ], 10, 2 );
+			add_action( 'rest_api_init', [ $this, 'register_rest_api_filters' ] );
 			add_filter( 'pre_wp_unique_post_slug', [ $this, 'fix_unique_post_slug' ], 10, 6 );
 			add_filter( 'preview_post_link', [ $this, 'fix_preview_link_part_one' ] );
 			add_filter( 'post_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
@@ -1622,6 +1623,63 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			$data['post_date_gmt'] = current_time( 'mysql', true );
 
 			return $data;
+		}
+
+		/**
+		 * Register REST API filters for every post type that supports custom statuses.
+		 *
+		 * @since 0.10.4
+		 */
+		public function register_rest_api_filters() {
+			$post_types = $this->get_post_types_for_module( $this->module );
+			foreach ( $post_types as $post_type ) {
+				add_filter( "rest_prepare_{$post_type}", [ $this, 'fix_custom_status_rest_date_gmt' ], 10, 2 );
+			}
+		}
+
+		/**
+		 * Return null for date_gmt in REST responses for posts in a custom status
+		 * whose GMT date has not been explicitly set.
+		 *
+		 * WP core's WP_REST_Posts_Controller::prepare_item_for_response() only returns
+		 * null for date_gmt when a post's status is 'draft' or 'pending'. For any
+		 * other status — including Edit Flow's custom statuses — core converts
+		 * post_date_gmt of '0000-00-00 00:00:00' into a concrete ISO 8601 date derived
+		 * from post_date. The block editor then shows that concrete date in the
+		 * Publish field instead of "Immediately".
+		 *
+		 * This filter restores parity with core's draft/pending behaviour so the
+		 * sidebar accurately reflects that the post has no scheduled publish time.
+		 *
+		 * @since 0.10.4
+		 *
+		 * @see https://github.com/Automattic/edit-flow/issues/925
+		 *
+		 * @param \WP_REST_Response $response The response object.
+		 * @param \WP_Post          $post     Post object.
+		 * @return \WP_REST_Response
+		 */
+		public function fix_custom_status_rest_date_gmt( $response, $post ) {
+			if ( ! $response instanceof \WP_REST_Response ) {
+				return $response;
+			}
+
+			if ( '0000-00-00 00:00:00' !== $post->post_date_gmt ) {
+				return $response;
+			}
+
+			$status_slugs = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+			if ( ! in_array( $post->post_status, $status_slugs, true ) ) {
+				return $response;
+			}
+
+			$data = $response->get_data();
+			if ( is_array( $data ) && array_key_exists( 'date_gmt', $data ) ) {
+				$data['date_gmt'] = null;
+				$response->set_data( $data );
+			}
+
+			return $response;
 		}
 
 		/**
