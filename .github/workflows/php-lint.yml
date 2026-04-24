@@ -49,8 +49,17 @@ jobs:
         with:
           composer-options: --prefer-dist --no-progress
 
+      - name: Cache PHPCS results
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .phpcs-cache
+          key: phpcs-${{ runner.os }}-${{ hashFiles('.phpcs.xml.dist', 'composer.json') }}-${{ github.sha }}
+          restore-keys: |
+            phpcs-${{ runner.os }}-${{ hashFiles('.phpcs.xml.dist', 'composer.json') }}-
+            phpcs-${{ runner.os }}-
+
       - name: PHP syntax lint
         run: composer lint-ci | cs2pr
 
       - name: PHP coding standards
-        run: composer cs -- --report=checkstyle | cs2pr
+        run: composer cs -- --cache=.phpcs-cache --report=checkstyle | cs2pr
