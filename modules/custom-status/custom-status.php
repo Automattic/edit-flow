@@ -1338,7 +1338,9 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				set_current_screen( 'edit-custom-status' );
 				$wp_list_table = new EF_Custom_Status_List_Table();
 				$wp_list_table->prepare_items();
-				echo wp_kses_post( $wp_list_table->single_row( $return ) );
+				// single_row() echoes its own output; column_* callbacks are
+				// responsible for escaping, as per WP_List_Table's contract.
+				$wp_list_table->single_row( $return );
 				wp_die();
 			} else {
 				/* translators: 1: the status's name */

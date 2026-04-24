@@ -1456,7 +1456,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				set_current_screen( 'edit-editorial-metadata' );
 				$wp_list_table = new EF_Editorial_Metadata_List_Table();
 				$wp_list_table->prepare_items();
-				echo wp_kses_post( $wp_list_table->single_row( $return ) );
+				// single_row() echoes its own output; column_* callbacks are
+				// responsible for escaping, as per WP_List_Table's contract.
+				$wp_list_table->single_row( $return );
 				wp_die();
 			} else {
 				/* Translators: 1: the name of the term that could not be found */
