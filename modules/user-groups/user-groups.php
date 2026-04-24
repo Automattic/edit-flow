@@ -553,12 +553,14 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				set_current_screen( 'edit-usergroup' );
 				$wp_list_table = new EF_Usergroups_List_Table();
 				$wp_list_table->prepare_items();
-				echo wp_kses_post( $wp_list_table->single_row( $return ) );
+				// single_row() echoes its own output; column_* callbacks are
+				// responsible for escaping, as per WP_List_Table's contract.
+				$wp_list_table->single_row( $return );
 				wp_die();
 			} else {
 				// translators: %s is the name of the user group.
-				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the user group: <strong>%s</strong>', 'edit-flow' ), $name ) );
-				wp_die( wp_kses( $change_error->get_error_message(), 'strong' ) );
+				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the user group: <strong>%s</strong>', 'edit-flow' ), esc_html( $name ) ) );
+				wp_die( wp_kses( $change_error->get_error_message(), array( 'strong' => array() ) ) );
 			}
 		}
 
@@ -1372,11 +1374,17 @@ if ( ! class_exists( 'EF_Usergroups_List_Table' ) ) {
 		 * @param object $usergroup The usergroup object.
 		 */
 		public function single_row( $usergroup ) {
-			static $row_class = '';
-			$row_class        = ( '' == $row_class ? ' class="alternate"' : '' );
+			static $is_alternate = false;
+			$is_alternate        = ! $is_alternate;
 
-			echo wp_kses_post( '<tr id="usergroup-' . $usergroup->term_id . '"' . $row_class . '>' );
-			echo wp_kses_post( $this->single_row_columns( $usergroup ) );
+			printf(
+				'<tr id="usergroup-%d"%s>',
+				(int) $usergroup->term_id,
+				$is_alternate ? ' class="alternate"' : ''
+			);
+			// single_row_columns() echoes its own output; the column_* callbacks are
+			// responsible for escaping, as per WP_List_Table's contract.
+			$this->single_row_columns( $usergroup );
 			echo '</tr>';
 		}
 

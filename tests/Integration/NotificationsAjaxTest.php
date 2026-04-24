@@ -22,15 +22,18 @@ class NotificationsAjaxTest extends AjaxTestCase {
 
 	protected static $admin_user_id;
 	protected static $editor_user_id;
+	protected static $author_user_id;
 
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$admin_user_id  = $factory->user->create( array( 'role' => 'administrator' ) );
 		self::$editor_user_id = $factory->user->create( array( 'role' => 'editor' ) );
+		self::$author_user_id = $factory->user->create( array( 'role' => 'author' ) );
 	}
 
 	public static function wpTearDownAfterClass() {
 		self::delete_user( self::$admin_user_id );
 		self::delete_user( self::$editor_user_id );
+		self::delete_user( self::$author_user_id );
 	}
 
 	protected function setUp(): void {
@@ -334,6 +337,73 @@ class NotificationsAjaxTest extends AjaxTestCase {
 		$response = json_decode( $this->_last_response, true );
 		$this->assertIsArray( $response, 'Response should be valid JSON' );
 		$this->assertEquals( 'error', $response['status'], 'Response should indicate error when nonce is invalid' );
+	}
+
+	/**
+	 * Test: ajax_save_post_subscriptions fails when the user cannot edit the post.
+	 *
+	 * An author has the edit_post_subscriptions capability but can only edit their own
+	 * posts. Attempting to save subscriptions for another user's post must be rejected,
+	 * even when the nonce and edit_post_subscriptions capability checks pass.
+	 *
+	 * @covers EF_Notifications::ajax_save_post_subscriptions
+	 */
+	public function test_ajax_save_fails_when_user_cannot_edit_post(): void {
+		// Authors have edit_post_subscriptions (granted by install()) but can only
+		// edit their own posts. Log in as the author and target the admin's post.
+		wp_set_current_user( self::$author_user_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$_POST['_nonce']                = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['post_id']               = $post_id;
+		$_POST['ef_notifications_name'] = 'ef-selected-users[]';
+		$_POST['user_group_ids']        = array( self::$author_user_id );
+
+		// wp_die() with no output → WPAjaxDieStopException.
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'save_notifications' );
+	}
+
+	/**
+	 * Test: handle_user_post_subscription fails when the user cannot edit the post.
+	 *
+	 * A user may have edit_post_subscriptions but lack edit access for a specific post.
+	 * The handler must reject follow/unfollow requests for posts the user cannot edit,
+	 * mirroring the gate applied in filter_post_row_actions().
+	 *
+	 * @covers EF_Notifications::handle_user_post_subscription
+	 */
+	public function test_handle_user_post_subscription_fails_when_user_cannot_edit_post(): void {
+		// Authors have edit_post_subscriptions but cannot edit another user's post.
+		wp_set_current_user( self::$author_user_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$_GET['_wpnonce'] = wp_create_nonce( 'ef_notifications_user_post_subscription' );
+		$_GET['post_id']  = $post_id;
+		$_GET['method']   = 'follow';
+
+		// print_ajax_response outputs JSON before dying → WPAjaxDieContinueException.
+		try {
+			$this->_handleAjax( 'ef_notifications_user_post_subscription' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+
+		$response = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $response, 'Response should be valid JSON' );
+		$this->assertEquals( 'error', $response['status'], 'Response should indicate error when user cannot edit the post' );
 	}
 
 	/**

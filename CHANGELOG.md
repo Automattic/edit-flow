@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.4] - 2026-04-24
+
+This release is dominated by defence-in-depth hardening following a security review of the plugin's authenticated code paths. None of the issues are known to be exploited in the wild, but all users are encouraged to update.
+
+### Security
+
+* fix: require `manage_options` on the Add Custom Status form handler by @GaryJones in [#940](https://github.com/Automattic/edit-flow/pull/940)
+* fix: correct ICS text escaping per RFC 5545 (semicolons, commas, backslashes, newlines) by @GaryJones in [#941](https://github.com/Automattic/edit-flow/pull/941)
+* fix: stop double-escaping editorial comment author fields by @GaryJones in [#942](https://github.com/Automattic/edit-flow/pull/942)
+* fix: use correct `wp_kses` arguments in inline-save error paths by @GaryJones in [#943](https://github.com/Automattic/edit-flow/pull/943)
+* fix: harden calendar trashed-message Undo URL construction against query-arg injection by @GaryJones in [#944](https://github.com/Automattic/edit-flow/pull/944)
+* fix: strip HTML from filter-supplied editorial metadata CSS to prevent `</style>` breakout by @GaryJones in [#945](https://github.com/Automattic/edit-flow/pull/945)
+* fix: validate metadata term in calendar AJAX update handler by @GaryJones in [#946](https://github.com/Automattic/edit-flow/pull/946)
+* fix: require `edit_post` access on notification subscription AJAX handlers by @GaryJones in [#931](https://github.com/Automattic/edit-flow/pull/931)
+
+### Fixed
+
+* fix: show "Immediately" for custom status posts in the block editor by @GaryJones in [#938](https://github.com/Automattic/edit-flow/pull/938)
+* fix: stop passing `null` to `wp_kses_post` in list-table `single_row` (removes five PHP 8.1+ deprecations per row) by @GaryJones in [#947](https://github.com/Automattic/edit-flow/pull/947)
+* fix: stop passing `null` to `wp_kses_post` on inline-save success (removes deprecations on Quick Edit) by @GaryJones in [#948](https://github.com/Automattic/edit-flow/pull/948)
+
+### Documentation
+
+* docs: add AGENTS.md with structured agent guidance by @GaryJones in [#906](https://github.com/Automattic/edit-flow/pull/906)
+* docs: add missing license fields to readme by @GaryJones in [#889](https://github.com/Automattic/edit-flow/pull/889)
+* docs: update WordPress forums link in README by @GaryJones in [#929](https://github.com/Automattic/edit-flow/pull/929)
+
+### Maintenance
+
+* chore: exclude `eslint` from the Dependabot `dev-dependencies` group by @GaryJones in [#919](https://github.com/Automattic/edit-flow/pull/919)
+* Routine dependency updates for npm packages and GitHub Actions
+
 ## [0.10.3] - 2026-01-12
 
 ### Added
@@ -415,6 +447,7 @@ This is a major update with significant bug fixes, new features, and modernised 
 
 * Ability to assign custom statuses to posts.
 
+[0.10.4]: https://github.com/Automattic/Edit-Flow/compare/0.10.3...0.10.4
 [0.10.3]: https://github.com/Automattic/Edit-Flow/compare/0.10.2...0.10.3
 [0.10.2]: https://github.com/Automattic/Edit-Flow/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/Automattic/Edit-Flow/compare/0.10.0...0.10.1

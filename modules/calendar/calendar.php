@@ -542,7 +542,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						$formatted_post = array(
 							'BEGIN'         => 'VEVENT',
 							'UID'           => $post->guid,
-							'SUMMARY'       => $this->do_ics_escaping( apply_filters( 'the_title', $post->post_title ) ) . ' - ' . $post_status_obj->label,
+							'SUMMARY'       => $this->do_ics_escaping( apply_filters( 'the_title', $post->post_title ) ) . ' - ' . $this->do_ics_escaping( $post_status_obj->label ),
 							'DTSTART'       => $start_date,
 							'DTEND'         => $end_date,
 							'LAST-MODIFIED' => $last_modified,
@@ -554,7 +554,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						$formatted_post['DESCRIPTION'] = '';
 						if ( ! empty( $information_fields ) ) {
 							foreach ( $information_fields as $key => $values ) {
-								$formatted_post['DESCRIPTION'] .= $values['label'] . ': ' . $values['value'] . '\n';
+								$formatted_post['DESCRIPTION'] .= $this->do_ics_escaping( $values['label'] ) . ': ' . $this->do_ics_escaping( $values['value'] ) . '\n';
 							}
 							$formatted_post['DESCRIPTION'] = rtrim( $formatted_post['DESCRIPTION'] );
 						}
@@ -626,16 +626,20 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		}
 
 		/**
-		 * Perform the encoding necessary for ICS feed text.
+		 * Perform the encoding necessary for ICS feed text per RFC 5545, section 3.3.11.
+		 *
+		 * The backslash must be escaped first, otherwise the backslashes introduced
+		 * by the subsequent replacements would themselves be escaped a second time.
 		 *
 		 * @param string $text The string that needs to be escaped.
 		 * @return string The string after escaping for ICS.
 		 * @since 0.8
 		 */
 		public function do_ics_escaping( $text ) {
-			$text = str_replace( ',', '\,', $text );
-			$text = str_replace( ';', '\:', $text );
 			$text = str_replace( '\\', '\\\\', $text );
+			$text = str_replace( array( "\r\n", "\r", "\n" ), '\n', $text );
+			$text = str_replace( ';', '\;', $text );
+			$text = str_replace( ',', '\,', $text );
 			return $text;
 		}
 
@@ -815,25 +819,44 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			<?php
 				// Handle posts that have been trashed or untrashed.
-				// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- These GET params are set by WordPress core's trash/untrash actions.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended -- These GET params are set by WordPress core's trash/untrash actions.
 			if ( isset( $_GET['trashed'] ) || isset( $_GET['untrashed'] ) ) {
 				echo '<div id="trashed-message" class="updated"><p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				if ( isset( $_GET['trashed'] ) && (int) $_GET['trashed'] ) {
+					$trashed_count = (int) $_GET['trashed'];
 					/* translators: %d: number of posts trashed */
-					echo esc_html( sprintf( _n( '%d post moved to the trash.', '%d posts moved to the trash.', $_GET['trashed'], 'edit-flow' ), number_format_i18n( $_GET['trashed'] ) ) );
-					$ids       = isset( $_GET['ids'] ) ? $_GET['ids'] : 0;
-					$pid       = explode( ',', $ids );
-					$post_type = get_post_type( $pid[0] );
-					echo ' <a href="' . esc_url( wp_nonce_url( "edit.php?post_type=$post_type&doaction=undo&action=untrash&ids=$ids", 'bulk-posts' ) ) . '">' . esc_html__( 'Undo', 'edit-flow' ) . '</a><br />';
+					echo esc_html( sprintf( _n( '%d post moved to the trash.', '%d posts moved to the trash.', $trashed_count, 'edit-flow' ), number_format_i18n( $trashed_count ) ) );
+
+					// Only build an Undo link from strictly-numeric ids; a
+					// user-crafted value must not be able to inject extra
+					// query arguments into the resulting URL.
+					$ids_raw  = isset( $_GET['ids'] ) ? sanitize_text_field( wp_unslash( $_GET['ids'] ) ) : '';
+					$pid_list = array_values( array_filter( array_map( 'absint', explode( ',', $ids_raw ) ) ) );
+					if ( ! empty( $pid_list ) ) {
+						$post_type = get_post_type( $pid_list[0] );
+						if ( $post_type && post_type_exists( $post_type ) ) {
+							$undo_url = add_query_arg(
+								array(
+									'post_type' => $post_type,
+									'doaction'  => 'undo',
+									'action'    => 'untrash',
+									'ids'       => implode( ',', $pid_list ),
+								),
+								admin_url( 'edit.php' )
+							);
+							echo ' <a href="' . esc_url( wp_nonce_url( $undo_url, 'bulk-posts' ) ) . '">' . esc_html__( 'Undo', 'edit-flow' ) . '</a><br />';
+						}
+					}
 					unset( $_GET['trashed'] );
 				}
 				if ( isset( $_GET['untrashed'] ) && (int) $_GET['untrashed'] ) {
+					$untrashed_count = (int) $_GET['untrashed'];
 					/* translators: %d: number of posts restored */
-					echo esc_html( sprintf( _n( '%d post restored from the Trash.', '%d posts restored from the Trash.', $_GET['untrashed'], 'edit-flow' ), number_format_i18n( $_GET['untrashed'] ) ) );
-					unset( $_GET['undeleted'] );
+					echo esc_html( sprintf( _n( '%d post restored from the Trash.', '%d posts restored from the Trash.', $untrashed_count, 'edit-flow' ), number_format_i18n( $untrashed_count ) ) );
+					unset( $_GET['untrashed'] );
 				}
 				echo '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			}
 			?>
 
@@ -1777,17 +1800,21 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$metadata_types = array_keys( EditFlow()->editorial_metadata->get_supported_metadata_types() );
 
 			// Update an editorial metadata field.
-			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below before use.
-			$metadata_term           = isset( $_POST['metadata_term'] ) ? $_POST['metadata_term'] : '';
-			$metadata_type           = isset( $_POST['metadata_type'] ) ? $_POST['metadata_type'] : '';
-			$incoming_metadata_value = isset( $_POST['metadata_value'] ) ? $_POST['metadata_value'] : '';
-			// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$metadata_term = isset( $_POST['metadata_term'] ) ? sanitize_text_field( wp_unslash( $_POST['metadata_term'] ) ) : '';
+			$metadata_type = isset( $_POST['metadata_type'] ) ? sanitize_text_field( wp_unslash( $_POST['metadata_type'] ) ) : '';
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is sanitized below based on metadata type.
+			$incoming_metadata_value = isset( $_POST['metadata_value'] ) ? wp_unslash( $_POST['metadata_value'] ) : '';
 
-			if ( isset( $_POST['metadata_type'] ) && in_array( $_POST['metadata_type'], $metadata_types ) ) {
-				$post_meta_key = sanitize_text_field( '_ef_editorial_meta_' . $_POST['metadata_type'] . '_' . $metadata_term );
+			if ( in_array( $metadata_type, $metadata_types, true ) ) {
+				// Validate the term slug refers to an existing editorial metadata term before using it in a meta key.
+				if ( '' === $metadata_term || ! EditFlow()->editorial_metadata->get_editorial_metadata_term_by( 'slug', $metadata_term ) ) {
+					$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+				}
+
+				$post_meta_key = '_ef_editorial_meta_' . $metadata_type . '_' . $metadata_term;
 
 				// Javascript date parsing is terrible, so use strtotime in PHP.
-				if ( 'date' == $metadata_type ) {
+				if ( 'date' === $metadata_type ) {
 					$metadata_value = strtotime( sanitize_text_field( $incoming_metadata_value ) );
 				} else {
 					$metadata_value = sanitize_text_field( $incoming_metadata_value );
@@ -1796,8 +1823,12 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				update_post_meta( $post->ID, $post_meta_key, $metadata_value );
 				$response = 'success';
 			} else {
-				switch ( $_POST['metadata_type'] ) {
+				switch ( $metadata_type ) {
 					case 'taxonomy':
+						// Validate that the term refers to a taxonomy registered for this post type.
+						if ( '' === $metadata_term || ! in_array( $metadata_term, get_object_taxonomies( $post->post_type ), true ) ) {
+							$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+						}
 						$response = wp_set_post_terms( $post->ID, $incoming_metadata_value, $metadata_term );
 						break;
 					default:

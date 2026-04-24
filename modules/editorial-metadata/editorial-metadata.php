@@ -318,12 +318,18 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 					}
 					// Allow users to filter out rules if there's something wonky.
 					$css_rules = apply_filters( 'ef_editorial_metadata_manage_posts_css_rules', $css_rules );
-					echo "<style type=\"text/css\">\n";
+
+					$css_lines = array();
 					foreach ( (array) $css_rules as $css_property => $rules ) {
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is for the escaping of the CSS property and rules.
-						echo $css_property . ' {' . implode( ' ', $rules ) . "}\n ";
+						// Strip any HTML tags that a misbehaving filter hook may have
+						// smuggled into the selector or declarations; this prevents
+						// an injected `</style>` sequence from breaking out of the
+						// style block into arbitrary HTML.
+						$safe_property = wp_strip_all_tags( (string) $css_property );
+						$safe_rules    = implode( ' ', array_map( 'wp_strip_all_tags', (array) $rules ) );
+						$css_lines[]   = $safe_property . ' {' . $safe_rules . '}';
 					}
-					echo '</style>';
+					wp_add_inline_style( 'edit_flow-editorial_metadata-styles', implode( "\n", $css_lines ) );
 				}
 			}
 
@@ -1450,12 +1456,14 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				set_current_screen( 'edit-editorial-metadata' );
 				$wp_list_table = new EF_Editorial_Metadata_List_Table();
 				$wp_list_table->prepare_items();
-				echo wp_kses_post( $wp_list_table->single_row( $return ) );
+				// single_row() echoes its own output; column_* callbacks are
+				// responsible for escaping, as per WP_List_Table's contract.
+				$wp_list_table->single_row( $return );
 				wp_die();
 			} else {
 				/* Translators: 1: the name of the term that could not be found */
-				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the term: <strong>%s</strong>', 'edit-flow' ), $metadata_name ) );
-				wp_die( wp_kses( $change_error->get_error_message() ) );
+				$change_error = new WP_Error( 'invalid', sprintf( __( 'Could not update the term: <strong>%s</strong>', 'edit-flow' ), esc_html( $metadata_name ) ) );
+				wp_die( wp_kses( $change_error->get_error_message(), array( 'strong' => array() ) ) );
 			}
 		}
 
@@ -1896,10 +1904,11 @@ class EF_Editorial_Metadata_List_Table extends WP_List_Table {
 	public function single_row( $term, $level = 0 ) {
 		static $alternate_class = '';
 		$alternate_class        = ( '' == $alternate_class ? ' alternate' : '' );
-		$row_class              = ' class="term-static' . $alternate_class . '"';
 
-		echo wp_kses_post( '<tr id="term-' . $term->term_id . '"' . $row_class . '>' );
-		echo wp_kses_post( $this->single_row_columns( $term ) );
+		printf( '<tr id="term-%d" class="term-static%s">', (int) $term->term_id, esc_attr( $alternate_class ) );
+		// single_row_columns() echoes its own output; the column_* callbacks are
+		// responsible for escaping, as per WP_List_Table's contract.
+		$this->single_row_columns( $term );
 		echo '</tr>';
 	}
 
