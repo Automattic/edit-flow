@@ -1902,10 +1902,11 @@ class EF_Editorial_Metadata_List_Table extends WP_List_Table {
 	public function single_row( $term, $level = 0 ) {
 		static $alternate_class = '';
 		$alternate_class        = ( '' == $alternate_class ? ' alternate' : '' );
-		$row_class              = ' class="term-static' . $alternate_class . '"';
 
-		echo wp_kses_post( '<tr id="term-' . $term->term_id . '"' . $row_class . '>' );
-		echo wp_kses_post( $this->single_row_columns( $term ) );
+		printf( '<tr id="term-%d" class="term-static%s">', (int) $term->term_id, esc_attr( $alternate_class ) );
+		// single_row_columns() echoes its own output; the column_* callbacks are
+		// responsible for escaping, as per WP_List_Table's contract.
+		$this->single_row_columns( $term );
 		echo '</tr>';
 	}
 

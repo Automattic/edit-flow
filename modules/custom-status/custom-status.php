@@ -2316,10 +2316,11 @@ class EF_Custom_Status_List_Table extends WP_List_Table {
 	public function single_row( $item ) {
 		static $alternate_class = '';
 		$alternate_class        = ( '' == $alternate_class ? ' alternate' : '' );
-		$row_class              = ' class="term-static' . $alternate_class . '"';
 
-		echo wp_kses_post( '<tr id="term-' . $item->term_id . '"' . $row_class . '>' );
-		echo wp_kses_post( $this->single_row_columns( $item ) );
+		printf( '<tr id="term-%d" class="term-static%s">', (int) $item->term_id, esc_attr( $alternate_class ) );
+		// single_row_columns() echoes its own output; the column_* callbacks are
+		// responsible for escaping, as per WP_List_Table's contract.
+		$this->single_row_columns( $item );
 		echo '</tr>';
 	}
 
