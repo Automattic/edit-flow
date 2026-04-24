@@ -11,7 +11,7 @@ Editorial workflow plugin with custom statuses, editorial comments, and notifica
 | **Function prefix** | `ef_` |
 | **Namespace** | Global (legacy) |
 | **Source directory** | `modules/` |
-| **Version** | 0.10.3 |
+| **Version** | 0.10.4 |
 | **Requires PHP** | 7.4+ |
 | **Requires WP** | 6.4+ |
 
