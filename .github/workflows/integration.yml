@@ -61,6 +61,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Put local node binaries on PATH
+        run: echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
