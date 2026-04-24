@@ -1372,11 +1372,17 @@ if ( ! class_exists( 'EF_Usergroups_List_Table' ) ) {
 		 * @param object $usergroup The usergroup object.
 		 */
 		public function single_row( $usergroup ) {
-			static $row_class = '';
-			$row_class        = ( '' == $row_class ? ' class="alternate"' : '' );
+			static $is_alternate = false;
+			$is_alternate        = ! $is_alternate;
 
-			echo wp_kses_post( '<tr id="usergroup-' . $usergroup->term_id . '"' . $row_class . '>' );
-			echo wp_kses_post( $this->single_row_columns( $usergroup ) );
+			printf(
+				'<tr id="usergroup-%d"%s>',
+				(int) $usergroup->term_id,
+				$is_alternate ? ' class="alternate"' : ''
+			);
+			// single_row_columns() echoes its own output; the column_* callbacks are
+			// responsible for escaping, as per WP_List_Table's contract.
+			$this->single_row_columns( $usergroup );
 			echo '</tr>';
 		}
 
