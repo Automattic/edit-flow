@@ -318,12 +318,18 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 					}
 					// Allow users to filter out rules if there's something wonky.
 					$css_rules = apply_filters( 'ef_editorial_metadata_manage_posts_css_rules', $css_rules );
-					echo "<style type=\"text/css\">\n";
+
+					$css_lines = array();
 					foreach ( (array) $css_rules as $css_property => $rules ) {
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- This is for the escaping of the CSS property and rules.
-						echo $css_property . ' {' . implode( ' ', $rules ) . "}\n ";
+						// Strip any HTML tags that a misbehaving filter hook may have
+						// smuggled into the selector or declarations; this prevents
+						// an injected `</style>` sequence from breaking out of the
+						// style block into arbitrary HTML.
+						$safe_property = wp_strip_all_tags( (string) $css_property );
+						$safe_rules    = implode( ' ', array_map( 'wp_strip_all_tags', (array) $rules ) );
+						$css_lines[]   = $safe_property . ' {' . $safe_rules . '}';
 					}
-					echo '</style>';
+					wp_add_inline_style( 'edit_flow-editorial_metadata-styles', implode( "\n", $css_lines ) );
 				}
 			}
 
