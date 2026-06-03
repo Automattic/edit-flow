@@ -2226,7 +2226,13 @@ class EF_Custom_Status_List_Table extends WP_List_Table {
 				// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar -- Intentionally commented out caching line for future implementation.
 				// wp_cache_set( "ef_custom_status_count_$column_name", $post_count );
 			}
-			$output = sprintf( '<a title="See all %1$ss saved as \'%2$s\'" href="%3$s">%4$s</a>', $column_name, $item->name, $edit_flow->helpers->filter_posts_link( $item->slug, $column_name ), $post_count );
+			$output = sprintf(
+				'<a title="See all %1$ss saved as \'%2$s\'" href="%3$s">%4$s</a>',
+				esc_attr( $column_name ),
+				esc_attr( $item->name ),
+				esc_url( $edit_flow->helpers->filter_posts_link( $item->slug, $column_name ) ),
+				esc_html( $post_count )
+			);
 			return $output;
 		}
 	}
