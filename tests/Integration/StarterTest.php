@@ -27,7 +27,7 @@ class StarterTest extends TestCase {
 		$minimum_version = '3.4.0';
 		$running_version = get_bloginfo( 'version' );
 
-		// trunk is always "master" in github terms, but WordPress has a specific way of describing it
+		// trunk is always "master" in GitHub terms, but WordPress has a specific way of describing it
 		// grab the exact version number to verify that we're on trunk
 		if ( 'master' === $running_version || 'trunk' === $running_version ) {
 			$file = file_get_contents( 'https://raw.github.com/WordPress/WordPress/master/wp-includes/version.php' );
