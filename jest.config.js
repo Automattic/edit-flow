@@ -9,4 +9,9 @@ module.exports = {
         }
     },
     preset: '@wordpress/jest-preset-default',
+    // uuid (pulled in by @wordpress/components) ships as ESM only, so it must be
+    // transpiled rather than left in the default node_modules ignore list.
+    transformIgnorePatterns: [
+        "node_modules/(?!(?:uuid)/)",
+    ],
 };
