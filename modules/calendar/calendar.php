@@ -1829,7 +1829,35 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						if ( '' === $metadata_term || ! in_array( $metadata_term, get_object_taxonomies( $post->post_type ), true ) ) {
 							$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
 						}
-						$response = wp_set_post_terms( $post->ID, $incoming_metadata_value, $metadata_term );
+
+						// Resolve the submitted value(s) to EXISTING term IDs only. This endpoint
+						// must not create new terms: passing free-text names to wp_set_post_terms()
+						// would let any user who can edit a single post create arbitrary taxonomy
+						// terms, which normally requires the taxonomy's term-management capability.
+						$incoming_terms = is_array( $incoming_metadata_value ) ? $incoming_metadata_value : array( $incoming_metadata_value );
+						$term_ids       = array();
+						foreach ( $incoming_terms as $incoming_term ) {
+							$incoming_term = sanitize_text_field( $incoming_term );
+							if ( '' === $incoming_term ) {
+								continue;
+							}
+							if ( is_numeric( $incoming_term ) ) {
+								$existing_term = get_term( (int) $incoming_term, $metadata_term );
+							} else {
+								$existing_term = get_term_by( 'slug', sanitize_title( $incoming_term ), $metadata_term );
+								if ( ! $existing_term ) {
+									$existing_term = get_term_by( 'name', $incoming_term, $metadata_term );
+								}
+							}
+							if ( $existing_term instanceof WP_Term ) {
+								$term_ids[] = (int) $existing_term->term_id;
+							} else {
+								// A non-empty value matching no existing term: reject rather than create one.
+								$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+							}
+						}
+
+						$response = wp_set_post_terms( $post->ID, $term_ids, $metadata_term, false );
 						break;
 					default:
 						$response = new WP_Error( 'invalid-type', __( 'Invalid metadata type', 'edit-flow' ) );
