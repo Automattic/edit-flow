@@ -380,15 +380,21 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			foreach ( $terms as $term ) {
 				$meta_key = $this->get_postmeta_key( $term );
 
+				// Mirror the sanitisation applied on the classic (metabox) save path so the
+				// REST/Gutenberg write path cannot store unsanitised values. Paragraph fields
+				// keep their line breaks; every other type is treated as a single line.
+				$sanitize_callback = ( 'paragraph' === $term->type ) ? 'sanitize_textarea_field' : 'sanitize_text_field';
+
 				foreach ( $supported_post_types as $post_type ) {
 					register_post_meta(
 						$post_type,
 						$meta_key,
 						array(
-							'show_in_rest'  => true,
-							'single'        => true,
-							'type'          => 'string',
-							'auth_callback' => function ( $allowed, $meta_key, $post_id ) {
+							'show_in_rest'      => true,
+							'single'            => true,
+							'type'              => 'string',
+							'sanitize_callback' => $sanitize_callback,
+							'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
 								return current_user_can( 'edit_post', $post_id );
 							},
 						)
@@ -441,8 +447,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				echo '<p>' . wp_kses( $message, 'a' ) . '</p>';
 			} else {
 				foreach ( $terms as $term ) {
-					$postmeta_key     = $this->get_postmeta_key( $term );
-					$current_metadata = esc_attr( $this->get_postmeta_value( $term, $post->ID ) );
+					$postmeta_key = $this->get_postmeta_key( $term );
+					// Raw stored value; each field type below escapes it for its own output context.
+					$current_metadata = $this->get_postmeta_value( $term, $post->ID );
 					$type             = $term->type;
 					$description      = $term->description;
 					if ( $description ) {
@@ -486,11 +493,24 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 							if ( $description_span ) {
 								echo '<label for="' . esc_attr( $postmeta_key ) . '">' . wp_kses_post( $description_span ) . '</label>';
 							}
-							echo '<input id="' . esc_attr( $postmeta_key ) . '" name="' . esc_attr( $postmeta_key ) . '"type=text value="' . esc_attr( $current_metadata ) . '" />';
+							echo '<input id="' . esc_attr( $postmeta_key ) . '" name="' . esc_attr( $postmeta_key ) . '" type="text" value="' . esc_attr( $current_metadata ) . '" />';
 							if ( ! empty( $current_metadata ) ) {
-								/* translators: %s is the google maps location. */
-								$google_maps_url = sprintf( esc_html__( 'View &#8220;%s&#8221; on Google Maps', 'edit-flow' ), esc_attr( $current_metadata ) );
-								echo '<div><a href=http://maps.google.com/?q="' . esc_attr( $current_metadata ) . '"&t=m target=_blank>"' . esc_attr( $google_maps_url ) . '"</a></div>';
+								// http_build_query() (unlike add_query_arg()) URL-encodes the value,
+								// so spaces, "&" and "=" cannot alter the URL structure.
+								$google_maps_url  = 'https://maps.google.com/?' . http_build_query(
+									array(
+										'q' => $current_metadata,
+										't' => 'm',
+									)
+								);
+								$google_maps_text = sprintf(
+									/* translators: %s: the location entered in the editorial metadata field. */
+									__( 'View “%s” on Google Maps', 'edit-flow' ),
+									$current_metadata
+								);
+								// Escape late: the label is translatable and filterable (gettext), so escape the
+								// whole composed string at output rather than trusting either source.
+								echo '<div><a href="' . esc_url( $google_maps_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $google_maps_text ) . '</a></div>';
 							}
 							break;
 						case 'text':
