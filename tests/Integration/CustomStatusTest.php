@@ -47,6 +47,32 @@ class CustomStatusTest extends TestCase {
 	}
 
 	/**
+	 * A custom status name must be escaped when rendered into the list table's
+	 * title attribute, so it cannot break out and inject markup.
+	 */
+	function test_list_table_column_escapes_status_name() {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		set_current_screen( 'edit-post' );
+
+		$table = new \EF_Custom_Status_List_Table();
+
+		$item = (object) array(
+			'term_id'  => 0,
+			'name'     => 'Bad" onmouseover=alert(1) x="',
+			'slug'     => 'bad-status',
+			'position' => 0,
+		);
+
+		$output = $table->column_default( $item, 'post' );
+
+		// The status name's double quote must be entity-encoded so it cannot close
+		// the title attribute and turn the rest of the value into tag attributes.
+		$this->assertStringContainsString( 'Bad&quot;', $output );
+		$this->assertStringNotContainsString( 'Bad" onmouseover', $output );
+		$this->assertStringContainsString( 'href="', $output );
+	}
+
+	/**
 	 * Test that a published post post_date_gmt is not altered
 	 */
 	function test_insert_post_publish_respect_post_date_gmt() {
