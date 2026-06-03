@@ -128,7 +128,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					'update-error'        => __( 'There was an error updating the post. Please try again.', 'edit-flow' ),
 					/* translators: %s: URL to the published post */
 					'published-post-ajax' => __( "Updating the post date dynamically doesn't work for published content. Please <a href='%s'>edit the post</a>.", 'edit-flow' ),
-					'key-regenerated'     => __( 'iCal secret key regenerated. Please inform all users they will need to resubscribe.', 'edit-flow' ),
+					'key-regenerated'     => __( 'Your iCal feed URL has been regenerated. Re-copy it from Screen Options on the Calendar.', 'edit-flow' ),
 				),
 				'configure_page_cb'     => 'print_configure_view',
 				'configure_link_text'   => __( 'Calendar Options', 'edit-flow' ),
@@ -339,10 +339,11 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			$output = '';
 
+			$current_user      = wp_get_current_user();
 			$args              = array(
 				'action'   => 'ef_calendar_ics_subscription',
-				'user'     => wp_get_current_user()->user_login,
-				'user_key' => md5( wp_get_current_user()->user_login . $this->module->options->ics_secret_key ),
+				'user'     => $current_user->user_login,
+				'user_key' => $this->get_user_ics_secret( $current_user->ID ),
 			);
 			$subscription_link = add_query_arg( $args, admin_url( 'admin-ajax.php' ) );
 			$output           .= '<br />';
@@ -353,13 +354,32 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		}
 
 		/**
+		 * Get the current user's personal .ics feed secret, creating one on first use.
+		 *
+		 * The secret is stored per user and is independently revocable, so a leaked feed URL
+		 * exposes only that user's calendar view and can be rotated without affecting anyone else.
+		 *
+		 * @param int $user_id The user to fetch the secret for.
+		 * @return string The per-user feed secret.
+		 */
+		private function get_user_ics_secret( $user_id ) {
+			$meta_key = self::usermeta_key_prefix . 'ics_secret';
+			$secret   = (string) $this->get_user_meta( $user_id, $meta_key, true );
+			if ( '' === $secret ) {
+				$secret = wp_generate_password( 32, false );
+				$this->update_user_meta( $user_id, $meta_key, $secret );
+			}
+			return $secret;
+		}
+
+		/**
 		 * Add module options to the screen panel
 		 *
 		 * @since 0.8.3
 		 */
 		public function add_screen_options_panel() {
 			require_once EDIT_FLOW_ROOT . '/common/php/screen-options.php';
-			if ( 'on' == $this->module->options->ics_subscription && $this->module->options->ics_secret_key ) {
+			if ( 'on' == $this->module->options->ics_subscription ) {
 				add_screen_options_panel( self::usermeta_key_prefix . 'screen_options', __( 'Calendar Options', 'edit-flow' ), array( $this, 'generate_screen_options' ), self::screen_id, false, true );
 			}
 		}
@@ -496,21 +516,41 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				wp_die(); // @todo Return an error response.
 			}
 
-			// Confirm this is a valid request.
-			$user           = sanitize_user( $_GET['user'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public feed with secret key validation.
-			$user_key       = sanitize_user( $_GET['user_key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public feed with secret key validation.
-			$ics_secret_key = $this->module->options->ics_secret_key;
-			if ( ! $ics_secret_key || md5( $user . $ics_secret_key ) !== $user_key ) {
+			// Resolve the feed user and validate their personal, per-user secret. The comparison
+			// runs unconditionally against a real-or-dummy secret to limit username enumeration
+			// via timing (best-effort: get_user_by() itself is not constant time). user_can() and
+			// the query below resolve against the current blog, the desired multisite behaviour.
+			$login    = sanitize_user( wp_unslash( $_GET['user'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public feed validated by per-user secret below.
+			$user_key = sanitize_text_field( wp_unslash( $_GET['user_key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public feed validated by per-user secret below.
+
+			$feed_user = get_user_by( 'login', $login );
+			$view_cap  = apply_filters( 'ef_view_calendar_cap', 'ef_view_calendar' );
+
+			$stored_secret = ( $feed_user && user_can( $feed_user, $view_cap ) )
+				? (string) $this->get_user_meta( $feed_user->ID, self::usermeta_key_prefix . 'ics_secret', true )
+				: '';
+			$known_secret  = '' !== $stored_secret ? $stored_secret : str_repeat( '*', 32 );
+
+			if ( ! hash_equals( $known_secret, $user_key ) || '' === $stored_secret ) {
 				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
-			// Set up the post data to be printed.
-			$post_query_args  = array();
-			$calendar_filters = $this->calendar_filters();
+			// Run the feed as the resolved user so the read scoping below applies to them.
+			wp_set_current_user( $feed_user->ID );
+
+			// Set up the post data to be printed. In this public feed we never honour caller-
+			// supplied author/post_status filters: they are the disclosure levers. The feed is
+			// scoped to the resolved user's own readable posts in get_calendar_posts_for_week().
+			$post_query_args    = array();
+			$calendar_filters   = $this->calendar_filters();
+			$disallowed_filters = array( 'author', 'post_status' );
 			foreach ( $calendar_filters as $filter ) {
-				// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public feed with secret key validation, sanitized by sanitize_filter().
+				if ( in_array( $filter, $disallowed_filters, true ) ) {
+					continue;
+				}
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public feed validated by per-user secret; sanitized by sanitize_filter().
 				if ( isset( $_GET[ $filter ] ) ) {
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public feed with secret key validation, sanitized by sanitize_filter().
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public feed validated by per-user secret; sanitized by sanitize_filter().
 					$value = $this->sanitize_filter( $filter, $_GET[ $filter ] );
 					if ( false !== $value ) {
 						$post_query_args[ $filter ] = $value;
@@ -681,15 +721,18 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				return;
 			}
 
-			if ( ! current_user_can( 'manage_options' ) ) {
+			// Any calendar-capable user may rotate their own feed token (per-user revocation).
+			$view_cap = apply_filters( 'ef_view_calendar_cap', 'ef_view_calendar' );
+			if ( ! current_user_can( $view_cap ) ) {
 				wp_die( esc_html( $this->module->messages['invalid-permissions'] ) );
 			}
 
-			if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'ef-regenerate-ics-key' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'ef-regenerate-ics-key' ) ) {
 				wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 			}
 
-			EditFlow()->update_module_option( $this->module->name, 'ics_secret_key', wp_generate_password() );
+			// Mint a fresh secret for the current user only; other users' feed URLs are unaffected.
+			$this->update_user_meta( get_current_user_id(), self::usermeta_key_prefix . 'ics_secret', wp_generate_password( 32, false ) );
 
 			wp_safe_redirect( add_query_arg( 'message', 'key-regenerated', menu_page_url( $this->module->settings_slug, false ) ) );
 			exit;
@@ -1408,7 +1451,17 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			);
 
 			// Filter for an end user to implement any of their own query args.
-			$args         = apply_filters( 'ef_calendar_posts_query_args', $args, $context );
+			$args = apply_filters( 'ef_calendar_posts_query_args', $args, $context );
+
+			// In the public .ics subscription context the request runs as the resolved feed user
+			// (see handle_ics_subscription()). Mirror the core posts list: a user who cannot edit
+			// others' posts only sees their own, so a leaked feed URL cannot disclose other
+			// authors' unpublished posts. Applied after the filter so it cannot be bypassed via
+			// ef_calendar_posts_query_args. The dashboard calendar (cap-gated) is unaffected.
+			if ( 'ics_subscription' === $context && ! current_user_can( 'edit_others_posts' ) ) {
+				$args['author'] = get_current_user_id();
+			}
+
 			$post_results = new WP_Query( $args );
 
 			$posts = array();
@@ -1612,11 +1665,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$regenerate_url = add_query_arg( 'action', 'ef_calendar_regenerate_calendar_feed_secret', admin_url( 'index.php' ) );
 			$regenerate_url = wp_nonce_url( $regenerate_url, 'ef-regenerate-ics-key' );
 			echo '&nbsp;&nbsp;&nbsp;<a href="' . esc_url( $regenerate_url ) . '">' . esc_html__( 'Regenerate calendar feed secret', 'edit-flow' ) . '</a>';
-
-			// If our secret key doesn't exist, create a new one.
-			if ( empty( $this->module->options->ics_secret_key ) ) {
-				EditFlow()->update_module_option( $this->module->name, 'ics_secret_key', wp_generate_password() );
-			}
 		}
 
 		/**
