@@ -78,7 +78,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 					'title'   => __( 'Overview', 'edit-flow' ),
 					'content' => __( '<p>Notifications ensure you keep up to date with progress your most important content. Users can be subscribed to notifications on a post one by one or by selecting user groups.</p><p>When enabled, email notifications can be sent when a post changes status or an editorial comment is left by a writer or an editor.</p>', 'edit-flow' ),
 				],
-				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/notifications/">Notifications Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
+				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/notifications/">Notifications Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on GitHub</a></p>', 'edit-flow' ),
 			];
 			$this->module     = EditFlow()->register_module( 'notifications', $args );
 		}

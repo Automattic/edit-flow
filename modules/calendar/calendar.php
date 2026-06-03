@@ -138,7 +138,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					// phpcs:ignore WordPress.WP.I18n.NoHtmlWrappedStrings -- HTML is intentional for help tab content.
 					'content' => __( '<p>The calendar is a convenient week-by-week or month-by-month view into your content. Quickly see which stories are on track to being published on time, and which will need extra effort.</p>', 'edit-flow' ),
 				),
-				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/calendar/">Calendar Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
+				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/calendar/">Calendar Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on GitHub</a></p>', 'edit-flow' ),
 			);
 			$this->module = EditFlow()->register_module( 'calendar', $args );
 		}
