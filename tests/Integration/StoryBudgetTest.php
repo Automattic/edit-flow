@@ -126,6 +126,63 @@ class StoryBudgetTest extends TestCase {
 	}
 
 	/**
+	 * The Story Budget must not surface another user's unpublished posts to a
+	 * low-privileged role that can view the budget but cannot read those posts.
+	 */
+	public function test_get_posts_for_term_hides_other_users_unpublished_posts() {
+		global $edit_flow;
+		$story_budget = $edit_flow->story_budget;
+
+		$author_id      = self::factory()->user->create( array( 'role' => 'author' ) );
+		$contributor_id = self::factory()->user->create( array( 'role' => 'contributor' ) );
+
+		$cat_id = self::factory()->category->create( array( 'name' => 'Budget Cat' ) );
+		$term   = get_term( $cat_id, 'category' );
+
+		$now = date( 'Y-m-d H:i:s' );
+
+		$others_draft = wp_insert_post(
+			array(
+				'post_author'   => $author_id,
+				'post_status'   => 'draft',
+				'post_title'    => 'Another author secret draft',
+				'post_date'     => $now,
+				'post_category' => array( $cat_id ),
+			)
+		);
+		$own_draft    = wp_insert_post(
+			array(
+				'post_author'   => $contributor_id,
+				'post_status'   => 'draft',
+				'post_title'    => 'My own draft',
+				'post_date'     => $now,
+				'post_category' => array( $cat_id ),
+			)
+		);
+
+		$story_budget->taxonomy_used = 'category';
+		$story_budget->user_filters  = array(
+			'post_status' => 'draft',
+			'cat'         => '',
+			'author'      => '',
+			'start_date'  => date( 'Y-m-d', strtotime( '-1 day' ) ),
+			'number_days' => 30,
+		);
+
+		// As the contributor: own draft is visible, the other author's draft is not.
+		wp_set_current_user( $contributor_id );
+		$contributor_ids = wp_list_pluck( $story_budget->get_posts_for_term( $term, $story_budget->user_filters ), 'ID' );
+		$this->assertContains( $own_draft, $contributor_ids, 'Contributor should see their own draft.' );
+		$this->assertNotContains( $others_draft, $contributor_ids, "Contributor must not see another user's draft." );
+
+		// An administrator still sees the whole pipeline.
+		wp_set_current_user( self::$admin_user_id );
+		$admin_ids = wp_list_pluck( $story_budget->get_posts_for_term( $term, $story_budget->user_filters ), 'ID' );
+		$this->assertContains( $own_draft, $admin_ids );
+		$this->assertContains( $others_draft, $admin_ids );
+	}
+
+	/**
 	 * Test that calendar has default custom statuses
 	 */
 	public function test_calendar_custom_statuses() {

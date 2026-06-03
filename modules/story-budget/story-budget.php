@@ -603,6 +603,16 @@ class EF_Story_Budget extends EF_Module {
 		// Filter for an end user to implement any of their own query args.
 		$args = apply_filters( 'ef_story_budget_posts_query_args', $args );
 
+		// Restrict users who cannot edit others' posts to their own, mirroring the core
+		// posts list (edit.php). The budget renders in an admin context, where WP_Query
+		// would otherwise return every author's unpublished posts; without this the
+		// status, author, title and date columns disclose other users' drafts, pending
+		// and scheduled posts to lower-privileged roles (e.g. Contributors). Applied
+		// after the filter above so it cannot be bypassed by a query-args filter.
+		if ( ! current_user_can( 'edit_others_posts' ) ) {
+			$args['author'] = get_current_user_id();
+		}
+
 		$term_posts_query_results = new WP_Query( $args );
 
 		$term_posts = array();
