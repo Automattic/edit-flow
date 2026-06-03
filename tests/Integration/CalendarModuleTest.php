@@ -51,6 +51,15 @@ class CalendarModuleTest extends TestCase {
 	}
 
 	/**
+	 * Test help sidebar uses correct GitHub capitalization.
+	 */
+	public function test_calendar_settings_help_sidebar_uses_github_branding() {
+		global $edit_flow;
+
+		$this->assertStringContainsString( 'Edit Flow on GitHub', $edit_flow->calendar->module->settings_help_sidebar );
+	}
+
+	/**
 	 * Test get_beginning_of_week with Sunday as start.
 	 */
 	public function test_get_beginning_of_week_sunday_start() {
