@@ -568,11 +568,7 @@ if ( ! class_exists( 'EF_Module' ) ) {
 						<label for="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>">
 							<div class="ef-user-subscribe-actions">
 								<?php do_action( 'ef_user_subscribe_actions', $user->ID, $checked ); ?>
-								<input type="checkbox" id="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $user->ID ); ?>"
-																		<?php
-																		echo esc_attr( $checked );
-																		echo esc_attr( $current_user_class );
-																		?>
+								<input type="checkbox" id="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $user->ID ); ?>" <?php echo $checked; ?> <?php echo $current_user_class;?>
 								/>
 							</div>
 
