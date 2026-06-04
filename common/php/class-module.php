@@ -560,15 +560,22 @@ if ( ! class_exists( 'EF_Module' ) ) {
 			<ul class="<?php echo esc_attr( $list_class ); ?>">
 				<?php
 				foreach ( $users as $user ) :
-					$checked = ( in_array( $user->ID, $selected ) ) ? 'checked="checked"' : '';
-					// Add a class to checkbox of current user so we know not to add them in notified list during notifiedMessage() js function.
-					$current_user_class = ( get_current_user_id() == $user->ID ) ? 'class="post_following_list-current_user" ' : '';
+					$checked = in_array( $user->ID, $selected );
 					?>
 					<li>
 						<label for="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>">
 							<div class="ef-user-subscribe-actions">
 								<?php do_action( 'ef_user_subscribe_actions', $user->ID, $checked ); ?>
-								<input type="checkbox" id="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $user->ID ); ?>" <?php echo $checked; ?> <?php echo $current_user_class;?>
+								<input type="checkbox" id="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $user->ID ); ?>"
+								<?php 
+								if ( $checked ) {
+									echo "checked='checked' ";
+								}
+								// Add a class to checkbox of current user so we know not to add them in notified list during notifiedMessage() js function.
+								if ( get_current_user_id() == $user->ID ) {
+									echo 'class="post_following_list-current_user" ';
+								}
+								?>
 								/>
 							</div>
 
