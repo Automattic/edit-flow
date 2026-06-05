@@ -1253,6 +1253,10 @@ if ( ! class_exists( 'EF_Usergroups_List_Table' ) ) {
 
 			$this->items = $edit_flow->user_groups->get_usergroups();
 
+			if ( ! is_array( $this->items ) ) {
+				$this->items = array();
+			}
+			
 			$this->set_pagination_args( array(
 				'total_items' => count( $this->items ),
 				'per_page'    => count( $this->items ),
