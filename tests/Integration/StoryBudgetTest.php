@@ -183,6 +183,37 @@ class StoryBudgetTest extends TestCase {
 	}
 
 	/**
+	 * Story Budget filters must only persist to user meta when submitted with a valid nonce,
+	 * not on a plain page load or a crafted URL.
+	 */
+	public function test_filters_persist_only_with_valid_nonce() {
+		global $edit_flow;
+		$story_budget = $edit_flow->story_budget;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$meta_key = 'ef_story_budget_filters';
+
+		// A URL carrying filter params but no valid nonce must not write user meta.
+		$_GET = array(
+			'page'        => 'story-budget',
+			'post_status' => 'draft',
+		);
+		$story_budget->update_user_filters();
+		$this->assertEmpty( get_user_meta( $user_id, $meta_key, true ), 'Filters must not persist without a valid nonce.' );
+
+		// A genuine filter submission carrying a valid nonce persists.
+		$_GET['ef-sb-filter-nonce'] = wp_create_nonce( 'ef-story-budget-filter' );
+		$story_budget->update_user_filters();
+		$saved = get_user_meta( $user_id, $meta_key, true );
+		$this->assertNotEmpty( $saved, 'Filters should persist when submitted with a valid nonce.' );
+		$this->assertSame( 'draft', $saved['post_status'] );
+
+		$_GET = array();
+	}
+
+	/**
 	 * Test that calendar has default custom statuses
 	 */
 	public function test_calendar_custom_statuses() {

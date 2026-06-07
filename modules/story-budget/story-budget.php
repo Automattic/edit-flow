@@ -254,7 +254,7 @@ class EF_Story_Budget extends EF_Module {
 	 *
 	 * @since 0.10
 	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Resetting filters is a safe operation.
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Routing guards run before the nonce is verified below.
 	 */
 	public function handle_filter_reset() {
 		if ( ! isset( $_GET['page'] ) || 'story-budget' !== $_GET['page'] ) {
@@ -263,6 +263,11 @@ class EF_Story_Budget extends EF_Module {
 
 		if ( ! isset( $_GET['reset-filters'] ) || '1' !== $_GET['reset-filters'] ) {
 			return;
+		}
+
+		// Resetting filters writes the current user's filter meta, so require a nonce.
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'ef-story-budget-reset-filters' ) ) {
+			wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 		}
 
 		$current_user = wp_get_current_user();
@@ -331,6 +336,11 @@ class EF_Story_Budget extends EF_Module {
 	 */
 	public function update_user_filters_from_form_date_range_change( $current_user, $new_filters ) {
 		$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
+		// get_user_meta() returns an empty string when no filters are stored yet; treat that
+		// as an empty set so the date keys below can be assigned without a string-offset error.
+		if ( ! is_array( $existing_filters ) ) {
+			$existing_filters = array();
+		}
 
 		// Default start date value.
 		if ( isset( $new_filters['start_date'] ) ) {
@@ -865,6 +875,7 @@ class EF_Story_Budget extends EF_Module {
 
 			<form method="GET" id="ef-story-budget-filters">
 				<input type="hidden" name="page" value="story-budget"/>
+				<?php wp_nonce_field( 'ef-story-budget-filter', 'ef-sb-filter-nonce', false ); ?>
 				<?php
 				foreach ( $this->story_budget_filters() as $select_id => $select_name ) {
 					echo wp_kses_post( $this->story_budget_filter_options( $select_id, $select_name, $this->user_filters ) );
@@ -872,7 +883,7 @@ class EF_Story_Budget extends EF_Module {
 				?>
 				<input type="submit" id="post-query-submit" value="<?php esc_attr_e( 'Filter', 'edit-flow' ); ?>" class="button-primary button" />
 				<?php if ( $has_active_filter ) : ?>
-				<a href="<?php echo esc_url( add_query_arg( 'reset-filters', '1', menu_page_url( $this->module->slug, false ) ) ); ?>" id="post-query-clear" class="button-secondary button"><?php esc_html_e( 'Reset', 'edit-flow' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'reset-filters', '1', menu_page_url( $this->module->slug, false ) ), 'ef-story-budget-reset-filters' ) ); ?>" id="post-query-clear" class="button-secondary button"><?php esc_html_e( 'Reset', 'edit-flow' ); ?></a>
 				<?php endif; ?>
 			</form>
 		</div><!-- /alignleft actions -->
@@ -918,8 +929,24 @@ class EF_Story_Budget extends EF_Module {
 
 		$user_filters = apply_filters( 'ef_story_budget_filter_values', $user_filters, $current_user_filters );
 
-		$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
+		// Only persist the filters when the filter form was submitted with a valid nonce; a
+		// plain page load (or a crafted URL without the nonce) must not write to user meta.
+		if ( $this->is_filter_form_submitted() ) {
+			$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
+		}
 		return $user_filters;
+	}
+
+	/**
+	 * Whether the current request is a Story Budget filter submission carrying a valid nonce.
+	 *
+	 * @return bool
+	 */
+	private function is_filter_form_submitted() {
+		if ( ! isset( $_GET['ef-sb-filter-nonce'] ) ) {
+			return false;
+		}
+		return (bool) wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['ef-sb-filter-nonce'] ) ), 'ef-story-budget-filter' );
 	}
 
 	/**
