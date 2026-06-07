@@ -421,6 +421,13 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			global $edit_flow;
 			$module_name = sanitize_key( $_POST['edit_flow_module_name'] );
 
+			// Validate the submitted module name resolves to a real module before
+			// dereferencing it; this runs ahead of the capability check below, so a bogus
+			// name must not reach a property access on a non-object.
+			if ( ! isset( $edit_flow->$module_name ) || ! is_object( $edit_flow->$module_name ) ) {
+				return false;
+			}
+
 			if ( 'update' != $_POST['action']
 			|| $_POST['option_page'] != $edit_flow->$module_name->module->options_group_name ) {
 				return false;
@@ -437,6 +444,12 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			// Only call the validation callback if it exists.
 			if ( method_exists( $edit_flow->$module_name, 'settings_validate' ) ) {
 				$new_options = $edit_flow->$module_name->settings_validate( $new_options );
+			} else {
+				// Without a module validator, accept only keys that already exist in the
+				// module's options and sanitise their values, rather than persisting
+				// arbitrary submitted keys into the autoloaded options row.
+				$existing    = (array) $edit_flow->$module_name->module->options;
+				$new_options = map_deep( array_intersect_key( (array) $new_options, $existing ), 'sanitize_text_field' );
 			}
 
 			// Cast our object and save the data.
