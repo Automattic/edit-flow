@@ -438,6 +438,38 @@ class UserGroupsTest extends TestCase {
 	}
 
 	/**
+	 * The list table must prepare without error when no user groups exist.
+	 *
+	 * Regression test for https://github.com/Automattic/edit-flow/issues/981:
+	 * get_usergroups() returns false (not an array) when there are no groups,
+	 * and prepare_items() then called count() on that boolean, causing a fatal
+	 * TypeError on PHP 8.
+	 */
+	public function test_list_table_prepare_items_with_no_usergroups() {
+		global $edit_flow;
+
+		// Ensure no user groups exist.
+		$existing = $edit_flow->user_groups->get_usergroups();
+		if ( is_array( $existing ) ) {
+			foreach ( $existing as $usergroup ) {
+				$edit_flow->user_groups->delete_usergroup( $usergroup->term_id );
+			}
+		}
+
+		// Sanity check: with no groups, get_usergroups() returns a non-array.
+		$this->assertIsNotArray( $edit_flow->user_groups->get_usergroups() );
+
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		set_current_screen( 'edit-flow_page_ef-user-groups-settings' );
+
+		$list_table = new \EF_Usergroups_List_Table();
+		$list_table->prepare_items();
+
+		$this->assertIsArray( $list_table->items );
+		$this->assertCount( 0, $list_table->items );
+	}
+
+	/**
 	 * Test that usergroup slug is properly prefixed.
 	 */
 	public function test_usergroup_slug_is_prefixed() {
