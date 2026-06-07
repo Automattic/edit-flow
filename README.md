@@ -60,4 +60,4 @@ For support questions, feedback and ideas, please use the [WordPress.org forums]
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
+See [CHANGELOG.md](https://github.com/Automattic/edit-flow/blob/develop/CHANGELOG.md) for the full changelog.
