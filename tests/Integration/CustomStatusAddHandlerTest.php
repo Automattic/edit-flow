@@ -71,7 +71,23 @@ class CustomStatusAddHandlerTest extends TestCase {
 	public function test_handle_add_custom_status_succeeds_for_admin() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$status_name = 'Security Test Status ' . wp_generate_password( 6, false );
+		// The handler's success path ends with wp_redirect(); exit. A bare exit
+		// would terminate the whole PHPUnit process, so intercept wp_redirect and
+		// throw: the exception unwinds the handler before it reaches exit, while
+		// still proving the success path was taken and letting us assert the
+		// status was created.
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			// phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement -- Intentionally throws to unwind the handler before its exit; it never returns.
+			function ( $location ) use ( &$redirected ) {
+				$redirected = true;
+				throw new \RuntimeException( 'wp_redirect intercepted' );
+			}
+		);
+
+		// The handler rejects names longer than 20 characters, so keep it short.
+		$status_name = 'Sec ' . wp_generate_password( 6, false );
 
 		$_POST['submit']      = 'Add New Status';
 		$_POST['action']      = 'add-new';
@@ -81,12 +97,15 @@ class CustomStatusAddHandlerTest extends TestCase {
 
 		try {
 			$this->custom_status->handle_add_custom_status();
-			// Successful paths end with wp_redirect(); exit. The test framework
-			// may or may not throw depending on configuration, so both outcomes
-			// are acceptable.
+			$this->fail( 'Handler should have redirected after a successful add.' );
 		} catch ( \WPDieException $e ) {
 			$this->fail( 'Admin should not hit wp_die on a valid add request: ' . $e->getMessage() );
+		} catch ( \RuntimeException $e ) {
+			// Expected: the success path reached wp_redirect().
+			$this->assertSame( 'wp_redirect intercepted', $e->getMessage() );
 		}
+
+		$this->assertTrue( $redirected, 'Handler should redirect after adding the status.' );
 
 		$status = $this->custom_status->get_custom_status_by( 'slug', sanitize_title( $status_name ) );
 		$this->assertNotFalse( $status, 'Custom status should have been created.' );

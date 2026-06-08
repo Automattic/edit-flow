@@ -24,10 +24,6 @@ abstract class AjaxTestCase extends TestCase {
 	 * Taken from testcase-ajax.php setUpBeforeClass function
 	 */
 	public static function setUpBeforeClass(): void {
-		if ( ! defined( 'DOING_AJAX' ) ) {
-			define( 'DOING_AJAX', true );
-		}
-
 		remove_action( 'admin_init', '_maybe_update_core' );
 		remove_action( 'admin_init', '_maybe_update_plugins' );
 		remove_action( 'admin_init', '_maybe_update_themes' );
@@ -43,6 +39,22 @@ abstract class AjaxTestCase extends TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		/*
+		 * Define DOING_AJAX here, in setUp(), rather than in setUpBeforeClass().
+		 *
+		 * AJAX test classes run each test method in a separate process
+		 * (@runTestsInSeparateProcesses), so setUp() executes inside the child
+		 * process where the AJAX request is actually exercised. setUpBeforeClass(),
+		 * by contrast, also runs in the parent PHPUnit process — defining the
+		 * constant there permanently leaks DOING_AJAX into the parent. Every
+		 * later non-AJAX test then sees wp_doing_ajax() as true, so any wp_die()
+		 * routes to the real AJAX die handler instead of the test framework's
+		 * throwing handler, killing the whole PHPUnit run with exit code 0.
+		 */
+		if ( ! defined( 'DOING_AJAX' ) ) {
+			define( 'DOING_AJAX', true );
+		}
 
 		add_filter( 'wp_die_ajax_handler', array( $this, 'getDieHandler' ), 1, 1 );
 

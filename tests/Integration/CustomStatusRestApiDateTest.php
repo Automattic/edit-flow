@@ -10,7 +10,6 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use EF_Custom_Status;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
@@ -27,15 +26,18 @@ class CustomStatusRestApiDateTest extends TestCase {
 	protected static $ef_custom_status;
 
 	public static function wpSetUpBeforeClass( $factory ) {
+		global $edit_flow;
+
 		self::$admin_user_id = $factory->user->create( array( 'role' => 'administrator' ) );
 
-		self::$ef_custom_status = new EF_Custom_Status();
+		// Use the registered module instance from $edit_flow, not a bare
+		// new EF_Custom_Status(): get_post_types_for_module() reads the module's
+		// configured options (post_types), which only the registered instance
+		// has. A fresh instance reports no post types, so register_rest_api_filters()
+		// would add no rest_prepare_{post_type} filters at all.
+		self::$ef_custom_status = $edit_flow->custom_status;
 		self::$ef_custom_status->install();
 		self::$ef_custom_status->init();
-
-		// Ensure our REST filters are registered; rest_api_init only fires once
-		// per REST request boot, so we invoke the registrar directly for tests.
-		self::$ef_custom_status->register_rest_api_filters();
 	}
 
 	public static function wpTearDownAfterClass() {
@@ -46,6 +48,13 @@ class CustomStatusRestApiDateTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		wp_set_current_user( self::$admin_user_id );
+
+		// Register the REST filters in setUp(), not wpSetUpBeforeClass(): the
+		// WP test case backs up and restores $wp_filter around every test, which
+		// strips any filter added once at class set-up. rest_api_init only fires
+		// once per REST boot, so we invoke the registrar directly here to ensure
+		// the filter is present for each test.
+		self::$ef_custom_status->register_rest_api_filters();
 	}
 
 	/**
