@@ -501,7 +501,21 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		 */
 		public function get_unencoded_description( $string_to_unencode ) {
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Required for term description retrieval.
-			return maybe_unserialize( base64_decode( $string_to_unencode ) );
+			$decoded = base64_decode( $string_to_unencode );
+
+			/*
+			 * Edit Flow only ever stores a serialized array here (see get_encoded_description()),
+			 * so forbid object instantiation during unserialisation. Without allowed_classes a
+			 * crafted term description could trigger PHP object injection. is_serialized() mirrors
+			 * maybe_unserialize()'s own gate, so a plain (unencoded) description still round-trips
+			 * unchanged and the callers' is_array() checks keep working.
+			 */
+			if ( is_serialized( $decoded ) ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Hardened with allowed_classes => false; stored data is always a scalar array.
+				return unserialize( $decoded, array( 'allowed_classes' => false ) );
+			}
+
+			return $decoded;
 		}
 
 		/**
