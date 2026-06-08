@@ -145,6 +145,39 @@ class ModuleTest extends TestCase {
 	}
 
 	/**
+	 * A legitimate encoded description (a base64'd serialized array) must decode back to
+	 * the original array, so the allowed_classes hardening does not regress normal storage.
+	 */
+	function test_get_unencoded_description_round_trips_array() {
+		$data = array(
+			'description' => "O'Brien & co <stuff>",
+			'position'    => 3,
+			'viewable'    => false,
+		);
+
+		$encoded = self::$EditFlowModule->get_encoded_description( $data );
+		$decoded = self::$EditFlowModule->get_unencoded_description( $encoded );
+
+		$this->assertSame( $data, $decoded, 'A legitimate encoded array should round-trip unchanged.' );
+	}
+
+	/**
+	 * A crafted term description containing a serialized object must never be instantiated as
+	 * that class: unserialisation here forbids objects, so PHP object injection cannot fire.
+	 */
+	function test_get_unencoded_description_blocks_object_injection() {
+		// A serialized stdClass object (O:8:"stdClass":0:{}) standing in for any gadget payload.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Building a hostile payload for the test.
+		$payload = base64_encode( 'O:8:"stdClass":0:{}' );
+
+		$decoded = self::$EditFlowModule->get_unencoded_description( $payload );
+
+		// allowed_classes => false turns any object into an inert __PHP_Incomplete_Class, so it is
+		// never a real instance of the named class. Without the hardening this would be a stdClass.
+		$this->assertNotInstanceOf( \stdClass::class, $decoded, 'A serialized object must not be instantiated as its class.' );
+	}
+
+	/**
 	 * Capture the echoed output of users_select_form().
 	 *
 	 * @param array $selected User IDs to mark as selected.
