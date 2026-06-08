@@ -314,22 +314,14 @@ class EF_Custom_Status_CLI extends WP_CLI_Command {
 	 * @return array
 	 */
 	private function get_all_valid_statuses() {
-		$statuses = [];
-
-		// Add core statuses.
-		$core_statuses = [ 'publish', 'pending', 'draft', 'private', 'trash', 'future' ];
-		$statuses      = array_merge( $statuses, $core_statuses );
-
-		// Add custom statuses.
 		$custom_status_module = $this->get_custom_status_module();
-		if ( $custom_status_module ) {
-			$custom_statuses = $custom_status_module->get_custom_statuses();
-			foreach ( $custom_statuses as $status ) {
-				$statuses[] = $status->slug;
-			}
+
+		// Fall back to the core statuses if the module is somehow unavailable.
+		if ( ! $custom_status_module ) {
+			return [ 'publish', 'pending', 'draft', 'private', 'trash', 'future' ];
 		}
 
-		return array_unique( $statuses );
+		return $custom_status_module->get_all_valid_statuses();
 	}
 }
 

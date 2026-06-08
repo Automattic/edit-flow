@@ -805,6 +805,19 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		/**
+		 * Get every status slug a post may validly be assigned: the core statuses plus all
+		 * registered custom statuses. Used to validate migration/reassignment targets.
+		 *
+		 * @return string[] Valid status slugs.
+		 */
+		public function get_all_valid_statuses() {
+			$core_statuses = [ 'publish', 'pending', 'draft', 'private', 'trash', 'future' ];
+			$custom_slugs  = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+
+			return array_values( array_unique( array_merge( $core_statuses, $custom_slugs ) ) );
+		}
+
+		/**
 		 * Display our custom post statuses in post listings when needed.
 		 *
 		 * @param array   $post_states An array of post display states.
@@ -1169,6 +1182,11 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				wp_die( esc_html__( 'Source and target status cannot be the same.', 'edit-flow' ) );
 			}
 
+			// The target must be a real status, otherwise posts would be stranded in a status that does not exist.
+			if ( ! in_array( $to_status, $this->get_all_valid_statuses(), true ) ) {
+				wp_die( esc_html__( 'Please select a valid target status.', 'edit-flow' ) );
+			}
+
 			// Perform the migration.
 			$this->reassign_post_status( $from_status, $to_status );
 
@@ -1476,13 +1494,23 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				return;
 			}
 
-			// Handles the transition to 'publish' on edit.php.
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Core request data checked for bulk edit transition.
+			// Handles the transition to 'publish' on edit.php (bulk edit).
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- The bulk-edit nonce is verified below before any write.
 			if ( isset( $edit_flow ) && 'edit.php' === $pagenow && isset( $_REQUEST['bulk_edit'] ) ) {
+				// Verify the bulk-edit nonce before touching any posts.
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+				if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-posts' ) ) {
+					return;
+				}
+
 				// For every post_id, set the post_status as 'pending' only when there's no timestamp set for $post_date_gmt.
 				if ( isset( $_REQUEST['post'] ) && isset( $_REQUEST['_status'] ) && 'publish' == $_REQUEST['_status'] ) {
 					$post_ids = array_map( 'intval', (array) $_REQUEST['post'] );
 					foreach ( $post_ids as $post_id ) {
+						// Only act on posts the current user is allowed to edit.
+						if ( ! current_user_can( 'edit_post', $post_id ) ) {
+							continue;
+						}
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
 						$wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
 							'ID'            => $post_id,
@@ -1495,31 +1523,36 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// phpcs:enable
 
 			// Handles the transition to 'publish' on post.php.
-			// phpcs:disable WordPress.Security.NonceVerification.Missing -- Core post edit transition check.
-			if ( isset( $edit_flow ) && 'post.php' == $pagenow && isset( $_POST['publish'] ) ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- The post-edit nonce is verified below before any write.
+			if ( isset( $edit_flow ) && 'post.php' == $pagenow && isset( $_POST['publish'] ) && isset( $_POST['post_ID'] ) ) {
+				$post_id = (int) $_POST['post_ID'];
+
+				// Verify the post-edit nonce and capability before touching the post.
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+				if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+					return;
+				}
+
 				// Set the post_status as 'pending' only when there's no timestamp set for $post_date_gmt.
-				if ( isset( $_POST['post_ID'] ) ) {
-					$post_id = (int) $_POST['post_ID'];
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
-					$ret = $wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
-						'ID'            => $post_id,
-						'post_date_gmt' => '0000-00-00 00:00:00',
-					] );
-					clean_post_cache( $post_id );
-					foreach ( [ 'aa', 'mm', 'jj', 'hh', 'mn' ] as $timeunit ) {
-						if ( isset( $_POST[ $timeunit ] ) && ! empty( $_POST[ 'hidden_' . $timeunit ] ) && $_POST[ 'hidden_' . $timeunit ] != $_POST[ $timeunit ] ) {
-							$edit_date = '1';
-							break;
-						}
-					}
-					if ( $ret && empty( $edit_date ) ) {
-						add_filter( 'pre_post_date', [ $this, 'helper_timestamp_hack' ] );
-						add_filter( 'pre_post_date_gmt', [ $this, 'helper_timestamp_hack' ] );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
+				$ret = $wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
+					'ID'            => $post_id,
+					'post_date_gmt' => '0000-00-00 00:00:00',
+				] );
+				clean_post_cache( $post_id );
+				foreach ( [ 'aa', 'mm', 'jj', 'hh', 'mn' ] as $timeunit ) {
+					if ( isset( $_POST[ $timeunit ] ) && ! empty( $_POST[ 'hidden_' . $timeunit ] ) && $_POST[ 'hidden_' . $timeunit ] != $_POST[ $timeunit ] ) {
+						$edit_date = '1';
+						break;
 					}
 				}
+				if ( $ret && empty( $edit_date ) ) {
+					add_filter( 'pre_post_date', [ $this, 'helper_timestamp_hack' ] );
+					add_filter( 'pre_post_date_gmt', [ $this, 'helper_timestamp_hack' ] );
+				}
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		/**
 		 * PHP < 5.3.x doesn't support anonymous functions.
