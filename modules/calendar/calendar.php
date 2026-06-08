@@ -161,8 +161,13 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				return false;
 			}
 
-			// Define the create-post capability.
-			$this->create_post_cap = apply_filters( 'ef_calendar_create_post_cap', 'edit_posts' );
+			// Define the create-post capability from the configured quick-create post type,
+			// rather than a generic 'edit_posts', so the check matches the post type actually
+			// being created. Falls back to 'edit_posts' if the type isn't registered yet.
+			$quick_create_type     = $this->module->options->quick_create_post_type;
+			$quick_create_type_obj = get_post_type_object( $quick_create_type );
+			$create_post_cap       = ( $quick_create_type_obj && ! empty( $quick_create_type_obj->cap->create_posts ) ) ? $quick_create_type_obj->cap->create_posts : 'edit_posts';
+			$this->create_post_cap = apply_filters( 'ef_calendar_create_post_cap', $create_post_cap );
 
 			add_action( 'admin_init', array( $this, 'add_screen_options_panel' ) );
 			add_action( 'admin_init', array( $this, 'handle_save_screen_options' ) );
