@@ -894,4 +894,70 @@ class CustomStatusTest extends TestCase {
 
 		$this->assertEquals( $custom_post_name, $update_post->post_name );
 	}
+
+	/**
+	 * The status-migration allow-list must cover every core status and every registered
+	 * custom status, while rejecting anything that is not a real status. This is what the
+	 * migration handler validates the target against before reassigning posts.
+	 */
+	public function test_get_all_valid_statuses_includes_core_and_custom() {
+		$valid = self::$ef_custom_status->get_all_valid_statuses();
+
+		foreach ( array( 'publish', 'pending', 'draft', 'private', 'trash', 'future' ) as $core_status ) {
+			$this->assertContains( $core_status, $valid, "Core status '$core_status' should be a valid target." );
+		}
+
+		// 'pitch' is one of the default custom statuses installed in wpSetUpBeforeClass().
+		$this->assertContains( 'pitch', $valid, 'A registered custom status should be a valid target.' );
+
+		$this->assertNotContains( 'definitely-not-a-status', $valid, 'An unknown status must not be a valid target.' );
+	}
+
+	/**
+	 * The publish-timestamp workaround writes directly to the posts table, so it must not act
+	 * on a post.php request that lacks a valid edit nonce; otherwise a forged request could
+	 * flip another user's post to 'pending'. A properly nonced request still works.
+	 */
+	public function test_check_timestamp_on_publish_requires_valid_nonce() {
+		global $pagenow, $typenow, $wpdb;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		$pagenow = 'post.php';
+		$typenow = 'post';
+
+		// Custom statuses must be active for this post type, or the workaround bails early.
+		if ( ! is_object( self::$ef_custom_status->module->options ) ) {
+			self::$ef_custom_status->module->options = new \stdClass();
+		}
+		self::$ef_custom_status->module->options->post_types = array(
+			'post' => 'on',
+			'page' => 'on',
+		);
+
+		$post_id = self::factory()->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => self::$admin_user_id,
+		) );
+
+		// The workaround only fires when post_date_gmt is unset, so guarantee that state.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test setup.
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+
+		$_POST['publish'] = '1';
+		$_POST['post_ID'] = (string) $post_id;
+
+		// Without a nonce the handler must leave the post untouched.
+		unset( $_POST['_wpnonce'] );
+		self::$ef_custom_status->check_timestamp_on_publish();
+		$this->assertSame( 'draft', get_post_status( $post_id ), 'A request with no nonce must not change the status.' );
+
+		// With the correct post-edit nonce the workaround applies as before.
+		$_POST['_wpnonce'] = wp_create_nonce( 'update-post_' . $post_id );
+		self::$ef_custom_status->check_timestamp_on_publish();
+		$this->assertSame( 'pending', get_post_status( $post_id ), 'A correctly nonced request should apply the workaround.' );
+
+		$_POST = array();
+	}
 }
