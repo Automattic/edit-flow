@@ -519,7 +519,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 							break;
 						case 'paragraph':
 							echo '<label for="' . esc_attr( $postmeta_key ) . '">' . esc_html( $term->name ) . wp_kses_post( $description_span ) . '</label>';
-							echo '<textarea id="' . esc_attr( $postmeta_key ) . '" name="' . esc_attr( $postmeta_key ) . '">' . esc_html( $current_metadata ) . '</textarea>';
+							echo '<textarea id="' . esc_attr( $postmeta_key ) . '" name="' . esc_attr( $postmeta_key ) . '">' . esc_textarea( $current_metadata ) . '</textarea>';
 							break;
 						case 'checkbox':
 							echo '<label for="' . esc_attr( $postmeta_key ) . '">' . esc_html( $term->name ) . wp_kses_post( $description_span ) . '</label>';
@@ -1760,17 +1760,17 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			<form class="add:the-list:" action="<?php echo esc_url( add_query_arg( array( 'page' => $this->module->settings_slug ), get_admin_url( null, 'admin.php' ) ) ); ?>" method="post" id="addmetadata" name="addmetadata">
 			<div class="form-field form-required">
 				<label for="metadata_name"><?php _e( 'Name', 'edit-flow' ); ?></label>
-					<input type="text" aria-required="true" size="20" maxlength="200" id="metadata_name" name="metadata_name" value="<?php echo ( empty( $_POST['metadata_name'] ) ? '' : esc_attr( $_POST['metadata_name'] ) ); ?>" />
+					<input type="text" aria-required="true" size="20" maxlength="200" id="metadata_name" name="metadata_name" value="<?php echo ( empty( $_POST['metadata_name'] ) ? '' : esc_attr( wp_unslash( $_POST['metadata_name'] ) ) ); ?>" />
 				<?php $edit_flow->settings->helper_print_error_or_description( 'name', __( 'The name is for labeling the metadata field.', 'edit-flow' ) ); ?>
 			</div>
 			<div class="form-field form-required">
 				<label for="metadata_slug"><?php _e( 'Slug', 'edit-flow' ); ?></label>
-					<input type="text" aria-required="true" size="20" maxlength="200" id="metadata_slug" name="metadata_slug" value="<?php echo ( empty( $_POST['metadata_slug'] ) ? '' : esc_attr( $_POST['metadata_slug'] ) ); ?>" />
+					<input type="text" aria-required="true" size="20" maxlength="200" id="metadata_slug" name="metadata_slug" value="<?php echo ( empty( $_POST['metadata_slug'] ) ? '' : esc_attr( wp_unslash( $_POST['metadata_slug'] ) ) ); ?>" />
 				<?php $edit_flow->settings->helper_print_error_or_description( 'slug', __( 'The "slug" is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.', 'edit-flow' ) ); ?>
 			</div>
 			<div class="form-field">
 				<label for="metadata_description"><?php _e( 'Description', 'edit-flow' ); ?></label>
-					<textarea cols="40" rows="5" id="metadata_description" name="metadata_description"><?php echo ( empty( $_POST['metadata_description'] ) ? '' : esc_attr( $_POST['metadata_description'] ) ); ?></textarea>
+					<textarea cols="40" rows="5" id="metadata_description" name="metadata_description"><?php echo ( empty( $_POST['metadata_description'] ) ? '' : esc_textarea( sanitize_textarea_field( wp_unslash( $_POST['metadata_description'] ) ) ) ); ?></textarea>
 				<?php $edit_flow->settings->helper_print_error_or_description( 'description', __( 'The description can be used to communicate with your team about what the metadata is for.', 'edit-flow' ) ); ?>
 			</div>
 			<div class="form-field form-required">
@@ -1998,8 +1998,8 @@ class EF_Editorial_Metadata_List_Table extends WP_List_Table {
 
 		$out .= $this->row_actions( $actions, false );
 		$out .= '<div class="hidden" id="inline_' . $item->term_id . '">';
-		$out .= '<div class="name">' . $item->name . '</div>';
-		$out .= '<div class="description">' . $item->description . '</div>';
+		$out .= '<div class="name">' . esc_html( $item->name ) . '</div>';
+		$out .= '<div class="description">' . esc_html( $item->description ) . '</div>';
 		$out .= '</div>';
 
 		return $out;
