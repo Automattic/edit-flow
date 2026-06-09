@@ -15,6 +15,8 @@
  * @package EditFlow
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Print admin notice regarding having an old version of PHP.
  *
