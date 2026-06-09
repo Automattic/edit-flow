@@ -4,6 +4,50 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-06-10
+
+This release completes the security-review remediation begun in 0.10.4. It resolves the remaining issues from a full audit of the plugin's authenticated code paths — the headline stored XSS in the editorial-metadata location field, two information-disclosure issues (the iCal feed and the Story Budget), and a long tail of defence-in-depth hardening across access control, input handling, deserialisation, output escaping, and client-side code. None are known to be exploited in the wild, but all users are encouraged to update.
+
+**Breaking:** the iCal subscription feed now uses a per-user, revocable secret instead of a single site-wide key. Existing calendar-subscription URLs will stop working, and each user must copy their new feed URL from the calendar's Screen Options. This is the reason for the minor version bump.
+
+### Security
+
+* fix: escape the editorial metadata location field to close a stored XSS by @GaryJones in [#970](https://github.com/Automattic/edit-flow/pull/970)
+* fix: restrict Story Budget to a user's own posts when they cannot edit others' by @GaryJones in [#972](https://github.com/Automattic/edit-flow/pull/972)
+* fix: escape the custom status name in the Custom Statuses list table by @GaryJones in [#973](https://github.com/Automattic/edit-flow/pull/973)
+* fix: stop the calendar metadata AJAX creating arbitrary taxonomy terms by @GaryJones in [#974](https://github.com/Automattic/edit-flow/pull/974)
+* fix: secure the calendar iCal feed against unauthenticated disclosure by @GaryJones in [#975](https://github.com/Automattic/edit-flow/pull/975)
+* fix: harden the settings and screen-options save handlers by @GaryJones in [#984](https://github.com/Automattic/edit-flow/pull/984)
+* fix: require a nonce to change Story Budget filters by @GaryJones in [#985](https://github.com/Automattic/edit-flow/pull/985)
+* fix: restrict notification subscriptions and harden the webhook sender by @GaryJones in [#987](https://github.com/Automattic/edit-flow/pull/987)
+* fix: gate calendar quick-create on the post type's create capability by @GaryJones in [#988](https://github.com/Automattic/edit-flow/pull/988)
+* fix: harden custom status migration and the publish-timestamp workaround by @GaryJones in [#989](https://github.com/Automattic/edit-flow/pull/989)
+* fix: block PHP object injection when decoding term descriptions by @GaryJones in [#990](https://github.com/Automattic/edit-flow/pull/990)
+* fix: harden admin form and AJAX input handling by @GaryJones in [#992](https://github.com/Automattic/edit-flow/pull/992)
+* fix: escape admin screen output consistently by @GaryJones in [#993](https://github.com/Automattic/edit-flow/pull/993)
+* refactor: tidy up bootstrap and select-form code quality by @GaryJones in [#995](https://github.com/Automattic/edit-flow/pull/995)
+* fix: harden client-side JS DOM and selector handling by @GaryJones in [#996](https://github.com/Automattic/edit-flow/pull/996)
+
+### Fixed
+
+* fix: prevent a critical error on the user groups dashboard when no groups exist by @Morpheus636 in [#982](https://github.com/Automattic/edit-flow/pull/982)
+* fix: correct checkbox-attribute escaping and the "no one notified" message in the user-select form by @jerclarke in [#980](https://github.com/Automattic/edit-flow/pull/980)
+* fix: use the slug-specific template when previewing custom statuses by @GaryJones in [#994](https://github.com/Automattic/edit-flow/pull/994)
+* fix: correct stale URLs in the module help sidebar panels by @thisismyurl in [#967](https://github.com/Automattic/edit-flow/pull/967)
+
+### Documentation
+
+* docs: correct GitHub brand capitalisation across modules and docs by @GaryJones in [#971](https://github.com/Automattic/edit-flow/pull/971)
+* docs: fix the broken CHANGELOG.md link in the plugin readme by @GaryJones in [#983](https://github.com/Automattic/edit-flow/pull/983)
+
+### Maintenance
+
+* ci: speed up CI with targeted caching and fewer jobs by @GaryJones in [#951](https://github.com/Automattic/edit-flow/pull/951)
+* ci: stop the integration test suite terminating early by @GaryJones in [#991](https://github.com/Automattic/edit-flow/pull/991)
+* ci: guard against non-npmjs registry URLs in the lockfile by @GaryJones in [#1000](https://github.com/Automattic/edit-flow/pull/1000)
+* ci: hold React-19-blocking @wordpress updates in Dependabot by @GaryJones in [#1004](https://github.com/Automattic/edit-flow/pull/1004)
+* Routine dependency updates for npm packages and GitHub Actions
+
 ## [0.10.4] - 2026-04-24
 
 This release is dominated by defence-in-depth hardening following a security review of the plugin's authenticated code paths. None of the issues are known to be exploited in the wild, but all users are encouraged to update.
@@ -447,6 +491,7 @@ This is a major update with significant bug fixes, new features, and modernised 
 
 * Ability to assign custom statuses to posts.
 
+[0.11.0]: https://github.com/Automattic/Edit-Flow/compare/0.10.4...0.11.0
 [0.10.4]: https://github.com/Automattic/Edit-Flow/compare/0.10.3...0.10.4
 [0.10.3]: https://github.com/Automattic/Edit-Flow/compare/0.10.2...0.10.3
 [0.10.2]: https://github.com/Automattic/Edit-Flow/compare/0.10.1...0.10.2
