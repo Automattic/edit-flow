@@ -854,8 +854,10 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			);
 
 			$parsed_args = wp_parse_args( $args, $defaults );
-			extract( $parsed_args, EXTR_SKIP );
-			$usergroups = $this->get_usergroups();
+			$list_class  = $parsed_args['list_class'];
+			$list_id     = $parsed_args['list_id'];
+			$input_id    = $parsed_args['input_id'];
+			$usergroups  = $this->get_usergroups();
 			if ( empty( $usergroups ) ) {
 				?>
 			<p><?php esc_html_e( 'No user groups were found.', 'edit-flow' ); ?> <a href="<?php echo esc_url( $this->get_link() ); ?>" title="<?php esc_attr_e( 'Add a new user group. Opens new window.', 'edit-flow' ); ?>" target="_blank"><?php esc_html_e( 'Add a User Group', 'edit-flow' ); ?></a></p>
