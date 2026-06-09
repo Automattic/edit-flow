@@ -917,31 +917,30 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			 * - Name is required and can't conflict with an existing name or slug.
 			 * - Description is optional.
 			 */
-			$_REQUEST['form-errors'] = [];
+			EditFlow()->settings->form_errors = [];
 			// Check if name field was filled in.
 			if ( empty( $status_name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the status', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the status', 'edit-flow' );
 			}
 			// Check that the name isn't numeric.
 			if ( 0 != (int) $status_name ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
 			}
 			// Check that the status name doesn't exceed 20 chars.
 			if ( strlen( $status_name ) > 20 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist as another term.
 			if ( term_exists( $status_slug, self::taxonomy_key ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the name is not restricted.
 			if ( $this->is_restricted_status( strtolower( $status_slug ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
 			}
 
 			// If there were any form errors, kick out and return them.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -1002,37 +1001,36 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			 * - 'name' is a required field and can't conflict with existing name or slug.
 			 * - 'description' is optional.
 			 */
-			$_REQUEST['form-errors'] = [];
+			EditFlow()->settings->form_errors = [];
 			// Check if name field was filled in.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the status', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the status', 'edit-flow' );
 			}
 			// Check that the name isn't numeric.
 			if ( is_numeric( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
 			}
 			// Check that the status name doesn't exceed 20 chars.
 			if ( strlen( $name ) > 20 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist as another term.
 			$term_exists = term_exists( sanitize_title( $name ), self::taxonomy_key );
 			if ( $term_exists && isset( $term_exists['term_id'] ) && $term_exists['term_id'] != $existing_status->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist.
 			$search_status = $this->get_custom_status_by( 'slug', sanitize_title( $name ) );
 			if ( $search_status && $search_status->term_id != $existing_status->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing status. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing status. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the name is not restricted.
 			if ( $this->is_restricted_status( strtolower( sanitize_title( $name ) ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
 			}
 
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}

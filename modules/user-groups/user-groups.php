@@ -314,7 +314,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below.
 			$description = ( isset( $_POST['description'] ) ) ? stripslashes( wp_filter_nohtml_kses( trim( $_POST['description'] ) ) ) : '';
 
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 
 			/*
 			 * Form validation for adding new Usergroup.
@@ -325,22 +325,21 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			 */
 			// Field is required.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			if ( $this->get_usergroup_by( 'name', $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			if ( $this->get_usergroup_by( 'slug', sanitize_title( $name ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
 			}
 			if ( strlen( $name ) > 40 ) {
-				$_REQUEST['form-errors']['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -402,7 +401,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below.
 			$description = isset( $_POST['description'] ) ? stripslashes( wp_filter_nohtml_kses( trim( $_POST['description'] ) ) ) : '';
 
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 
 			/*
 			 * Form validation for editing a Usergroup.
@@ -413,24 +412,23 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			 */
 			// Field is required.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			$search_term = $this->get_usergroup_by( 'name', $name );
 			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_usergroup->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			$search_term = $this->get_usergroup_by( 'slug', sanitize_title( $name ) );
 			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_usergroup->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
 			}
 			if ( strlen( $name ) > 40 ) {
-				$_REQUEST['form-errors']['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
