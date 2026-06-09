@@ -256,4 +256,25 @@ class StoryBudgetTest extends TestCase {
 
 		$this->assertContains( 'future', $statuses );
 	}
+
+	/**
+	 * The author column must escape the display name, which is the one attacker-influenced value
+	 * in that column, so a user whose display name contains markup cannot inject it into the
+	 * Story Budget table.
+	 */
+	public function test_author_column_escapes_display_name() {
+		global $edit_flow;
+
+		$author_id = self::factory()->user->create( array( 'role' => 'author' ) );
+		wp_update_user( array(
+			'ID'           => $author_id,
+			'display_name' => 'A & B <evil>',
+		) );
+		$post_id = self::factory()->post->create( array( 'post_author' => $author_id ) );
+
+		$output = $edit_flow->story_budget->term_column_default( get_post( $post_id ), 'author', null );
+
+		$this->assertStringContainsString( '&amp;', $output, 'The display name should be HTML-escaped at output.' );
+		$this->assertStringNotContainsString( '<evil>', $output, 'Raw markup must not survive into the author column.' );
+	}
 }

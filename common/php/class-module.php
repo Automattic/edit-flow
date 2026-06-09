@@ -375,7 +375,11 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		 * @since 0.7
 		 *
 		 * @param string $status    Whether it was a 'success' or an 'error'.
-		 * @param string $message   Optional message to include.
+		 * @param string $message   Optional message. SECURITY: the caller is responsible for
+		 *                          escaping this. Several JS consumers insert it as HTML (e.g.
+		 *                          via jQuery .html()), so pass only fixed/translated strings,
+		 *                          esc_html()'d values, or trusted server-generated markup —
+		 *                          never raw, unescaped user input.
 		 * @param int    $http_code HTTP response code.
 		 */
 		protected function print_ajax_response( $status, $message = '', $http_code = 200 ) {

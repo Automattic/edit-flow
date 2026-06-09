@@ -702,13 +702,12 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 					<div class="form-field form-required">
 						<label for="name"><?php _e( 'Name', 'edit-flow' ); ?></label>
 						<?php // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is escaped with esc_attr. ?>
-						<input type="text" aria-required="true" id="name" name="name" maxlength="40" value="<?php echo ( empty( $_POST['name'] ) ? '' : esc_attr( $_POST['name'] ) ); ?>"/>
+						<input type="text" aria-required="true" id="name" name="name" maxlength="40" value="<?php echo ( empty( $_POST['name'] ) ? '' : esc_attr( wp_unslash( $_POST['name'] ) ) ); ?>"/>
 						<?php $edit_flow->settings->helper_print_error_or_description( 'name', __( 'The name is used to identify the user group.', 'edit-flow' ) ); ?>
 					</div>
 					<div class="form-field">
 						<label for="description"><?php _e( 'Description', 'edit-flow' ); ?></label>
-						<?php // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is escaped with esc_attr. ?>
-						<textarea cols="40" rows="5" id="description" name="description"><?php echo ( empty( $_POST['description'] ) ? '' : esc_attr( $_POST['description'] ) ); ?></textarea>
+						<textarea cols="40" rows="5" id="description" name="description"><?php echo ( empty( $_POST['description'] ) ? '' : esc_textarea( sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) ) ); ?></textarea>
 						<?php $edit_flow->settings->helper_print_error_or_description( 'description', __( 'The description is primarily for administrative use, to give you some context on what the user group is to be used for.', 'edit-flow' ) ); ?>
 					</div>
 					<?php wp_nonce_field( 'add-usergroup' ); ?>
@@ -875,7 +874,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 						</div>
 						<span class="ef-usergroup_name"><?php echo esc_html( $usergroup->name ); ?></span>
 						<span class="ef-usergroup_description" title="<?php echo esc_attr( $usergroup->description ); ?>">
-							<?php echo ( strlen( $usergroup->description ) >= 50 ) ? esc_html( substr_replace( esc_html( $usergroup->description ), '...', 50 ) ) : esc_html( $usergroup->description ); ?>
+							<?php echo esc_html( wp_html_excerpt( $usergroup->description, 50, '...' ) ); ?>
 						</span>
 					</label>
 				</li>
@@ -1319,15 +1318,15 @@ if ( ! class_exists( 'EF_Usergroups_List_Table' ) ) {
 			) ) ) . '">' . esc_html( $usergroup->name ) . '</a></strong>';
 
 			$actions                            = array();
-			$actions['edit edit-usergroup']     = sprintf( '<a href="%1$s">' . __( 'Edit', 'edit-flow' ) . '</a>', $edit_flow->user_groups->get_link( array(
+			$actions['edit edit-usergroup']     = sprintf( '<a href="%1$s">' . __( 'Edit', 'edit-flow' ) . '</a>', esc_url( $edit_flow->user_groups->get_link( array(
 				'action'       => 'edit-usergroup',
 				'usergroup-id' => $usergroup->term_id,
-			) ) );
+			) ) ) );
 			$actions['inline hide-if-no-js']    = '<a href="#" class="editinline">' . __( 'Quick&nbsp;Edit', 'edit-flow' ) . '</a>';
-			$actions['delete delete-usergroup'] = sprintf( '<a href="%1$s">' . __( 'Delete', 'edit-flow' ) . '</a>', $edit_flow->user_groups->get_link( array(
+			$actions['delete delete-usergroup'] = sprintf( '<a href="%1$s">' . __( 'Delete', 'edit-flow' ) . '</a>', esc_url( $edit_flow->user_groups->get_link( array(
 				'action'       => 'delete-usergroup',
 				'usergroup-id' => $usergroup->term_id,
-			) ) );
+			) ) ) );
 
 			$output .= $this->row_actions( $actions, false );
 			$output .= '<div class="hidden" id="inline_' . $usergroup->term_id . '">';

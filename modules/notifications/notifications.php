@@ -1020,7 +1020,12 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				return;
 			}
 
-			// Set up the payload.
+			// Set up the payload. The message embeds user-controlled values (display name, post
+			// title, comment text). It is delivered as a JSON-encoded body below, so it cannot
+			// break out of the request structure; the only residual is that a destination which
+			// renders Slack mrkdwn will format any markup characters within those values. That is
+			// cosmetic and the feature is opt-in; a site that needs to neutralise it can rewrite
+			// the text via the payload filter.
 			$payload = [
 				'text' => $message,
 			];

@@ -214,7 +214,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			<input type="hidden" value="" id="ef-comment_parent" name="ef-comment_parent" />
 			<input type="hidden" name="ef-post_id" id="ef-post_id" value="<?php echo esc_attr( $post->ID ); ?>" />
 
-			<?php wp_nonce_field( 'comment', 'ef_comment_nonce', false ); ?>
+			<?php wp_nonce_field( 'ef-insert-editorial-comment-' . $post->ID, 'ef_comment_nonce', false ); ?>
 
 			<br class="clear" />
 		</div>
@@ -270,7 +270,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				// The output for this has been individually escaped. Escaping the entire string will break comment reply functionality.
 				// ToDo: Use wp_kses with a custom set of allowed tags instead.
 				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- ToDo comment.
-				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . esc_html( $comment->comment_ID ) . '\',\'' . esc_html( $comment->comment_post_ID ) . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
+				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . (int) $comment->comment_ID . '\',\'' . (int) $comment->comment_post_ID . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
 
 				$sep = ' ';
 				$i   = 0;
@@ -332,18 +332,19 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		public function ajax_insert_comment() {
 			global $current_user, $user_ID, $wpdb;
 
-			// Verify nonce.
+			// Set up the target post first; the nonce is tied to it.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+
+			// Verify the nonce, which is namespaced to the post being commented on.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
-			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'comment' ) ) {
+			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'ef-insert-editorial-comment-' . $post_id ) ) {
 				wp_die( esc_html__( "Nonce check failed. Please ensure you're supposed to be adding editorial comments.", 'edit-flow' ) );
 			}
 
 			// Get user info.
 			wp_get_current_user();
 
-			// Set up comment data.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$post_id = absint( $_POST['post_id'] );
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$parent = absint( $_POST['parent'] );
 
