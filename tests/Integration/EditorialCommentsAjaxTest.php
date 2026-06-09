@@ -40,7 +40,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 		) );
 
 		// Set up the AJAX request
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['parent']  = 0;
 		$_POST['content'] = 'This is a test editorial comment.';
@@ -122,7 +122,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'post_author' => $author_id,
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['content'] = 'Test comment';
 
@@ -142,7 +142,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'post_author' => $author_user_id,
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['content'] = '';
 
@@ -162,7 +162,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'post_author' => $author_user_id,
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['content'] = '   ';
 
@@ -190,7 +190,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'post_author' => $author_user_id,
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['parent']  = 0;
 		$_POST['content'] = 'Comment from O\'Brien';
@@ -234,7 +234,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'comment_type'    => 'editorial-comment',
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_b );
 		$_POST['post_id'] = $post_b;
 		$_POST['parent']  = $parent_on_a;
 		$_POST['content'] = 'Reply pointed at another post';
@@ -265,7 +265,7 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 			'comment_type'    => 'editorial-comment',
 		) );
 
-		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['_nonce']  = wp_create_nonce( 'ef-insert-editorial-comment-' . $post_id );
 		$_POST['post_id'] = $post_id;
 		$_POST['parent']  = $parent;
 		$_POST['content'] = 'A valid threaded reply';
