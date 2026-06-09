@@ -128,7 +128,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! isset( $_POST['change_module_nonce'] ) || ! wp_verify_nonce( $_POST['change_module_nonce'], 'change-edit-flow-module-nonce' ) || ! current_user_can( 'manage_options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
+				wp_die( esc_html__( 'Cheatin’ uh?', 'edit-flow' ) );
 			}
 
 			if ( ! isset( $_POST['module_action'], $_POST['slug'] ) ) {
@@ -447,7 +447,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( $_POST['_wpnonce'], $edit_flow->$module_name->module->options_group_name . '-options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
+				wp_die( esc_html__( 'Cheatin’ uh?', 'edit-flow' ) );
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitization is handled by each module's settings_validate method.

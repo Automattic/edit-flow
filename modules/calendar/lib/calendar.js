@@ -409,7 +409,7 @@ jQuery( document ).ready( function ( $ ) {
 			$form
 				.find( '.post-insert-dialog-controls' )
 				.show()
-				.before( '<div class="error">Error: ' + error_msg + '</div>' );
+				.before( jQuery( '<div class="error"></div>' ).text( 'Error: ' + error_msg ) );
 		}, // display_errors
 	};
 
