@@ -132,9 +132,11 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				wp_die( '-1' );
 			}
 
-			if ( 'enable' == $module_action ) {
+			$return = false;
+
+			if ( 'enable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'on' );
-			} elseif ( 'disable' == $module_action ) {
+			} elseif ( 'disable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'off' );
 			}
 
