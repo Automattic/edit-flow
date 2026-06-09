@@ -28,21 +28,3 @@ add_filter( 'ef_edit_post_subscriptions_cap', function () {
 add_filter( 'ef_manage_usergroups_cap', function () {
 	return 'manage_options';
 } );
-
-add_action( 'after_setup_theme', 'edit_flow_wpcom_load_modules' );
-
-/**
- * Load Edit Flow modules for VIP Go environments.
- *
- * Edit Flow loads modules after plugins_loaded, which has already been fired
- * when loading via wpcom_vip_load_plugins. This runs the load method at
- * after_setup_theme instead.
- *
- * @return void
- */
-function edit_flow_wpcom_load_modules() {
-	global $edit_flow;
-	if ( method_exists( $edit_flow, 'action_ef_loaded_load_modules' ) ) {
-		$edit_flow->action_ef_loaded_load_modules();
-	}
-}

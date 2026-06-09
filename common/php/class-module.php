@@ -553,7 +553,8 @@ if ( ! class_exists( 'EF_Module' ) ) {
 				'input_id'   => 'ef-selected-users',
 			);
 			$parsed_args = wp_parse_args( $args, $defaults );
-			extract( $parsed_args, EXTR_SKIP );
+			$list_class  = $parsed_args['list_class'];
+			$input_id    = $parsed_args['input_id'];
 
 			$args = array(
 				'capability' => 'publish_posts',
