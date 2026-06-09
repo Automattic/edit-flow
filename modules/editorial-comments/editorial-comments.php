@@ -270,7 +270,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				// The output for this has been individually escaped. Escaping the entire string will break comment reply functionality.
 				// ToDo: Use wp_kses with a custom set of allowed tags instead.
 				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- ToDo comment.
-				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . esc_html( $comment->comment_ID ) . '\',\'' . esc_html( $comment->comment_post_ID ) . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
+				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . (int) $comment->comment_ID . '\',\'' . (int) $comment->comment_post_ID . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
 
 				$sep = ' ';
 				$i   = 0;
