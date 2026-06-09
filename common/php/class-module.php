@@ -461,11 +461,11 @@ if ( ! class_exists( 'EF_Module' ) ) {
 			}
 
 			// The current page better be in the array of registered settings view slugs.
-			if ( ! in_array( $_GET['page'], $settings_view_slugs ) ) {
+			if ( ! in_array( $_GET['page'], $settings_view_slugs, true ) ) {
 				return false;
 			}
 
-			if ( $module_name && $edit_flow->modules->$module_name->settings_slug != $_GET['page'] ) {
+			if ( $module_name && $edit_flow->modules->$module_name->settings_slug !== $_GET['page'] ) {
 				return false;
 			}
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -574,7 +574,7 @@ if ( ! class_exists( 'EF_Module' ) ) {
 			<ul class="<?php echo esc_attr( $list_class ); ?>">
 				<?php
 				foreach ( $users as $user ) :
-					$checked = in_array( $user->ID, $selected );
+					$checked = in_array( (int) $user->ID, array_map( 'intval', (array) $selected ), true );
 					?>
 					<li>
 						<label for="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>">
