@@ -1260,15 +1260,18 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
 			if ( ! isset( $_POST['custom_status_sortable_nonce'] ) || ! wp_verify_nonce( $_POST['custom_status_sortable_nonce'], 'custom-status-sortable' ) ) {
 				$this->print_ajax_response( 'error', esc_html( $this->module->messages['nonce-failed'] ) );
+				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$this->print_ajax_response( 'error', esc_html( $this->module->messages['invalid-permissions'] ) );
+				return;
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Array is sanitized when processing each item.
 			if ( ! isset( $_POST['status_positions'] ) || ! is_array( $_POST['status_positions'] ) ) {
 				$this->print_ajax_response( 'error', esc_html__( 'Terms not set.', 'edit-flow' ) );
+				return;
 			}
 
 			// Update each custom status with its new position.

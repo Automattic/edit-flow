@@ -1496,14 +1496,17 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
 			if ( ! isset( $_POST['editorial_metadata_sortable_nonce'] ) || ! wp_verify_nonce( $_POST['editorial_metadata_sortable_nonce'], 'editorial-metadata-sortable' ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
+				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
+				return;
 			}
 
 			if ( ! isset( $_POST['term_positions'] ) || ! is_array( $_POST['term_positions'] ) ) {
 				$this->print_ajax_response( 'error', __( 'Terms not set.', 'edit-flow' ) );
+				return;
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are cast to int below.
