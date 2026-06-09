@@ -1,0 +1,55 @@
+name: Lockfile Registry
+
+on:
+  push:
+    paths:
+      - 'package-lock.json'
+      - '.github/workflows/lockfile-registry.yml'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'package-lock.json'
+      - '.github/workflows/lockfile-registry.yml'
+  workflow_dispatch:
+
+# Disable all permissions by default; grant minimal permissions per job
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  registry:
+    name: Resolved URLs on official registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Check resolved URLs point to registry.npmjs.org
+        run: |
+          # Every package tarball in the lockfile must resolve from the public
+          # npm registry. A local proxy or mirror (e.g. an internal caching
+          # registry) baked into "resolved" URLs breaks `npm ci` for anyone
+          # outside that network and leaks internal hostnames into a public repo.
+          offenders="$(grep -oE '"resolved": *"https?://[^"]+"' package-lock.json \
+            | grep -vE '"resolved": *"https://registry\.npmjs\.org/' \
+            | sort -u || true)"
+
+          if [ -n "$offenders" ]; then
+            echo "::error file=package-lock.json::Found resolved URLs outside https://registry.npmjs.org/"
+            echo "Offending entries:"
+            echo "$offenders"
+            echo
+            echo "Regenerate the lockfile against the official registry, for example:"
+            echo "  npm install --registry https://registry.npmjs.org/"
+            exit 1
+          fi
+
+          echo "All resolved URLs point to https://registry.npmjs.org/"
