@@ -494,7 +494,7 @@ class EF_Story_Budget extends EF_Module {
 		<div class="<?php echo esc_attr( $wrap_classes ); ?>" id="ef-story-budget-wrap">
 			<div id="ef-story-budget-title">
 				<?php echo '<img src="' . esc_url( $this->module->img_url ) . '" class="module-icon icon32" />'; ?>
-				<h2><?php _e( 'Story Budget', 'edit-flow' ); ?></h2>
+				<h2><?php esc_html_e( 'Story Budget', 'edit-flow' ); ?></h2>
 			</div><!-- /Story Budget Title -->
 			<?php $this->print_messages(); ?>
 			<?php $this->table_navigation(); ?>
@@ -683,7 +683,7 @@ class EF_Story_Budget extends EF_Module {
 				</tbody>
 			</table>
 			<?php else : ?>
-			<div class="message info"><p><?php _e( 'There are no posts for this term in the range or filter specified.', 'edit-flow' ); ?></p></div>
+			<div class="message info"><p><?php esc_html_e( 'There are no posts for this term in the range or filter specified.', 'edit-flow' ); ?></p></div>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -739,10 +739,10 @@ class EF_Story_Budget extends EF_Module {
 		switch ( $column_name ) {
 			case 'status':
 				$status_name = get_post_status_object( $post->post_status );
-				return $status_name->label;
+				return $status_name ? esc_html( $status_name->label ) : '';
 			case 'author':
 				$post_author = get_userdata( $post->post_author );
-				return $post_author->display_name;
+				return $post_author ? esc_html( $post_author->display_name ) : '';
 			case 'post_date':
 				$output = get_the_time( get_option( 'date_format' ), $post->ID );
 				// Only show time if it's not midnight (indicating a specific time was set).
@@ -774,7 +774,7 @@ class EF_Story_Budget extends EF_Module {
 		$post_type_object = get_post_type_object( $post->post_type );
 		$can_edit_post    = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 		if ( $can_edit_post ) {
-			$output = '<strong><a href="' . get_edit_post_link( $post->ID ) . '">' . esc_html( $post_title ) . '</a></strong>';
+			$output = '<strong><a href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html( $post_title ) . '</a></strong>';
 		} else {
 			$output = '<strong>' . esc_html( $post_title ) . '</strong>';
 		}
@@ -798,19 +798,19 @@ class EF_Story_Budget extends EF_Module {
 		$output      .= '<div class="row-actions">';
 		$item_actions = array();
 		if ( $can_edit_post ) {
-			$item_actions['edit'] = '<a title="' . __( 'Edit this post', 'edit-flow' ) . '" href="' . get_edit_post_link( $post->ID ) . '">' . __( 'Edit', 'edit-flow' ) . '</a>';
+			$item_actions['edit'] = '<a title="' . esc_attr__( 'Edit this post', 'edit-flow' ) . '" href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html__( 'Edit', 'edit-flow' ) . '</a>';
 		}
 		if ( EMPTY_TRASH_DAYS > 0 && current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
-			$item_actions['trash'] = '<a class="submitdelete" title="' . __( 'Move this item to the Trash', 'edit-flow' ) . '" href="' . get_delete_post_link( $post->ID ) . '">' . __( 'Trash', 'edit-flow' ) . '</a>';
+			$item_actions['trash'] = '<a class="submitdelete" title="' . esc_attr__( 'Move this item to the Trash', 'edit-flow' ) . '" href="' . esc_url( get_delete_post_link( $post->ID ) ) . '">' . esc_html__( 'Trash', 'edit-flow' ) . '</a>';
 		}
 
 		// Display a View or a Preview link depending on whether the post has been published or not.
 		if ( in_array( $post->post_status, array( 'publish' ) ) ) {
 			/* translators: %s: post title */
-			$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
+			$item_actions['view'] = '<a href="' . esc_url( get_permalink( $post->ID ) ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . esc_html__( 'View', 'edit-flow' ) . '</a>';
 		} elseif ( $can_edit_post ) {
 			/* translators: %s: post title */
-			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
+			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . esc_html__( 'Preview', 'edit-flow' ) . '</a>';
 		}
 
 		$item_actions = apply_filters( 'ef_story_budget_item_actions', $item_actions, $post->ID );
