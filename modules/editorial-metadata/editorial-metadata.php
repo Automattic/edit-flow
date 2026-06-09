@@ -263,14 +263,14 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// Add the metabox date picker JS and CSS.
 			$current_post_type    = $this->get_current_post_type();
 			$supported_post_types = $this->get_post_types_for_module( $this->module );
-			if ( in_array( $current_post_type, $supported_post_types ) ) {
+			if ( in_array( $current_post_type, $supported_post_types, true ) ) {
 				$this->enqueue_datepicker_resources();
 
 				// Now add the rest of the metabox CSS.
 				wp_enqueue_style( 'edit_flow-editorial_metadata-styles', $this->module_url . 'lib/editorial-metadata.css', false, EDIT_FLOW_VERSION, 'all' );
 			}
 			// A bit of custom CSS for the Manage Posts view if we have viewable metadata.
-			if ( 'edit' == $current_screen->base && in_array( $current_post_type, $supported_post_types ) ) {
+			if ( 'edit' === $current_screen->base && in_array( $current_post_type, $supported_post_types, true ) ) {
 				$terms          = $this->get_editorial_metadata_terms();
 				$viewable_terms = array();
 				foreach ( $terms as $term ) {
@@ -1182,7 +1182,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			$term_description = isset( $_POST['metadata_description'] ) ? stripslashes( wp_filter_nohtml_kses( trim( $_POST['metadata_description'] ) ) ) : '';
 			$term_type        = isset( $_POST['metadata_type'] ) ? sanitize_key( $_POST['metadata_type'] ) : '';
 
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 
 			/**
 			 * Form validation for adding new editorial metadata term.
@@ -1193,32 +1193,32 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			 */
 			// Field is required.
 			if ( empty( $term_name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the editorial metadata.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the editorial metadata.', 'edit-flow' );
 			}
 			// Field is required.
 			if ( empty( $term_slug ) ) {
-				$_REQUEST['form-errors']['slug'] = __( 'Please enter a slug for the editorial metadata.', 'edit-flow' );
+				EditFlow()->settings->form_errors['slug'] = __( 'Please enter a slug for the editorial metadata.', 'edit-flow' );
 			}
 			if ( term_exists( $term_slug ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with existing term. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			if ( $this->get_editorial_metadata_term_by( 'name', $term_name, self::metadata_taxonomy ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			if ( $this->get_editorial_metadata_term_by( 'slug', $term_slug ) ) {
-				$_REQUEST['form-errors']['slug'] = __( 'Slug already in use. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['slug'] = __( 'Slug already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist as another term because otherwise we'd get a weird slug.
 			// Check that the term name doesn't exceed 200 chars.
 			if ( strlen( $term_name ) > 200 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name cannot exceed 200 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name cannot exceed 200 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Metadata type needs to pass our whitelist check.
 			$metadata_types = $this->get_supported_metadata_types();
 			if ( empty( $_POST['metadata_type'] ) || ! isset( $metadata_types[ $_POST['metadata_type'] ] ) ) {
-				$_REQUEST['form-errors']['type'] = __( 'Please select a valid metadata type.', 'edit-flow' );
+				EditFlow()->settings->form_errors['type'] = __( 'Please select a valid metadata type.', 'edit-flow' );
 			}
 			// Metadata viewable needs to be a valid Yes or No.
 			$term_viewable = false;
@@ -1227,8 +1227,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			}
 
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -1290,36 +1289,36 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			 * - "name", "slug", and "type" are required fields
 			 * - "description" can accept a limited amount of HTML, and is optional
 			 */
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 			// Check if name field was filled in.
 			if ( empty( $new_name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the editorial metadata', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the editorial metadata', 'edit-flow' );
 			}
 
 			// Check that the name isn't numeric.
 			if ( is_numeric( $new_name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a valid, non-numeric name for the editorial metadata.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a valid, non-numeric name for the editorial metadata.', 'edit-flow' );
 			}
 
 			$term_exists = term_exists( sanitize_title( $new_name ) );
-			if ( $term_exists && $term_exists != $existing_term->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Metadata name conflicts with existing term. Please choose another.', 'edit-flow' );
+			if ( $term_exists && (int) $term_exists !== (int) $existing_term->term_id ) {
+				EditFlow()->settings->form_errors['name'] = __( 'Metadata name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 
 			// Check to ensure a term with the same name doesn't exist.
 			$search_term = $this->get_editorial_metadata_term_by( 'name', $new_name );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Or that the term name doesn't map to an existing term's slug.
 			$search_term = $this->get_editorial_metadata_term_by( 'slug', sanitize_title( $new_name ) );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with slug for another term. Please choose something else.', 'edit-flow' );
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with slug for another term. Please choose something else.', 'edit-flow' );
 			}
 
 			// Check that the term name doesn't exceed 200 chars.
 			if ( strlen( $new_name ) > 200 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name cannot exceed 200 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name cannot exceed 200 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Make sure the viewable state is valid.
 			$new_viewable = false;
@@ -1328,8 +1327,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			}
 
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -1363,7 +1361,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce verified below.
 			// Check that the current GET request is our GET request.
 			if ( ! isset( $_GET['page'], $_GET['action'], $_GET['term-id'], $_GET['nonce'] )
-			|| $_GET['page'] != $this->module->settings_slug || ! in_array( $_GET['action'], array( 'make-viewable', 'make-hidden' ) ) ) {
+			|| $_GET['page'] !== $this->module->settings_slug || ! in_array( $_GET['action'], array( 'make-viewable', 'make-hidden' ), true ) ) {
 				return;
 			}
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -1447,21 +1445,21 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 
 			// Check to make sure the status doesn't already exist as another term because otherwise we'd get a fatal error.
 			$term_exists = term_exists( sanitize_title( $metadata_name ) );
-			if ( $term_exists && $term_exists != $term_id ) {
+			if ( $term_exists && (int) $term_exists !== (int) $term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Metadata name conflicts with existing term. Please choose another.', 'edit-flow' ) );
 				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Check to ensure a term with the same name doesn't exist.
 			$search_term = $this->get_editorial_metadata_term_by( 'name', $metadata_name );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name already in use. Please choose another.', 'edit-flow' ) );
 				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 
 			// Or that the term name doesn't map to an existing term's slug.
 			$search_term = $this->get_editorial_metadata_term_by( 'slug', sanitize_title( $metadata_name ) );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' ) );
 				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
@@ -1496,14 +1494,17 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
 			if ( ! isset( $_POST['editorial_metadata_sortable_nonce'] ) || ! wp_verify_nonce( $_POST['editorial_metadata_sortable_nonce'], 'editorial-metadata-sortable' ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
+				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
+				return;
 			}
 
 			if ( ! isset( $_POST['term_positions'] ) || ! is_array( $_POST['term_positions'] ) ) {
 				$this->print_ajax_response( 'error', __( 'Terms not set.', 'edit-flow' ) );
+				return;
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are cast to int below.
@@ -1777,7 +1778,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				<?php
 					$metadata_types = $this->get_supported_metadata_types();
 					// Select the previously selected metadata type if a valid one exists.
-					$current_metadata_type = ( isset( $_POST['metadata_type'] ) && in_array( $_POST['metadata_type'], array_keys( $metadata_types ) ) ) ? $_POST['metadata_type'] : false;
+					$current_metadata_type = ( isset( $_POST['metadata_type'] ) && in_array( $_POST['metadata_type'], array_keys( $metadata_types ), true ) ) ? $_POST['metadata_type'] : false;
 				?>
 				<select id="metadata_type" name="metadata_type">
 				<?php foreach ( $metadata_types as $metadata_type => $metadata_type_name ) : ?>
@@ -1793,7 +1794,7 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 						'no'  => __( 'No', 'edit-flow' ),
 						'yes' => __( 'Yes', 'edit-flow' ),
 					);
-					$current_metadata_viewable = ( isset( $_POST['metadata_viewable'] ) && in_array( $_POST['metadata_viewable'], array_keys( $metadata_viewable_options ) ) ) ? $_POST['metadata_viewable'] : 'no';
+					$current_metadata_viewable = ( isset( $_POST['metadata_viewable'] ) && in_array( $_POST['metadata_viewable'], array_keys( $metadata_viewable_options ), true ) ) ? $_POST['metadata_viewable'] : 'no';
 					?>
 				<select id="metadata_viewable" name="metadata_viewable">
 				<?php foreach ( $metadata_viewable_options as $metadata_viewable_key => $metadata_viewable_value ) : ?>

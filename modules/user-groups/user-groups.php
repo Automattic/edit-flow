@@ -314,7 +314,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below.
 			$description = ( isset( $_POST['description'] ) ) ? stripslashes( wp_filter_nohtml_kses( trim( $_POST['description'] ) ) ) : '';
 
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 
 			/*
 			 * Form validation for adding new Usergroup.
@@ -325,22 +325,21 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			 */
 			// Field is required.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			if ( $this->get_usergroup_by( 'name', $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			if ( $this->get_usergroup_by( 'slug', sanitize_title( $name ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
 			}
 			if ( strlen( $name ) > 40 ) {
-				$_REQUEST['form-errors']['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -402,7 +401,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized below.
 			$description = isset( $_POST['description'] ) ? stripslashes( wp_filter_nohtml_kses( trim( $_POST['description'] ) ) ) : '';
 
-			$_REQUEST['form-errors'] = array();
+			EditFlow()->settings->form_errors = array();
 
 			/*
 			 * Form validation for editing a Usergroup.
@@ -413,24 +412,23 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			 */
 			// Field is required.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the user group.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			$search_term = $this->get_usergroup_by( 'name', $name );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_usergroup->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_usergroup->term_id ) {
+				EditFlow()->settings->form_errors['name'] = __( 'Name already in use. Please choose another.', 'edit-flow' );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			$search_term = $this->get_usergroup_by( 'slug', sanitize_title( $name ) );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_usergroup->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_usergroup->term_id ) {
+				EditFlow()->settings->form_errors['name'] = __( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' );
 			}
 			if ( strlen( $name ) > 40 ) {
-				$_REQUEST['form-errors']['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'User group name cannot exceed 40 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -532,13 +530,13 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 			}
 			// Check to ensure a term with the same name doesn't exist.
 			$search_term = $this->get_usergroup_by( 'name', $name );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name already in use. Please choose another.', 'edit-flow' ) );
 				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
 			// Check to ensure a term with the same slug doesn't exist.
 			$search_term = $this->get_usergroup_by( 'slug', sanitize_title( $name ) );
-			if ( is_object( $search_term ) && $search_term->term_id != $existing_term->term_id ) {
+			if ( is_object( $search_term ) && (int) $search_term->term_id !== (int) $existing_term->term_id ) {
 				$change_error = new WP_Error( 'invalid', esc_html__( 'Name conflicts with slug for another term. Please choose again.', 'edit-flow' ) );
 				wp_die( esc_html( $change_error->get_error_message() ) );
 			}
@@ -801,7 +799,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				$usergroups     = isset( $_POST['ef_usergroups'] ) ? array_map( 'intval', (array) $_POST['ef_usergroups'] ) : array();
 				$all_usergroups = $this->get_usergroups();
 				foreach ( $all_usergroups as $usergroup ) {
-					if ( in_array( $usergroup->term_id, $usergroups ) ) {
+					if ( in_array( (int) $usergroup->term_id, $usergroups, true ) ) {
 						$this->add_user_to_usergroup( $user->ID, $usergroup->term_id );
 					} else {
 						$this->remove_user_from_usergroup( $user->ID, $usergroup->term_id );
@@ -873,7 +871,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				<li>
 					<label for="<?php echo esc_attr( $input_id ) . esc_attr( $usergroup->term_id ); ?>" title="<?php echo esc_attr( $usergroup->description ); ?>">
 						<div class="ef-user-subscribe-actions">
-							<input type="checkbox" id="<?php echo esc_attr( $input_id . $usergroup->term_id ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $usergroup->term_id ); ?>"<?php echo checked( in_array( $usergroup->term_id, $selected ) ); ?> />
+							<input type="checkbox" id="<?php echo esc_attr( $input_id . $usergroup->term_id ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $usergroup->term_id ); ?>"<?php echo checked( in_array( (int) $usergroup->term_id, array_map( 'intval', (array) $selected ), true ) ); ?> />
 						</div>
 						<span class="ef-usergroup_name"><?php echo esc_html( $usergroup->name ); ?></span>
 						<span class="ef-usergroup_description" title="<?php echo esc_attr( $usergroup->description ); ?>">
@@ -1117,7 +1115,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				$usergroup = $this->get_usergroup_by( 'id', $usergroup_id );
 
 				// Skip if user is already in this group.
-				if ( in_array( $user_id, $usergroup->user_ids, true ) ) {
+				if ( in_array( (int) $user_id, array_map( 'intval', (array) $usergroup->user_ids ), true ) ) {
 					continue;
 				}
 
@@ -1152,7 +1150,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				$usergroup = $this->get_usergroup_by( 'id', $usergroup_id );
 				// @todo I bet there's a PHP function for this I couldn't look up at 35,000 over the Atlantic.
 				foreach ( $usergroup->user_ids as $key => $usergroup_user_id ) {
-					if ( $usergroup_user_id == $user_id ) {
+					if ( (int) $usergroup_user_id === (int) $user_id ) {
 						unset( $usergroup->user_ids[ $key ] );
 					}
 				}
@@ -1188,7 +1186,7 @@ if ( ! class_exists( 'EF_User_Groups' ) ) {
 				$usergroup_objects_or_ids = array();
 				foreach ( $all_usergroups as $usergroup ) {
 					// Not in this usergroup, so keep going.
-					if ( ! in_array( $user_id, $usergroup->user_ids ) ) {
+					if ( ! in_array( (int) $user_id, array_map( 'intval', (array) $usergroup->user_ids ), true ) ) {
 						continue;
 					}
 					if ( 'ids' == $ids_or_objects ) {

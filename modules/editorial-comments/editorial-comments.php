@@ -353,6 +353,19 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				wp_die( esc_html__( 'Sorry, you don\'t have the privileges to add editorial comments. Please talk to your Administrator.', 'edit-flow' ) );
 			}
 
+			// If this is a reply, the parent must be an editorial comment on this same post,
+			// so a request cannot thread a comment under an unrelated post's comment.
+			if ( $parent ) {
+				$parent_comment = get_comment( $parent );
+				if (
+					! $parent_comment
+					|| (int) $parent_comment->comment_post_ID !== $post_id
+					|| self::comment_type !== $parent_comment->comment_type
+				) {
+					wp_die( esc_html__( 'The comment you are replying to is invalid.', 'edit-flow' ) );
+				}
+			}
+
 			// Verify that comment was actually entered.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Content is sanitized by wp_kses when building $data.
 			$comment_content = isset( $_POST['content'] ) ? trim( $_POST['content'] ) : '';

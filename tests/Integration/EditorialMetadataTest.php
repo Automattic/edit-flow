@@ -195,4 +195,79 @@ class EditorialMetadataTest extends TestCase {
 		$this->assertSame( 'sanitize_textarea_field', $registered[ $paragraph_key ]['sanitize_callback'] );
 		$this->assertSame( 'sanitize_text_field', $registered[ $number_key ]['sanitize_callback'] );
 	}
+
+	/**
+	 * Renaming a term to a name already used by ANOTHER term must report a conflict. This guards
+	 * the strict term_exists() comparison so it keeps detecting genuine name collisions.
+	 */
+	public function test_edit_term_rename_to_other_existing_name_reports_conflict() {
+		global $edit_flow;
+		wp_set_current_user( self::$admin_user_id );
+
+		$edit_flow->editorial_metadata->insert_editorial_metadata_term( array(
+			'name' => 'Alpha EM',
+			'type' => 'text',
+		) );
+		$beta = $edit_flow->editorial_metadata->insert_editorial_metadata_term( array(
+			'name' => 'Beta EM',
+			'type' => 'text',
+		) );
+
+		$_GET['page']      = $edit_flow->editorial_metadata->module->settings_slug;
+		$_GET['action']    = 'edit-term';
+		$_GET['term-id']   = $beta['term_id'];
+		$_POST['submit']   = 'Submit';
+		$_POST['_wpnonce'] = wp_create_nonce( 'editorial-metadata-edit-nonce' );
+		$_POST['name']     = 'Alpha EM';
+
+		$edit_flow->settings->form_errors = array();
+		$edit_flow->editorial_metadata->handle_edit_editorial_metadata();
+
+		$this->assertArrayHasKey( 'name', $edit_flow->settings->form_errors, "Renaming to another term's name should report a conflict." );
+	}
+
+	/**
+	 * Renaming a term to its OWN current name must NOT report a conflict: term_exists() returns
+	 * the term itself. This locks the self-rename behaviour of the conflict check — in particular
+	 * it would fail if the comparison were tightened to a strict !== without int-casting
+	 * term_exists()'s numeric-string return against the integer term_id.
+	 */
+	public function test_edit_term_rename_to_same_name_is_allowed() {
+		global $edit_flow;
+		wp_set_current_user( self::$admin_user_id );
+
+		$gamma = $edit_flow->editorial_metadata->insert_editorial_metadata_term( array(
+			'name' => 'Gamma EM',
+			'type' => 'text',
+		) );
+
+		$_GET['page']      = $edit_flow->editorial_metadata->module->settings_slug;
+		$_GET['action']    = 'edit-term';
+		$_GET['term-id']   = $gamma['term_id'];
+		$_POST['submit']   = 'Submit';
+		$_POST['_wpnonce'] = wp_create_nonce( 'editorial-metadata-edit-nonce' );
+		$_POST['name']     = 'Gamma EM';
+
+		$edit_flow->settings->form_errors = array();
+
+		// The no-conflict path ends in wp_redirect(); exit — intercept the redirect so the test
+		// process survives and we can assert no conflict was recorded.
+		$redirected = false;
+		$catch      = function () use ( &$redirected ) {
+			$redirected = true;
+			throw new \RuntimeException( 'redirected' );
+		};
+		add_filter( 'wp_redirect', $catch );
+
+		try {
+			$edit_flow->editorial_metadata->handle_edit_editorial_metadata();
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'wp_redirect', $catch );
+		}
+
+		$this->assertTrue( $redirected, 'A self-rename should pass validation and reach the redirect.' );
+		$this->assertArrayNotHasKey( 'name', $edit_flow->settings->form_errors, 'A self-rename must not report a name conflict.' );
+	}
 }

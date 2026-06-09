@@ -211,4 +211,83 @@ class EditorialCommentsAjaxTest extends AjaxTestCase {
 		$comment = get_comment( (int) $matches[1] );
 		$this->assertSame( "O'Brien", $comment->comment_author, 'Author should be stored verbatim without escape sequences.' );
 	}
+
+	/**
+	 * Test: a reply whose parent comment belongs to a different post is rejected, so a comment
+	 * cannot be threaded under an unrelated post's comment.
+	 */
+	public function test_insert_comment_rejects_reply_parent_from_another_post(): void {
+		$author_user_id = $this->factory->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $author_user_id );
+
+		$post_a = $this->factory->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => $author_user_id,
+		) );
+		$post_b = $this->factory->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => $author_user_id,
+		) );
+
+		$parent_on_a = $this->factory->comment->create( array(
+			'comment_post_ID' => $post_a,
+			'comment_type'    => 'editorial-comment',
+		) );
+
+		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['post_id'] = $post_b;
+		$_POST['parent']  = $parent_on_a;
+		$_POST['content'] = 'Reply pointed at another post';
+
+		global $current_user, $user_ID;
+		$current_user = wp_get_current_user();
+		$user_ID      = $author_user_id;
+
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'editflow_ajax_insert_comment' );
+	}
+
+	/**
+	 * Test: a reply whose parent is an editorial comment on the same post is accepted and
+	 * threaded under that parent.
+	 */
+	public function test_insert_comment_allows_reply_parent_on_same_post(): void {
+		$author_user_id = $this->factory->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $author_user_id );
+
+		$post_id = $this->factory->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => $author_user_id,
+		) );
+
+		$parent = $this->factory->comment->create( array(
+			'comment_post_ID' => $post_id,
+			'comment_type'    => 'editorial-comment',
+		) );
+
+		$_POST['_nonce']  = wp_create_nonce( 'comment' );
+		$_POST['post_id'] = $post_id;
+		$_POST['parent']  = $parent;
+		$_POST['content'] = 'A valid threaded reply';
+
+		global $current_user, $user_ID;
+		$current_user = wp_get_current_user();
+		$user_ID      = $author_user_id;
+
+		$caught = false;
+		try {
+			$this->_handleAjax( 'editflow_ajax_insert_comment' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			$caught = true;
+			unset( $e );
+		}
+
+		$this->assertTrue( $caught, 'A reply with a valid same-post parent should succeed.' );
+
+		preg_match( '/<comment id=\'(\d+)\'/', $this->_last_response, $matches );
+		$this->assertNotEmpty( $matches, 'Comment ID should be extracted from response.' );
+
+		$comment = get_comment( (int) $matches[1] );
+		$this->assertSame( (int) $parent, (int) $comment->comment_parent, 'Reply should be threaded under the parent.' );
+	}
 }

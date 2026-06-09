@@ -20,6 +20,18 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		public $module;
 
 		/**
+		 * Validation errors for the settings and term forms, keyed by field name.
+		 *
+		 * The module form handlers populate this on a failed submission and
+		 * helper_print_error_or_description() reads it back when the form re-renders in the
+		 * same request. Holding it here rather than on $_REQUEST means a crafted query string
+		 * cannot inject fake inline error messages onto the settings screens.
+		 *
+		 * @var array
+		 */
+		public $form_errors = array();
+
+		/**
 		 * Register the module with Edit Flow but don't do anything else.
 		 */
 		public function __construct() {
@@ -132,9 +144,11 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				wp_die( '-1' );
 			}
 
-			if ( 'enable' == $module_action ) {
+			$return = false;
+
+			if ( 'enable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'on' );
-			} elseif ( 'disable' == $module_action ) {
+			} elseif ( 'disable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'off' );
 			}
 
@@ -350,12 +364,10 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 * @param string $description Unlocalized string to display if there was no error with the given field.
 		 */
 		public function helper_print_error_or_description( $field, $description ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for error display, no data modification.
-			if ( isset( $_REQUEST['form-errors'][ $field ] ) ) :
+			if ( isset( $this->form_errors[ $field ] ) ) :
 				?>
 			<div class="form-error">
-				<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display only, esc_html handles output. ?>
-				<p><?php echo esc_html( $_REQUEST['form-errors'][ $field ] ); ?></p>
+				<p><?php echo esc_html( $this->form_errors[ $field ] ); ?></p>
 			</div>
 			<?php else : ?>
 			<p class="description"><?php echo esc_html( $description ); ?></p>
