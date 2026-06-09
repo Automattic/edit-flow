@@ -143,6 +143,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_filter( 'page_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
 			add_filter( 'post_type_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
 			add_filter( 'preview_post_link', [ $this, 'fix_preview_link_part_three' ], 11, 2 );
+			add_action( 'template_redirect', [ $this, 'fix_preview_template' ] );
 			add_filter( 'get_sample_permalink', [ $this, 'fix_get_sample_permalink' ], 10, 5 );
 			add_filter( 'get_sample_permalink_html', [ $this, 'fix_get_sample_permalink_html' ], 10, 5 );
 			add_filter( 'post_row_actions', [ $this, 'fix_post_row_actions' ], 10, 2 );
@@ -1926,6 +1927,76 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				}
 			}
 			return remove_query_arg( [ 'preview_nonce' ], $preview_link );
+		}
+
+		/**
+		 * Another hack! hack! hack! until core better supports custom statuses.
+		 *
+		 * Posts and pages with a custom status are kept with an empty `post_name`
+		 * (see `maybe_keep_post_name_empty()` and `fix_unique_post_slug()`). WordPress's
+		 * template hierarchy resolves slug-specific templates — `page-{slug}.php` and
+		 * `single-{post-type}-{slug}.php` — from `$post->post_name`, so an empty slug
+		 * silently degrades template selection when the post is previewed: only the
+		 * generic `page.php` / `single.php` fallback can match. The same empty slug also
+		 * breaks template-based conditional logic such as ACF location rules.
+		 *
+		 * Here we synthesise a slug from the title on the queried object in memory only,
+		 * for the duration of the preview request. Nothing is persisted: the stored
+		 * `post_name` stays empty, so none of the slug-emptying behaviour changes.
+		 *
+		 * @since 0.11.0
+		 *
+		 * @see https://github.com/Automattic/Edit-Flow/issues/933
+		 */
+		public function fix_preview_template() {
+			// Only singular requests resolve a slug-specific template from post_name.
+			if ( ! is_singular() ) {
+				return;
+			}
+
+			$post = get_queried_object();
+
+			// Nothing to do unless we have a titled post whose slug is empty.
+			if ( ! $post instanceof WP_Post
+			|| ! empty( $post->post_name )
+			|| empty( $post->post_title ) ) {
+				return;
+			}
+
+			// Only act on the pre-publish custom statuses and post types we support.
+			$status_slugs = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+			if ( ! in_array( $post->post_status, $status_slugs, true )
+			|| ! in_array( $post->post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
+				return;
+			}
+
+			/**
+			 * Filters the slug synthesised in memory for template selection while
+			 * previewing a custom-status post. Return an empty string to leave the
+			 * slug empty and disable this behaviour for the post.
+			 *
+			 * @since 0.11.0
+			 *
+			 * @param string  $post_name Slug derived from the post title.
+			 * @param WP_Post $post      The post being previewed.
+			 */
+			$post_name = apply_filters( 'ef_preview_template_post_name', sanitize_title( $post->post_title ), $post );
+
+			if ( '' === $post_name ) {
+				return;
+			}
+
+			// Set it on the queried object (used by the template hierarchy) and keep the
+			// loop post and global in sync for template tags and conditional logic.
+			$post->post_name = $post_name;
+
+			global $wp_query;
+			if ( isset( $wp_query->post ) && $wp_query->post instanceof WP_Post && $wp_query->post->ID === $post->ID ) {
+				$wp_query->post->post_name = $post_name;
+			}
+			if ( isset( $GLOBALS['post'] ) && $GLOBALS['post'] instanceof WP_Post && $GLOBALS['post']->ID === $post->ID ) {
+				$GLOBALS['post']->post_name = $post_name;
+			}
 		}
 
 		/**
