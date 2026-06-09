@@ -1169,7 +1169,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 								<?php $editable_class = $values['editable'] ? 'editable-value' : ''; ?>
 								<td class="value <?php echo esc_attr( $editable_class ); ?>"><?php echo esc_html( $values['value'] ); ?></td>
 								<?php if ( $values['editable'] ) : ?>
-									<td class="editable-html hidden" data-type="<?php echo esc_attr( $values['type'] ); ?>" data-metadataterm="<?php echo esc_attr( str_replace( 'editorial-metadata-', '', str_replace( 'tax_', '', $field ) ) ); ?>"><?php echo $this->get_editable_html( $values['type'], $values['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+									<td class="editable-html hidden" data-type="<?php echo esc_attr( $values['type'] ); ?>" data-metadataterm="<?php echo esc_attr( str_replace( 'editorial-metadata-', '', str_replace( 'tax_', '', $field ) ) ); ?>"><?php echo $this->get_editable_html( $values['type'], $values['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_editable_html() escapes each branch (esc_attr/esc_html) and otherwise returns only static markup or core-escaped wp_dropdown_users() output. ?></td>
 								<?php endif; ?>
 							<?php else : ?>
 								<td class="value"><?php echo esc_html( $values['value'] ); ?></td>
