@@ -1779,7 +1779,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			// If the user desires that to be the behavior, they can set the result of this filter to 'true'.
 			// With how WordPress works internally, setting 'post_date_gmt' will set the timestamp.
 			if ( apply_filters( 'ef_calendar_allow_ajax_to_set_timestamp', false ) ) {
-				$post_placeholder['post_date_gmt'] = date( 'Y-m-d H:i:s', strtotime( $post_date ) );
+				$post_placeholder['post_date_gmt'] = get_gmt_from_date( $post_placeholder['post_date'] );
 			}
 
 			// Create the post.
