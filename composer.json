@@ -26,7 +26,7 @@
     "coverage-ci": "@php ./vendor/bin/phpunit",
     "cs": "@php ./vendor/bin/phpcs -q",
     "cs-fix": "@php ./vendor/bin/phpcbf -q",
-    "i18n": "wp i18n make-pot . ./languages/edit-flow.pot",
+    "i18n": "wp i18n make-pot . ./languages/edit-flow.pot --slug=edit-flow",
     "lint": "@php ./vendor/bin/parallel-lint . -e php --exclude vendor --exclude .git",
     "lint-ci": "@php ./vendor/bin/parallel-lint . -e php --exclude vendor --exclude .git --checkstyle",
     "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/edit-flow ./vendor/bin/phpunit --testsuite integration",
