@@ -64,3 +64,19 @@ updates:
       prefix: "npm"
       include: "scope"
     open-pull-requests-limit: 5
+    ignore:
+      # The following @wordpress/* packages are pinned to their last
+      # React-18-compatible, CommonJS line until two follow-ups land:
+      # a React 18 -> 19 upgrade and an ESM migration of the E2E harness.
+      # Remove each entry once its blocker is cleared.
+      #
+      # components 34+ requires react ^19 as a peer dependency.
+      - dependency-name: "@wordpress/components"
+        update-types: ["version-update:semver-major"]
+      # plugins 7.47+ transitively requires @wordpress/components ^34 (React 19).
+      - dependency-name: "@wordpress/plugins"
+        versions: [">=7.47.0"]
+      # e2e-test-utils-playwright 1.47+ ships a raw ESM entry point that the
+      # CommonJS tests/e2e/global-setup.js cannot require.
+      - dependency-name: "@wordpress/e2e-test-utils-playwright"
+        versions: [">=1.47.0"]
