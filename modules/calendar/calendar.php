@@ -425,11 +425,13 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		}
 
 		/**
-		 * Handle an AJAX request from the calendar to update a post's timestamp.
+		 * Handle an AJAX request from the calendar to update a post's date.
 		 * Notes:
-		 * - For Post Time, if the post is unpublished, the change sets the publication timestamp
-		 * - If the post was published or scheduled for the future, the change will change the timestamp. 'publish' posts
-		 * will become scheduled if moved past today and 'future' posts will be published if moved before today
+		 * - Published and private posts can't be moved; an error is returned
+		 * - Scheduled ('future') posts keep their publish timestamp in sync with the new date and have
+		 * their publish cron event rescheduled; one moved before the present publishes on the next cron run
+		 * - Posts with a floating date keep it floating, unless the
+		 * 'ef_calendar_allow_ajax_to_set_timestamp' filter is set to true
 		 * - Need to respect user permissions. Editors can move all, authors can move their own, and contributors can't move at all
 		 *
 		 * @since 0.7
@@ -475,19 +477,22 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			// Persist the old hourstamp because we can't manipulate the exact time on the calendar.
 			// Bump the last modified timestamps too.
-			$existing_time     = date( 'H:i:s', strtotime( $post->post_date ) );
-			$existing_time_gmt = date( 'H:i:s', strtotime( $post->post_date_gmt ) );
-			$new_values        = array(
+			$existing_time = date( 'H:i:s', strtotime( $post->post_date ) );
+			$new_values    = array(
 				'post_date'         => date( 'Y-m-d', $next_date_full ) . ' ' . $existing_time,
 				'post_modified'     => current_time( 'mysql' ),
 				'post_modified_gmt' => current_time( 'mysql', 1 ),
 			);
 
-			// By default, changing a post on the calendar won't set the timestamp.
-			// If the user desires that to be the behaviour, they can set the result of this filter to 'true'.
-			// With how WordPress works internally, setting 'post_date_gmt' will set the timestamp.
-			if ( apply_filters( 'ef_calendar_allow_ajax_to_set_timestamp', false ) ) {
-				$new_values['post_date_gmt'] = date( 'Y-m-d', $next_date_full ) . ' ' . $existing_time_gmt;
+			// A concrete post_date_gmt is an explicit publish timestamp (e.g. a scheduled post) and must
+			// be kept in sync with post_date: core publishes on post_date_gmt, so leaving it behind would
+			// publish the post at the old time while displaying the new date.
+			// A zeroed post_date_gmt is a floating date ("publish immediately"); leave it floating so that
+			// moving a post on the calendar stays a planning action rather than scheduling it, unless the
+			// site opts in to drag-to-schedule via the filter.
+			$has_publish_timestamp = '0000-00-00 00:00:00' !== $post->post_date_gmt;
+			if ( $has_publish_timestamp || apply_filters( 'ef_calendar_allow_ajax_to_set_timestamp', false ) ) {
+				$new_values['post_date_gmt'] = get_gmt_from_date( $new_values['post_date'] );
 			}
 
 			// We have to do SQL unfortunately because of core bugginess.
@@ -499,6 +504,14 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			if ( ! $response ) {
 				$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+			}
+
+			// The direct database update bypasses _future_post_hook(), so the publish_future_post cron
+			// event would still fire at the old time. Reschedule it to match the new date; an event in
+			// the past runs on the next cron spawn, publishing a post that was moved before the present.
+			if ( 'future' === $post->post_status && isset( $new_values['post_date_gmt'] ) ) {
+				wp_clear_scheduled_hook( 'publish_future_post', array( $post->ID ) );
+				wp_schedule_single_event( strtotime( $new_values['post_date_gmt'] . ' GMT' ), 'publish_future_post', array( $post->ID ) );
 			}
 
 			$this->print_ajax_response( 'success', $this->module->messages['post-date-updated'] );
