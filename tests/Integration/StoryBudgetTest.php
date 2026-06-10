@@ -126,6 +126,94 @@ class StoryBudgetTest extends TestCase {
 	}
 
 	/**
+	 * The Story Budget must not surface another user's unpublished posts to a
+	 * low-privileged role that can view the budget but cannot read those posts.
+	 */
+	public function test_get_posts_for_term_hides_other_users_unpublished_posts() {
+		global $edit_flow;
+		$story_budget = $edit_flow->story_budget;
+
+		$author_id      = self::factory()->user->create( array( 'role' => 'author' ) );
+		$contributor_id = self::factory()->user->create( array( 'role' => 'contributor' ) );
+
+		$cat_id = self::factory()->category->create( array( 'name' => 'Budget Cat' ) );
+		$term   = get_term( $cat_id, 'category' );
+
+		$now = date( 'Y-m-d H:i:s' );
+
+		$others_draft = wp_insert_post(
+			array(
+				'post_author'   => $author_id,
+				'post_status'   => 'draft',
+				'post_title'    => 'Another author secret draft',
+				'post_date'     => $now,
+				'post_category' => array( $cat_id ),
+			)
+		);
+		$own_draft    = wp_insert_post(
+			array(
+				'post_author'   => $contributor_id,
+				'post_status'   => 'draft',
+				'post_title'    => 'My own draft',
+				'post_date'     => $now,
+				'post_category' => array( $cat_id ),
+			)
+		);
+
+		$story_budget->taxonomy_used = 'category';
+		$story_budget->user_filters  = array(
+			'post_status' => 'draft',
+			'cat'         => '',
+			'author'      => '',
+			'start_date'  => date( 'Y-m-d', strtotime( '-1 day' ) ),
+			'number_days' => 30,
+		);
+
+		// As the contributor: own draft is visible, the other author's draft is not.
+		wp_set_current_user( $contributor_id );
+		$contributor_ids = wp_list_pluck( $story_budget->get_posts_for_term( $term, $story_budget->user_filters ), 'ID' );
+		$this->assertContains( $own_draft, $contributor_ids, 'Contributor should see their own draft.' );
+		$this->assertNotContains( $others_draft, $contributor_ids, "Contributor must not see another user's draft." );
+
+		// An administrator still sees the whole pipeline.
+		wp_set_current_user( self::$admin_user_id );
+		$admin_ids = wp_list_pluck( $story_budget->get_posts_for_term( $term, $story_budget->user_filters ), 'ID' );
+		$this->assertContains( $own_draft, $admin_ids );
+		$this->assertContains( $others_draft, $admin_ids );
+	}
+
+	/**
+	 * Story Budget filters must only persist to user meta when submitted with a valid nonce,
+	 * not on a plain page load or a crafted URL.
+	 */
+	public function test_filters_persist_only_with_valid_nonce() {
+		global $edit_flow;
+		$story_budget = $edit_flow->story_budget;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$meta_key = 'ef_story_budget_filters';
+
+		// A URL carrying filter params but no valid nonce must not write user meta.
+		$_GET = array(
+			'page'        => 'story-budget',
+			'post_status' => 'draft',
+		);
+		$story_budget->update_user_filters();
+		$this->assertEmpty( get_user_meta( $user_id, $meta_key, true ), 'Filters must not persist without a valid nonce.' );
+
+		// A genuine filter submission carrying a valid nonce persists.
+		$_GET['ef-sb-filter-nonce'] = wp_create_nonce( 'ef-story-budget-filter' );
+		$story_budget->update_user_filters();
+		$saved = get_user_meta( $user_id, $meta_key, true );
+		$this->assertNotEmpty( $saved, 'Filters should persist when submitted with a valid nonce.' );
+		$this->assertSame( 'draft', $saved['post_status'] );
+
+		$_GET = array();
+	}
+
+	/**
 	 * Test that calendar has default custom statuses
 	 */
 	public function test_calendar_custom_statuses() {
@@ -167,5 +255,26 @@ class StoryBudgetTest extends TestCase {
 		);
 
 		$this->assertContains( 'future', $statuses );
+	}
+
+	/**
+	 * The author column must escape the display name, which is the one attacker-influenced value
+	 * in that column, so a user whose display name contains markup cannot inject it into the
+	 * Story Budget table.
+	 */
+	public function test_author_column_escapes_display_name() {
+		global $edit_flow;
+
+		$author_id = self::factory()->user->create( array( 'role' => 'author' ) );
+		wp_update_user( array(
+			'ID'           => $author_id,
+			'display_name' => 'A & B <evil>',
+		) );
+		$post_id = self::factory()->post->create( array( 'post_author' => $author_id ) );
+
+		$output = $edit_flow->story_budget->term_column_default( get_post( $post_id ), 'author', null );
+
+		$this->assertStringContainsString( '&amp;', $output, 'The display name should be HTML-escaped at output.' );
+		$this->assertStringNotContainsString( '<evil>', $output, 'Raw markup must not survive into the author column.' );
 	}
 }

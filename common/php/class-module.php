@@ -375,7 +375,11 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		 * @since 0.7
 		 *
 		 * @param string $status    Whether it was a 'success' or an 'error'.
-		 * @param string $message   Optional message to include.
+		 * @param string $message   Optional message. SECURITY: the caller is responsible for
+		 *                          escaping this. Several JS consumers insert it as HTML (e.g.
+		 *                          via jQuery .html()), so pass only fixed/translated strings,
+		 *                          esc_html()'d values, or trusted server-generated markup —
+		 *                          never raw, unescaped user input.
 		 * @param int    $http_code HTTP response code.
 		 */
 		protected function print_ajax_response( $status, $message = '', $http_code = 200 ) {
@@ -461,11 +465,11 @@ if ( ! class_exists( 'EF_Module' ) ) {
 			}
 
 			// The current page better be in the array of registered settings view slugs.
-			if ( ! in_array( $_GET['page'], $settings_view_slugs ) ) {
+			if ( ! in_array( $_GET['page'], $settings_view_slugs, true ) ) {
 				return false;
 			}
 
-			if ( $module_name && $edit_flow->modules->$module_name->settings_slug != $_GET['page'] ) {
+			if ( $module_name && $edit_flow->modules->$module_name->settings_slug !== $_GET['page'] ) {
 				return false;
 			}
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -501,7 +505,21 @@ if ( ! class_exists( 'EF_Module' ) ) {
 		 */
 		public function get_unencoded_description( $string_to_unencode ) {
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Required for term description retrieval.
-			return maybe_unserialize( base64_decode( $string_to_unencode ) );
+			$decoded = base64_decode( $string_to_unencode );
+
+			/*
+			 * Edit Flow only ever stores a serialized array here (see get_encoded_description()),
+			 * so forbid object instantiation during unserialisation. Without allowed_classes a
+			 * crafted term description could trigger PHP object injection. is_serialized() mirrors
+			 * maybe_unserialize()'s own gate, so a plain (unencoded) description still round-trips
+			 * unchanged and the callers' is_array() checks keep working.
+			 */
+			if ( is_serialized( $decoded ) ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Hardened with allowed_classes => false; stored data is always a scalar array.
+				return unserialize( $decoded, array( 'allowed_classes' => false ) );
+			}
+
+			return $decoded;
 		}
 
 		/**
@@ -535,7 +553,8 @@ if ( ! class_exists( 'EF_Module' ) ) {
 				'input_id'   => 'ef-selected-users',
 			);
 			$parsed_args = wp_parse_args( $args, $defaults );
-			extract( $parsed_args, EXTR_SKIP );
+			$list_class  = $parsed_args['list_class'];
+			$input_id    = $parsed_args['input_id'];
 
 			$args = array(
 				'capability' => 'publish_posts',
@@ -560,19 +579,22 @@ if ( ! class_exists( 'EF_Module' ) ) {
 			<ul class="<?php echo esc_attr( $list_class ); ?>">
 				<?php
 				foreach ( $users as $user ) :
-					$checked = ( in_array( $user->ID, $selected ) ) ? 'checked="checked"' : '';
-					// Add a class to checkbox of current user so we know not to add them in notified list during notifiedMessage() js function.
-					$current_user_class = ( get_current_user_id() == $user->ID ) ? 'class="post_following_list-current_user" ' : '';
+					$checked = in_array( (int) $user->ID, array_map( 'intval', (array) $selected ), true );
 					?>
 					<li>
 						<label for="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>">
 							<div class="ef-user-subscribe-actions">
 								<?php do_action( 'ef_user_subscribe_actions', $user->ID, $checked ); ?>
 								<input type="checkbox" id="<?php echo esc_attr( $input_id . '-' . $user->ID ); ?>" name="<?php echo esc_attr( $input_id ); ?>[]" value="<?php echo esc_attr( $user->ID ); ?>"
-																		<?php
-																		echo esc_attr( $checked );
-																		echo esc_attr( $current_user_class );
-																		?>
+								<?php 
+								if ( $checked ) {
+									echo "checked='checked' ";
+								}
+								// Add a class to checkbox of current user so we know not to add them in notified list during notifiedMessage() js function.
+								if ( get_current_user_id() == $user->ID ) {
+									echo 'class="post_following_list-current_user" ';
+								}
+								?>
 								/>
 							</div>
 

@@ -5,8 +5,13 @@ jQuery( document ).ready( function () {
 	if ( location.hash == '#editorialcomments/add' ) {
 		editorialCommentReply.open();
 	} else if ( location.hash.search( /#editorialcomments\/reply/ ) > -1 ) {
-		const reply_id = location.hash.substring( location.hash.lastIndexOf( '/' ) + 1 );
-		editorialCommentReply.open( reply_id );
+		const reply_id = parseInt(
+			location.hash.substring( location.hash.lastIndexOf( '/' ) + 1 ),
+			10
+		);
+		if ( reply_id > 0 ) {
+			editorialCommentReply.open( reply_id );
+		}
 	}
 } );
 
@@ -242,7 +247,7 @@ editorialCommentReply = {
 		}
 
 		if ( er ) {
-			jQuery( '#ef-replysubmit .error' ).html( message ).show();
+			jQuery( '#ef-replysubmit .error' ).text( message ).show();
 		}
 	},
 };

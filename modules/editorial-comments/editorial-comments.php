@@ -48,7 +48,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 					'title'   => __( 'Overview', 'edit-flow' ),
 					'content' => __( '<p>Editorial comments help you cut down on email overload and keep the conversation close to where it matters: your content. Threaded commenting in the admin, similar to what you find at the end of a blog post, allows writers and editors to privately leave feedback and discuss what needs to be changed before publication.</p><p>Anyone with access to view the story in progress will also have the ability to comment on it. If you have notifications enabled, those following the post will receive an email every time a comment is left.</p>', 'edit-flow' ),
 				),
-				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="http://editflow.org/features/editorial-comments/">Editorial Comments Documentation</a></p><p><a href="http://wordpress.org/tags/edit-flow?forum_id=10">Edit Flow Forum</a></p><p><a href="https://github.com/danielbachhuber/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
+				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/editorial-comments/">Editorial Comments Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on GitHub</a></p>', 'edit-flow' ),
 			);
 			$this->module = EditFlow()->register_module( 'editorial_comments', $args );
 		}
@@ -214,7 +214,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			<input type="hidden" value="" id="ef-comment_parent" name="ef-comment_parent" />
 			<input type="hidden" name="ef-post_id" id="ef-post_id" value="<?php echo esc_attr( $post->ID ); ?>" />
 
-			<?php wp_nonce_field( 'comment', 'ef_comment_nonce', false ); ?>
+			<?php wp_nonce_field( 'ef-insert-editorial-comment-' . $post->ID, 'ef_comment_nonce', false ); ?>
 
 			<br class="clear" />
 		</div>
@@ -270,7 +270,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 				// The output for this has been individually escaped. Escaping the entire string will break comment reply functionality.
 				// ToDo: Use wp_kses with a custom set of allowed tags instead.
 				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- ToDo comment.
-				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . esc_html( $comment->comment_ID ) . '\',\'' . esc_html( $comment->comment_post_ID ) . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
+				$actions['reply'] = '<a onclick="editorialCommentReply.open(\'' . (int) $comment->comment_ID . '\',\'' . (int) $comment->comment_post_ID . '\');return false;" class="vim-r hide-if-no-js" title="' . esc_attr( __( 'Reply to this comment', 'edit-flow' ) ) . '" href="#">' . esc_html__( 'Reply', 'edit-flow' ) . '</a>';
 
 				$sep = ' ';
 				$i   = 0;
@@ -332,18 +332,19 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 		public function ajax_insert_comment() {
 			global $current_user, $user_ID, $wpdb;
 
-			// Verify nonce.
+			// Set up the target post first; the nonce is tied to it.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+
+			// Verify the nonce, which is namespaced to the post being commented on.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
-			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'comment' ) ) {
+			if ( ! isset( $_POST['_nonce'] ) || ! wp_verify_nonce( $_POST['_nonce'], 'ef-insert-editorial-comment-' . $post_id ) ) {
 				wp_die( esc_html__( "Nonce check failed. Please ensure you're supposed to be adding editorial comments.", 'edit-flow' ) );
 			}
 
 			// Get user info.
 			wp_get_current_user();
 
-			// Set up comment data.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$post_id = absint( $_POST['post_id'] );
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$parent = absint( $_POST['parent'] );
 
@@ -351,6 +352,19 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			// @TODO: Consider allowing contributors to add comments as well.
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
 				wp_die( esc_html__( 'Sorry, you don\'t have the privileges to add editorial comments. Please talk to your Administrator.', 'edit-flow' ) );
+			}
+
+			// If this is a reply, the parent must be an editorial comment on this same post,
+			// so a request cannot thread a comment under an unrelated post's comment.
+			if ( $parent ) {
+				$parent_comment = get_comment( $parent );
+				if (
+					! $parent_comment
+					|| (int) $parent_comment->comment_post_ID !== $post_id
+					|| self::comment_type !== $parent_comment->comment_type
+				) {
+					wp_die( esc_html__( 'The comment you are replying to is invalid.', 'edit-flow' ) );
+				}
 			}
 
 			// Verify that comment was actually entered.

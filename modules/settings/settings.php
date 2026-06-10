@@ -20,6 +20,18 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		public $module;
 
 		/**
+		 * Validation errors for the settings and term forms, keyed by field name.
+		 *
+		 * The module form handlers populate this on a failed submission and
+		 * helper_print_error_or_description() reads it back when the form re-renders in the
+		 * same request. Holding it here rather than on $_REQUEST means a crafted query string
+		 * cannot inject fake inline error messages onto the settings screens.
+		 *
+		 * @var array
+		 */
+		public $form_errors = array();
+
+		/**
 		 * Register the module with Edit Flow but don't do anything else.
 		 */
 		public function __construct() {
@@ -116,7 +128,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! isset( $_POST['change_module_nonce'] ) || ! wp_verify_nonce( $_POST['change_module_nonce'], 'change-edit-flow-module-nonce' ) || ! current_user_can( 'manage_options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
+				wp_die( esc_html__( 'Cheatin’ uh?', 'edit-flow' ) );
 			}
 
 			if ( ! isset( $_POST['module_action'], $_POST['slug'] ) ) {
@@ -132,9 +144,11 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 				wp_die( '-1' );
 			}
 
-			if ( 'enable' == $module_action ) {
+			$return = false;
+
+			if ( 'enable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'on' );
-			} elseif ( 'disable' == $module_action ) {
+			} elseif ( 'disable' === $module_action ) {
 				$return = $edit_flow->update_module_option( $module->name, 'enabled', 'off' );
 			}
 
@@ -350,12 +364,10 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 		 * @param string $description Unlocalized string to display if there was no error with the given field.
 		 */
 		public function helper_print_error_or_description( $field, $description ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just checking for error display, no data modification.
-			if ( isset( $_REQUEST['form-errors'][ $field ] ) ) :
+			if ( isset( $this->form_errors[ $field ] ) ) :
 				?>
 			<div class="form-error">
-				<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display only, esc_html handles output. ?>
-				<p><?php echo esc_html( $_REQUEST['form-errors'][ $field ] ); ?></p>
+				<p><?php echo esc_html( $this->form_errors[ $field ] ); ?></p>
 			</div>
 			<?php else : ?>
 			<p class="description"><?php echo esc_html( $description ); ?></p>
@@ -421,6 +433,13 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			global $edit_flow;
 			$module_name = sanitize_key( $_POST['edit_flow_module_name'] );
 
+			// Validate the submitted module name resolves to a real module before
+			// dereferencing it; this runs ahead of the capability check below, so a bogus
+			// name must not reach a property access on a non-object.
+			if ( ! isset( $edit_flow->$module_name ) || ! is_object( $edit_flow->$module_name ) ) {
+				return false;
+			}
+
 			if ( 'update' != $_POST['action']
 			|| $_POST['option_page'] != $edit_flow->$module_name->module->options_group_name ) {
 				return false;
@@ -428,7 +447,7 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonces don't need sanitization, just verification.
 			if ( ! current_user_can( 'manage_options' ) || ! wp_verify_nonce( $_POST['_wpnonce'], $edit_flow->$module_name->module->options_group_name . '-options' ) ) {
-				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'edit-flow' ) );
+				wp_die( esc_html__( 'Cheatin’ uh?', 'edit-flow' ) );
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitization is handled by each module's settings_validate method.
@@ -437,6 +456,12 @@ if ( ! class_exists( 'EF_Settings' ) ) {
 			// Only call the validation callback if it exists.
 			if ( method_exists( $edit_flow->$module_name, 'settings_validate' ) ) {
 				$new_options = $edit_flow->$module_name->settings_validate( $new_options );
+			} else {
+				// Without a module validator, accept only keys that already exist in the
+				// module's options and sanitise their values, rather than persisting
+				// arbitrary submitted keys into the autoloaded options row.
+				$existing    = (array) $edit_flow->$module_name->module->options;
+				$new_options = map_deep( array_intersect_key( (array) $new_options, $existing ), 'sanitize_text_field' );
 			}
 
 			// Cast our object and save the data.

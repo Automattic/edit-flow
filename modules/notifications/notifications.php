@@ -78,7 +78,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 					'title'   => __( 'Overview', 'edit-flow' ),
 					'content' => __( '<p>Notifications ensure you keep up to date with progress your most important content. Users can be subscribed to notifications on a post one by one or by selecting user groups.</p><p>When enabled, email notifications can be sent when a post changes status or an editorial comment is left by a writer or an editor.</p>', 'edit-flow' ),
 				],
-				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="http://editflow.org/features/notifications/">Notifications Documentation</a></p><p><a href="http://wordpress.org/tags/edit-flow?forum_id=10">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
+				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/notifications/">Notifications Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on GitHub</a></p>', 'edit-flow' ),
 			];
 			$this->module     = EditFlow()->register_module( 'notifications', $args );
 		}
@@ -494,6 +494,10 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			}
 
 			if ( 'ef-selected-users[]' === $_POST['ef_notifications_name'] ) {
+				// Only subscribe users offered by the subscription picker (the publish_posts
+				// set); arbitrary user IDs in the request must not be added as followers.
+				$user_group_ids = array_values( array_intersect( $user_group_ids, $this->get_subscribable_user_ids() ) );
+
 				// Prevent auto-subscribing users that have opted out of notifications.
 				add_filter( 'ef_notification_auto_subscribe_current_user', '__return_false', PHP_INT_MAX );
 				$this->save_post_following_users( $post, $user_group_ids );
@@ -622,8 +626,11 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				return;
 			}
 
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
-			$users = isset( $_POST['ef-selected-users'] ) ? $_POST['ef-selected-users'] : [];
+			// Only subscribe users offered by the subscription picker (the publish_posts set);
+			// arbitrary user IDs in the request must not be added as followers.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cast to integers and intersected with the allowed set below.
+			$submitted_users = isset( $_POST['ef-selected-users'] ) ? (array) wp_unslash( $_POST['ef-selected-users'] ) : [];
+			$users           = array_values( array_intersect( array_map( 'intval', $submitted_users ), $this->get_subscribable_user_ids() ) );
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are sanitized when saved.
 			$usergroups = isset( $_POST['following_usergroups'] ) ? $_POST['following_usergroups'] : [];
 			$this->save_post_following_users( $post, $users );
@@ -1013,7 +1020,12 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				return;
 			}
 
-			// Set up the payload.
+			// Set up the payload. The message embeds user-controlled values (display name, post
+			// title, comment text). It is delivered as a JSON-encoded body below, so it cannot
+			// break out of the request structure; the only residual is that a destination which
+			// renders Slack mrkdwn will format any markup characters within those values. That is
+			// cosmetic and the feature is opt-in; a site that needs to neutralise it can rewrite
+			// the text via the payload filter.
 			$payload = [
 				'text' => $message,
 			];
@@ -1021,8 +1033,13 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			// Apply filters to the payload.
 			$payload = apply_filters( 'ef_notification_send_to_webhook_payload', $payload, $action, $user, $post );
 
-			// Send the notification.
-			$response = wp_remote_post(
+			// The webhook is a side-effect fired from transition_post_status and editorial comment
+			// insertion, both of which have already completed by the time this runs (in AJAX and
+			// non-AJAX requests alike). A failure must therefore never die or abort, which would
+			// misreport an already-successful save/comment. Send best-effort with the SSRF-safe
+			// variant (private, loopback and link-local hosts are rejected) and expose any failure
+			// via an action so sites can log it.
+			$response = wp_safe_remote_post(
 				$webhook_url,
 				[
 					'body'    => wp_json_encode( $payload ),
@@ -1030,7 +1047,7 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 				]
 			);
 			if ( is_wp_error( $response ) ) {
-				$this->print_ajax_response( 'error', 'Unable to send notification to webhook provided', 400 );
+				do_action( 'ef_notification_webhook_failed', $response, $action, $user, $post );
 			}
 		}
 
@@ -1165,6 +1182,24 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			 * @param int $post_id The post the user will be notified about.
 			 */
 			return (bool) apply_filters( 'ef_notification_user_can_be_notified', $can_be_notified, $user, $post_id );
+		}
+
+		/**
+		 * The set of user IDs that may be subscribed to a post, matching the subscription
+		 * picker (users_select_form). Used to reject arbitrary user IDs submitted in a request.
+		 *
+		 * @return int[] User IDs offered by the subscription picker.
+		 */
+		private function get_subscribable_user_ids() {
+			$args = apply_filters(
+				'ef_users_select_form_get_users_args',
+				array(
+					'capability' => 'publish_posts',
+					'fields'     => array( 'ID', 'display_name', 'user_nicename', 'user_email' ),
+					'orderby'    => 'display_name',
+				)
+			);
+			return array_map( 'intval', wp_list_pluck( get_users( $args ), 'ID' ) );
 		}
 
 		/**

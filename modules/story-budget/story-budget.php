@@ -254,7 +254,7 @@ class EF_Story_Budget extends EF_Module {
 	 *
 	 * @since 0.10
 	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Resetting filters is a safe operation.
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended -- Routing guards run before the nonce is verified below.
 	 */
 	public function handle_filter_reset() {
 		if ( ! isset( $_GET['page'] ) || 'story-budget' !== $_GET['page'] ) {
@@ -263,6 +263,11 @@ class EF_Story_Budget extends EF_Module {
 
 		if ( ! isset( $_GET['reset-filters'] ) || '1' !== $_GET['reset-filters'] ) {
 			return;
+		}
+
+		// Resetting filters writes the current user's filter meta, so require a nonce.
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'ef-story-budget-reset-filters' ) ) {
+			wp_die( esc_html( $this->module->messages['nonce-failed'] ) );
 		}
 
 		$current_user = wp_get_current_user();
@@ -331,6 +336,11 @@ class EF_Story_Budget extends EF_Module {
 	 */
 	public function update_user_filters_from_form_date_range_change( $current_user, $new_filters ) {
 		$existing_filters = $this->get_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', true );
+		// get_user_meta() returns an empty string when no filters are stored yet; treat that
+		// as an empty set so the date keys below can be assigned without a string-offset error.
+		if ( ! is_array( $existing_filters ) ) {
+			$existing_filters = array();
+		}
 
 		// Default start date value.
 		if ( isset( $new_filters['start_date'] ) ) {
@@ -484,7 +494,7 @@ class EF_Story_Budget extends EF_Module {
 		<div class="<?php echo esc_attr( $wrap_classes ); ?>" id="ef-story-budget-wrap">
 			<div id="ef-story-budget-title">
 				<?php echo '<img src="' . esc_url( $this->module->img_url ) . '" class="module-icon icon32" />'; ?>
-				<h2><?php _e( 'Story Budget', 'edit-flow' ); ?></h2>
+				<h2><?php esc_html_e( 'Story Budget', 'edit-flow' ); ?></h2>
 			</div><!-- /Story Budget Title -->
 			<?php $this->print_messages(); ?>
 			<?php $this->table_navigation(); ?>
@@ -603,6 +613,16 @@ class EF_Story_Budget extends EF_Module {
 		// Filter for an end user to implement any of their own query args.
 		$args = apply_filters( 'ef_story_budget_posts_query_args', $args );
 
+		// Restrict users who cannot edit others' posts to their own, mirroring the core
+		// posts list (edit.php). The budget renders in an admin context, where WP_Query
+		// would otherwise return every author's unpublished posts; without this the
+		// status, author, title and date columns disclose other users' drafts, pending
+		// and scheduled posts to lower-privileged roles (e.g. Contributors). Applied
+		// after the filter above so it cannot be bypassed by a query-args filter.
+		if ( ! current_user_can( 'edit_others_posts' ) ) {
+			$args['author'] = get_current_user_id();
+		}
+
 		$term_posts_query_results = new WP_Query( $args );
 
 		$term_posts = array();
@@ -663,7 +683,7 @@ class EF_Story_Budget extends EF_Module {
 				</tbody>
 			</table>
 			<?php else : ?>
-			<div class="message info"><p><?php _e( 'There are no posts for this term in the range or filter specified.', 'edit-flow' ); ?></p></div>
+			<div class="message info"><p><?php esc_html_e( 'There are no posts for this term in the range or filter specified.', 'edit-flow' ); ?></p></div>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -719,10 +739,10 @@ class EF_Story_Budget extends EF_Module {
 		switch ( $column_name ) {
 			case 'status':
 				$status_name = get_post_status_object( $post->post_status );
-				return $status_name->label;
+				return $status_name ? esc_html( $status_name->label ) : '';
 			case 'author':
 				$post_author = get_userdata( $post->post_author );
-				return $post_author->display_name;
+				return $post_author ? esc_html( $post_author->display_name ) : '';
 			case 'post_date':
 				$output = get_the_time( get_option( 'date_format' ), $post->ID );
 				// Only show time if it's not midnight (indicating a specific time was set).
@@ -754,7 +774,7 @@ class EF_Story_Budget extends EF_Module {
 		$post_type_object = get_post_type_object( $post->post_type );
 		$can_edit_post    = current_user_can( $post_type_object->cap->edit_post, $post->ID );
 		if ( $can_edit_post ) {
-			$output = '<strong><a href="' . get_edit_post_link( $post->ID ) . '">' . esc_html( $post_title ) . '</a></strong>';
+			$output = '<strong><a href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html( $post_title ) . '</a></strong>';
 		} else {
 			$output = '<strong>' . esc_html( $post_title ) . '</strong>';
 		}
@@ -778,19 +798,19 @@ class EF_Story_Budget extends EF_Module {
 		$output      .= '<div class="row-actions">';
 		$item_actions = array();
 		if ( $can_edit_post ) {
-			$item_actions['edit'] = '<a title="' . __( 'Edit this post', 'edit-flow' ) . '" href="' . get_edit_post_link( $post->ID ) . '">' . __( 'Edit', 'edit-flow' ) . '</a>';
+			$item_actions['edit'] = '<a title="' . esc_attr__( 'Edit this post', 'edit-flow' ) . '" href="' . esc_url( get_edit_post_link( $post->ID ) ) . '">' . esc_html__( 'Edit', 'edit-flow' ) . '</a>';
 		}
 		if ( EMPTY_TRASH_DAYS > 0 && current_user_can( $post_type_object->cap->delete_post, $post->ID ) ) {
-			$item_actions['trash'] = '<a class="submitdelete" title="' . __( 'Move this item to the Trash', 'edit-flow' ) . '" href="' . get_delete_post_link( $post->ID ) . '">' . __( 'Trash', 'edit-flow' ) . '</a>';
+			$item_actions['trash'] = '<a class="submitdelete" title="' . esc_attr__( 'Move this item to the Trash', 'edit-flow' ) . '" href="' . esc_url( get_delete_post_link( $post->ID ) ) . '">' . esc_html__( 'Trash', 'edit-flow' ) . '</a>';
 		}
 
 		// Display a View or a Preview link depending on whether the post has been published or not.
 		if ( in_array( $post->post_status, array( 'publish' ) ) ) {
 			/* translators: %s: post title */
-			$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
+			$item_actions['view'] = '<a href="' . esc_url( get_permalink( $post->ID ) ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . esc_html__( 'View', 'edit-flow' ) . '</a>';
 		} elseif ( $can_edit_post ) {
 			/* translators: %s: post title */
-			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
+			$item_actions['previewpost'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post_title ) ) . '" rel="permalink">' . esc_html__( 'Preview', 'edit-flow' ) . '</a>';
 		}
 
 		$item_actions = apply_filters( 'ef_story_budget_item_actions', $item_actions, $post->ID );
@@ -855,6 +875,7 @@ class EF_Story_Budget extends EF_Module {
 
 			<form method="GET" id="ef-story-budget-filters">
 				<input type="hidden" name="page" value="story-budget"/>
+				<?php wp_nonce_field( 'ef-story-budget-filter', 'ef-sb-filter-nonce', false ); ?>
 				<?php
 				foreach ( $this->story_budget_filters() as $select_id => $select_name ) {
 					echo wp_kses_post( $this->story_budget_filter_options( $select_id, $select_name, $this->user_filters ) );
@@ -862,7 +883,7 @@ class EF_Story_Budget extends EF_Module {
 				?>
 				<input type="submit" id="post-query-submit" value="<?php esc_attr_e( 'Filter', 'edit-flow' ); ?>" class="button-primary button" />
 				<?php if ( $has_active_filter ) : ?>
-				<a href="<?php echo esc_url( add_query_arg( 'reset-filters', '1', menu_page_url( $this->module->slug, false ) ) ); ?>" id="post-query-clear" class="button-secondary button"><?php esc_html_e( 'Reset', 'edit-flow' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'reset-filters', '1', menu_page_url( $this->module->slug, false ) ), 'ef-story-budget-reset-filters' ) ); ?>" id="post-query-clear" class="button-secondary button"><?php esc_html_e( 'Reset', 'edit-flow' ); ?></a>
 				<?php endif; ?>
 			</form>
 		</div><!-- /alignleft actions -->
@@ -908,8 +929,24 @@ class EF_Story_Budget extends EF_Module {
 
 		$user_filters = apply_filters( 'ef_story_budget_filter_values', $user_filters, $current_user_filters );
 
-		$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
+		// Only persist the filters when the filter form was submitted with a valid nonce; a
+		// plain page load (or a crafted URL without the nonce) must not write to user meta.
+		if ( $this->is_filter_form_submitted() ) {
+			$this->update_user_meta( $current_user->ID, self::usermeta_key_prefix . 'filters', $user_filters );
+		}
 		return $user_filters;
+	}
+
+	/**
+	 * Whether the current request is a Story Budget filter submission carrying a valid nonce.
+	 *
+	 * @return bool
+	 */
+	private function is_filter_form_submitted() {
+		if ( ! isset( $_GET['ef-sb-filter-nonce'] ) ) {
+			return false;
+		}
+		return (bool) wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['ef-sb-filter-nonce'] ) ), 'ef-story-budget-filter' );
 	}
 
 	/**

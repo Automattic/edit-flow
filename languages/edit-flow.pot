@@ -2,21 +2,21 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Edit Flow 0.10.4\n"
+"Project-Id-Version: Edit Flow 0.11.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/edit-flow\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-24T01:16:27+00:00\n"
+"POT-Creation-Date: 2026-06-09T22:53:15+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: edit-flow\n"
 
 #. Plugin Name of the plugin
 #: edit_flow.php
-#: modules/settings/settings.php:29
+#: modules/settings/settings.php:41
 msgid "Edit Flow"
 msgstr ""
 
@@ -44,13 +44,13 @@ msgid "Page"
 msgstr ""
 
 #: common/php/class-module.php:222
-#: modules/custom-status/custom-status.php:188
+#: modules/custom-status/custom-status.php:189
 #: modules/custom-status/views/configure.php:48
 msgid "Draft"
 msgstr ""
 
 #: common/php/class-module.php:228
-#: modules/custom-status/custom-status.php:196
+#: modules/custom-status/custom-status.php:197
 #: modules/custom-status/views/configure.php:49
 msgid "Pending Review"
 msgstr ""
@@ -59,48 +59,48 @@ msgstr ""
 msgid "(no title)"
 msgstr ""
 
-#: edit_flow.php:26
+#: edit_flow.php:28
 msgid "Edit Flow requires PHP 7.4+. Please contact your host to update your PHP version."
 msgstr ""
 
-#: edit_flow.php:294
-#: modules/editorial-metadata/editorial-metadata.php:429
+#: edit_flow.php:296
+#: modules/editorial-metadata/editorial-metadata.php:435
 msgid "Configure"
 msgstr ""
 
-#: edit_flow.php:297
+#: edit_flow.php:299
 msgid "Settings updated."
 msgstr ""
 
-#: edit_flow.php:298
+#: edit_flow.php:300
 msgid "Please correct your form errors below and try again."
 msgstr ""
 
-#: edit_flow.php:299
-#: modules/settings/settings.php:119
-#: modules/settings/settings.php:431
-msgid "Cheatin&#8217; uh?"
+#: edit_flow.php:301
+#: modules/settings/settings.php:131
+#: modules/settings/settings.php:450
+msgid "Cheatin’ uh?"
 msgstr ""
 
-#: edit_flow.php:300
+#: edit_flow.php:302
 msgid "You do not have necessary permissions to complete this action."
 msgstr ""
 
-#: edit_flow.php:301
+#: edit_flow.php:303
 msgid "Post does not exist"
 msgstr ""
 
-#: edit_flow.php:445
+#: edit_flow.php:447
 msgid "All"
 msgstr ""
 
-#: edit_flow.php:446
+#: edit_flow.php:448
 msgid "Selected"
 msgstr ""
 
 #: modules/calendar/calendar.php:108
-#: modules/calendar/calendar.php:246
-#: modules/calendar/calendar.php:817
+#: modules/calendar/calendar.php:251
+#: modules/calendar/calendar.php:865
 msgid "Calendar"
 msgstr ""
 
@@ -129,11 +129,11 @@ msgid "Updating the post date dynamically doesn't work for published content. Pl
 msgstr ""
 
 #: modules/calendar/calendar.php:131
-msgid "iCal secret key regenerated. Please inform all users they will need to resubscribe."
+msgid "Your iCal feed URL has been regenerated. Re-copy it from Screen Options on the Calendar."
 msgstr ""
 
 #: modules/calendar/calendar.php:134
-#: modules/calendar/calendar.php:363
+#: modules/calendar/calendar.php:388
 msgid "Calendar Options"
 msgstr ""
 
@@ -151,238 +151,235 @@ msgid "<p>The calendar is a convenient week-by-week or month-by-month view into 
 msgstr ""
 
 #: modules/calendar/calendar.php:141
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/calendar/\">Calendar Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/danielbachhuber/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/calendar/\">Calendar Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
-#: modules/calendar/calendar.php:349
+#: modules/calendar/calendar.php:355
 msgid "Subscribe in iCal or Google Calendar"
 msgstr ""
 
-#: modules/calendar/calendar.php:442
+#: modules/calendar/calendar.php:467
 msgid "Missing new date."
 msgstr ""
 
-#: modules/calendar/calendar.php:448
+#: modules/calendar/calendar.php:473
 msgid "Something is wrong with the format for the new date."
 msgstr ""
 
 #. translators: %d: number of posts trashed
-#: modules/calendar/calendar.php:828
+#: modules/calendar/calendar.php:876
 #, php-format
 msgid "%d post moved to the trash."
 msgid_plural "%d posts moved to the trash."
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/calendar/calendar.php:847
-#: modules/story-budget/story-budget.php:828
+#: modules/calendar/calendar.php:895
+#: modules/story-budget/story-budget.php:848
 msgid "Undo"
 msgstr ""
 
 #. translators: %d: number of posts restored
-#: modules/calendar/calendar.php:855
+#: modules/calendar/calendar.php:903
 #, php-format
 msgid "%d post restored from the Trash."
 msgid_plural "%d posts restored from the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/calendar/calendar.php:975
-#: build/calendar-react.js:3
+#: modules/calendar/calendar.php:1023
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:100
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:103
 msgid "Today"
 msgstr ""
 
 #. translators: %d = number of posts to show
-#: modules/calendar/calendar.php:995
+#: modules/calendar/calendar.php:1043
 #, php-format
 msgid "Show %d more"
 msgstr ""
 
 #. translators: %1$s = post type name, %2$s = date
-#: modules/calendar/calendar.php:1005
+#: modules/calendar/calendar.php:1053
 #, php-format
 msgid "Schedule a %1$s for %2$s"
 msgstr ""
 
 #. translators: %s = post type name
-#: modules/calendar/calendar.php:1007
+#: modules/calendar/calendar.php:1055
 #, php-format
 msgctxt "post type name"
 msgid "%s Title"
 msgstr ""
 
 #. translators: %s = post type name
-#: modules/calendar/calendar.php:1010
+#: modules/calendar/calendar.php:1058
 #, php-format
 msgctxt "post type name"
 msgid "Create %s"
 msgstr ""
 
 #. translators: %s = post type name
-#: modules/calendar/calendar.php:1011
+#: modules/calendar/calendar.php:1059
 #, php-format
 msgctxt "post type name"
 msgid "Edit %s"
 msgstr ""
 
-#: modules/calendar/calendar.php:1132
+#: modules/calendar/calendar.php:1180
 msgid "None"
 msgstr ""
 
-#: modules/calendar/calendar.php:1143
+#: modules/calendar/calendar.php:1191
 msgid "Edit this item"
 msgstr ""
 
-#: modules/calendar/calendar.php:1143
-#: modules/custom-status/custom-status.php:355
-#: modules/custom-status/custom-status.php:2275
-#: modules/editorial-metadata/editorial-metadata.php:1963
-#: modules/story-budget/story-budget.php:781
-#: modules/user-groups/user-groups.php:1320
+#: modules/calendar/calendar.php:1191
+#: modules/custom-status/custom-status.php:356
+#: modules/custom-status/custom-status.php:2386
+#: modules/editorial-metadata/editorial-metadata.php:1984
+#: modules/story-budget/story-budget.php:801
+#: modules/user-groups/user-groups.php:1323
 msgid "Edit"
 msgstr ""
 
-#: modules/calendar/calendar.php:1145
+#: modules/calendar/calendar.php:1193
 msgid "Trash this item"
 msgstr ""
 
-#: modules/calendar/calendar.php:1145
+#: modules/calendar/calendar.php:1193
 #: modules/custom-status/views/configure.php:52
-#: modules/story-budget/story-budget.php:784
+#: modules/story-budget/story-budget.php:804
 msgid "Trash"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1149
-#: modules/custom-status/custom-status.php:2092
-#: modules/story-budget/story-budget.php:793
+#: modules/calendar/calendar.php:1197
+#: modules/custom-status/custom-status.php:2197
+#: modules/story-budget/story-budget.php:813
 #, php-format
 msgid "Preview &#8220;%s&#8221;"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1149
-#: modules/custom-status/custom-status.php:2092
-#: modules/story-budget/story-budget.php:793
+#: modules/calendar/calendar.php:1197
+#: modules/custom-status/custom-status.php:2197
+#: modules/story-budget/story-budget.php:813
 msgid "Preview"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1152
-#: modules/story-budget/story-budget.php:790
+#: modules/calendar/calendar.php:1200
+#: modules/story-budget/story-budget.php:810
 #, php-format
 msgid "View &#8220;%s&#8221;"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1152
-#: modules/story-budget/story-budget.php:790
+#: modules/calendar/calendar.php:1200
+#: modules/story-budget/story-budget.php:810
 msgid "View"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1156
+#: modules/calendar/calendar.php:1204
 #, php-format
 msgid "Save &#8220;%s&#8221;"
 msgstr ""
 
 #. translators: %s: post title
-#: modules/calendar/calendar.php:1156
-#: modules/custom-status/custom-status.php:354
+#: modules/calendar/calendar.php:1204
+#: modules/custom-status/custom-status.php:355
 msgid "Save"
 msgstr ""
 
-#: modules/calendar/calendar.php:1244
+#: modules/calendar/calendar.php:1292
 #: modules/story-budget/story-budget.php:243
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:79
 msgid "Author"
 msgstr ""
 
-#: modules/calendar/calendar.php:1252
-#: build/calendar-react.js:11
+#: modules/calendar/calendar.php:1300
 #: modules/calendar/lib/react/calendar.react.js:109
 msgid "Post Type"
 msgstr ""
 
-#: modules/calendar/calendar.php:1265
-#: modules/custom-status/custom-status.php:509
+#: modules/calendar/calendar.php:1313
+#: modules/custom-status/custom-status.php:510
 #: modules/dashboard/dashboard.php:182
 msgid "Scheduled"
 msgstr ""
 
-#: modules/calendar/calendar.php:1270
-#: modules/custom-status/custom-status.php:351
-#: modules/custom-status/custom-status.php:499
+#: modules/calendar/calendar.php:1318
+#: modules/custom-status/custom-status.php:352
+#: modules/custom-status/custom-status.php:500
 #: modules/custom-status/views/configure.php:50
 msgid "Published"
 msgstr ""
 
 #. translators: %1$s = first date, %2$s = last date.
-#: modules/calendar/calendar.php:1517
+#: modules/calendar/calendar.php:1575
 #, php-format
 msgid "for %1$s through %2$s"
 msgstr ""
 
-#: modules/calendar/calendar.php:1562
+#: modules/calendar/calendar.php:1620
 msgid "Post types to show"
 msgstr ""
 
-#: modules/calendar/calendar.php:1563
+#: modules/calendar/calendar.php:1621
 msgid "Post type to create directly from calendar"
 msgstr ""
 
-#: modules/calendar/calendar.php:1564
+#: modules/calendar/calendar.php:1622
 msgid "Subscription in iCal or Google Calendar"
 msgstr ""
 
-#: modules/calendar/calendar.php:1600
-#: modules/custom-status/custom-status.php:1382
+#: modules/calendar/calendar.php:1658
+#: modules/custom-status/custom-status.php:1402
 #: modules/dashboard/dashboard.php:276
 #: modules/dashboard/dashboard.php:296
 #: modules/dashboard/dashboard.php:324
-#: modules/notifications/notifications.php:1487
-#: modules/notifications/notifications.php:1506
+#: modules/notifications/notifications.php:1522
+#: modules/notifications/notifications.php:1541
 msgid "Disabled"
 msgstr ""
 
-#: modules/calendar/calendar.php:1601
-#: modules/custom-status/custom-status.php:1383
+#: modules/calendar/calendar.php:1659
+#: modules/custom-status/custom-status.php:1403
 #: modules/dashboard/dashboard.php:277
 #: modules/dashboard/dashboard.php:297
 #: modules/dashboard/dashboard.php:325
-#: modules/notifications/notifications.php:1488
-#: modules/notifications/notifications.php:1507
+#: modules/notifications/notifications.php:1523
+#: modules/notifications/notifications.php:1542
 msgid "Enabled"
 msgstr ""
 
-#: modules/calendar/calendar.php:1614
+#: modules/calendar/calendar.php:1672
 msgid "Regenerate calendar feed secret"
 msgstr ""
 
-#: modules/calendar/calendar.php:1685
+#: modules/calendar/calendar.php:1738
 msgid "No date supplied."
 msgstr ""
 
-#: modules/calendar/calendar.php:1690
+#: modules/calendar/calendar.php:1743
 msgid "Please change Quick Create to use a post type viewable on the calendar."
 msgstr ""
 
-#: modules/calendar/calendar.php:1697
+#: modules/calendar/calendar.php:1750
 msgid "Untitled"
 msgstr ""
 
-#: modules/calendar/calendar.php:1731
+#: modules/calendar/calendar.php:1784
 msgid "Post could not be created"
 msgstr ""
 
-#: modules/calendar/calendar.php:1835
+#: modules/calendar/calendar.php:1916
 msgid "Invalid metadata type"
 msgstr ""
 
-#: modules/calendar/calendar.php:1844
+#: modules/calendar/calendar.php:1925
 msgid "Metadata could not be updated."
 msgstr ""
 
@@ -437,274 +434,278 @@ msgid "<p>Edit Flow’s custom statuses allow you to define the most important s
 msgstr ""
 
 #: modules/custom-status/custom-status.php:86
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/custom-statuses/\">Custom Status Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/custom-statuses/\">Custom Status Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:164
+#: modules/custom-status/custom-status.php:165
 msgid "Pitch"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:167
+#: modules/custom-status/custom-status.php:168
 msgid "Idea proposed; waiting for acceptance."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:172
+#: modules/custom-status/custom-status.php:173
 msgid "Assigned"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:175
+#: modules/custom-status/custom-status.php:176
 msgid "Post idea assigned to writer."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:180
+#: modules/custom-status/custom-status.php:181
 msgid "In Progress"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:183
+#: modules/custom-status/custom-status.php:184
 msgid "Writer is working on the post."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:191
+#: modules/custom-status/custom-status.php:192
 msgid "Post is a draft; not ready for review or publication."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:199
+#: modules/custom-status/custom-status.php:200
 msgid "Post needs to be reviewed by an editor."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:342
+#: modules/custom-status/custom-status.php:343
 msgid "Are you sure you want to delete the post status? All posts with this status will be assigned to the default status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:350
+#: modules/custom-status/custom-status.php:351
 msgid "&mdash; No Change &mdash;"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:352
+#: modules/custom-status/custom-status.php:353
 #: modules/custom-status/views/configure.php:51
 msgid "Private"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:353
+#: modules/custom-status/custom-status.php:354
 msgid "Save as"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:356
+#: modules/custom-status/custom-status.php:357
 msgid "OK"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:357
-#: modules/custom-status/custom-status.php:2351
+#: modules/custom-status/custom-status.php:358
+#: modules/custom-status/custom-status.php:2462
 #: modules/custom-status/views/edit-status.php:50
 #: modules/editorial-comments/editorial-comments.php:208
-#: modules/editorial-metadata/editorial-metadata.php:1699
-#: modules/editorial-metadata/editorial-metadata.php:2009
-#: modules/user-groups/user-groups.php:670
-#: modules/user-groups/user-groups.php:1413
+#: modules/editorial-metadata/editorial-metadata.php:1720
+#: modules/editorial-metadata/editorial-metadata.php:2030
+#: modules/user-groups/user-groups.php:668
+#: modules/user-groups/user-groups.php:1416
 msgid "Cancel"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:422
+#: modules/custom-status/custom-status.php:423
 msgid "<strong>Note:</strong> Your browser does not support JavaScript or has JavaScript disabled. You will not be able to access or change the post status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:504
+#: modules/custom-status/custom-status.php:505
 msgid "Privately Published"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:587
+#: modules/custom-status/custom-status.php:588
 msgid "Custom status doesn't exist."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:597
+#: modules/custom-status/custom-status.php:598
 msgid "Changing the name and slug of \"Draft\" is not allowed"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:652
+#: modules/custom-status/custom-status.php:653
 msgid "Cannot reassign to the status you want to delete"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:679
+#: modules/custom-status/custom-status.php:680
 msgid "Restricted status "
 msgstr ""
 
-#: modules/custom-status/custom-status.php:910
-#: modules/custom-status/custom-status.php:995
+#: modules/custom-status/custom-status.php:924
+#: modules/custom-status/custom-status.php:1008
 msgid "Please enter a name for the status"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:914
-#: modules/custom-status/custom-status.php:999
-#: modules/custom-status/custom-status.php:1301
+#: modules/custom-status/custom-status.php:928
+#: modules/custom-status/custom-status.php:1012
+#: modules/custom-status/custom-status.php:1321
 msgid "Please enter a valid, non-numeric name for the status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:918
-#: modules/custom-status/custom-status.php:1003
-#: modules/custom-status/custom-status.php:1307
+#: modules/custom-status/custom-status.php:932
+#: modules/custom-status/custom-status.php:1016
+#: modules/custom-status/custom-status.php:1327
 msgid "Status name cannot exceed 20 characters. Please try a shorter name."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:922
-#: modules/custom-status/custom-status.php:1008
-#: modules/custom-status/custom-status.php:1326
+#: modules/custom-status/custom-status.php:936
+#: modules/custom-status/custom-status.php:1021
+#: modules/custom-status/custom-status.php:1346
 msgid "Status name conflicts with existing term. Please choose another."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:926
-#: modules/custom-status/custom-status.php:1017
+#: modules/custom-status/custom-status.php:940
+#: modules/custom-status/custom-status.php:1030
 msgid "Status name is restricted. Please choose another name."
 msgstr ""
 
 #. translators: %s: error message
-#: modules/custom-status/custom-status.php:944
+#: modules/custom-status/custom-status.php:957
 #, php-format
 msgid "Could not add status: %s"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1013
+#: modules/custom-status/custom-status.php:1026
 msgid "Status name conflicts with existing status. Please choose another."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1035
+#: modules/custom-status/custom-status.php:1047
 msgid "Error updating post status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1063
-#: modules/custom-status/custom-status.php:1102
-#: modules/custom-status/custom-status.php:1152
+#: modules/custom-status/custom-status.php:1075
+#: modules/custom-status/custom-status.php:1114
+#: modules/custom-status/custom-status.php:1164
 msgid "Invalid nonce for submission."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1068
-#: modules/custom-status/custom-status.php:1107
+#: modules/custom-status/custom-status.php:1080
+#: modules/custom-status/custom-status.php:1119
 msgid "Sorry, you do not have permission to edit custom statuses."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1081
+#: modules/custom-status/custom-status.php:1093
 msgid "Status doesn&#39;t exist."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1114
+#: modules/custom-status/custom-status.php:1126
 msgid "Status does not exist."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1119
+#: modules/custom-status/custom-status.php:1131
 msgid "Cannot delete default status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1124
+#: modules/custom-status/custom-status.php:1136
 msgid "Could not delete the status: "
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1157
+#: modules/custom-status/custom-status.php:1169
 msgid "Sorry, you do not have permission to migrate posts."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1165
+#: modules/custom-status/custom-status.php:1177
 msgid "Please select both a source and target status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1169
+#: modules/custom-status/custom-status.php:1181
 msgid "Source and target status cannot be the same."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1253
-#: modules/editorial-metadata/editorial-metadata.php:1486
+#: modules/custom-status/custom-status.php:1186
+msgid "Please select a valid target status."
+msgstr ""
+
+#: modules/custom-status/custom-status.php:1272
+#: modules/editorial-metadata/editorial-metadata.php:1506
 msgid "Terms not set."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1295
+#: modules/custom-status/custom-status.php:1315
 msgid "Please enter a name for the status."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1313
+#: modules/custom-status/custom-status.php:1333
 msgid "Status name is restricted. Please chose another name."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1319
+#: modules/custom-status/custom-status.php:1339
 msgid "Status already exists. Please choose another name."
 msgstr ""
 
 #. translators: 1: the status's name
-#: modules/custom-status/custom-status.php:1347
+#: modules/custom-status/custom-status.php:1367
 #, php-format
 msgid "Could not update the status: <strong>%s</strong>"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1361
+#: modules/custom-status/custom-status.php:1381
 msgid "Use on these post types:"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:1362
+#: modules/custom-status/custom-status.php:1382
 msgid "Always show dropdown:"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2167
+#: modules/custom-status/custom-status.php:2272
 msgid "No custom statuses found."
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2182
-#: modules/editorial-metadata/editorial-metadata.php:1887
+#: modules/custom-status/custom-status.php:2287
+#: modules/editorial-metadata/editorial-metadata.php:1908
 msgid "Position"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2183
-#: modules/custom-status/custom-status.php:2342
+#: modules/custom-status/custom-status.php:2288
+#: modules/custom-status/custom-status.php:2453
 #: modules/custom-status/views/configure.php:117
-#: modules/editorial-metadata/editorial-metadata.php:1653
-#: modules/editorial-metadata/editorial-metadata.php:1741
-#: modules/editorial-metadata/editorial-metadata.php:1888
-#: modules/editorial-metadata/editorial-metadata.php:2000
-#: modules/user-groups/user-groups.php:659
-#: modules/user-groups/user-groups.php:705
-#: modules/user-groups/user-groups.php:1281
-#: modules/user-groups/user-groups.php:1404
+#: modules/editorial-metadata/editorial-metadata.php:1674
+#: modules/editorial-metadata/editorial-metadata.php:1762
+#: modules/editorial-metadata/editorial-metadata.php:1909
+#: modules/editorial-metadata/editorial-metadata.php:2021
+#: modules/user-groups/user-groups.php:657
+#: modules/user-groups/user-groups.php:703
+#: modules/user-groups/user-groups.php:1284
+#: modules/user-groups/user-groups.php:1407
 msgid "Name"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2184
-#: modules/custom-status/custom-status.php:2346
+#: modules/custom-status/custom-status.php:2289
+#: modules/custom-status/custom-status.php:2457
 #: modules/custom-status/views/configure.php:124
 #: modules/custom-status/views/edit-status.php:40
-#: modules/editorial-metadata/editorial-metadata.php:1665
-#: modules/editorial-metadata/editorial-metadata.php:1751
-#: modules/editorial-metadata/editorial-metadata.php:1890
-#: modules/editorial-metadata/editorial-metadata.php:2004
-#: modules/user-groups/user-groups.php:664
-#: modules/user-groups/user-groups.php:711
-#: modules/user-groups/user-groups.php:1282
-#: modules/user-groups/user-groups.php:1408
+#: modules/editorial-metadata/editorial-metadata.php:1686
+#: modules/editorial-metadata/editorial-metadata.php:1772
+#: modules/editorial-metadata/editorial-metadata.php:1911
+#: modules/editorial-metadata/editorial-metadata.php:2025
+#: modules/user-groups/user-groups.php:662
+#: modules/user-groups/user-groups.php:709
+#: modules/user-groups/user-groups.php:1285
+#: modules/user-groups/user-groups.php:1411
 msgid "Description"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2264
+#: modules/custom-status/custom-status.php:2375
 msgid "Default"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2276
-#: modules/editorial-metadata/editorial-metadata.php:1964
-#: modules/user-groups/user-groups.php:1324
+#: modules/custom-status/custom-status.php:2387
+#: modules/editorial-metadata/editorial-metadata.php:1985
+#: modules/user-groups/user-groups.php:1327
 msgid "Quick&nbsp;Edit"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2277
+#: modules/custom-status/custom-status.php:2388
 msgid "Make&nbsp;Default"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2284
-#: modules/editorial-metadata/editorial-metadata.php:1976
-#: modules/user-groups/user-groups.php:1325
+#: modules/custom-status/custom-status.php:2395
+#: modules/editorial-metadata/editorial-metadata.php:1997
+#: modules/user-groups/user-groups.php:1328
 msgid "Delete"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2340
-#: modules/editorial-metadata/editorial-metadata.php:1998
-#: modules/user-groups/user-groups.php:1402
+#: modules/custom-status/custom-status.php:2451
+#: modules/editorial-metadata/editorial-metadata.php:2019
+#: modules/user-groups/user-groups.php:1405
 msgid "Quick Edit"
 msgstr ""
 
-#: modules/custom-status/custom-status.php:2352
+#: modules/custom-status/custom-status.php:2463
 #: modules/custom-status/views/edit-status.php:49
 msgid "Update Status"
 msgstr ""
@@ -714,14 +715,14 @@ msgid "Deleting a post status will assign all posts to the default post status."
 msgstr ""
 
 #: modules/custom-status/views/configure.php:29
-#: modules/editorial-metadata/editorial-metadata.php:1710
-#: modules/user-groups/user-groups.php:690
+#: modules/editorial-metadata/editorial-metadata.php:1731
+#: modules/user-groups/user-groups.php:688
 msgid "Add New"
 msgstr ""
 
 #: modules/custom-status/views/configure.php:31
-#: modules/editorial-metadata/editorial-metadata.php:1719
-#: modules/user-groups/user-groups.php:692
+#: modules/editorial-metadata/editorial-metadata.php:1740
+#: modules/user-groups/user-groups.php:690
 msgid "Options"
 msgstr ""
 
@@ -782,8 +783,8 @@ msgid "Custom Status"
 msgstr ""
 
 #: modules/custom-status/views/edit-status.php:33
-#: modules/editorial-metadata/editorial-metadata.php:1658
-#: modules/editorial-metadata/editorial-metadata.php:1746
+#: modules/editorial-metadata/editorial-metadata.php:1679
+#: modules/editorial-metadata/editorial-metadata.php:1767
 msgid "Slug"
 msgstr ""
 
@@ -838,7 +839,7 @@ msgid "Edit Custom Statuses"
 msgstr ""
 
 #: modules/dashboard/dashboard.php:244
-#: modules/story-budget/story-budget.php:781
+#: modules/story-budget/story-budget.php:801
 msgid "Edit this post"
 msgstr ""
 
@@ -894,7 +895,7 @@ msgid "<p>Editorial comments help you cut down on email overload and keep the co
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:51
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/editorial-comments/\">Editorial Comments Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/danielbachhuber/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/editorial-comments/\">Editorial Comments Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:101
@@ -902,7 +903,7 @@ msgid "and"
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:102
-#: modules/editorial-comments/editorial-comments.php:415
+#: modules/editorial-comments/editorial-comments.php:429
 msgid "No one will be notified."
 msgstr ""
 
@@ -927,7 +928,7 @@ msgid "No users or groups were notified."
 msgstr ""
 
 #: modules/editorial-comments/editorial-comments.php:241
-#: modules/notifications/notifications.php:903
+#: modules/notifications/notifications.php:910
 msgid "Notified"
 msgstr ""
 
@@ -945,28 +946,32 @@ msgstr ""
 msgid "<span class=\"comment-author\">%1$s</span><span class=\"meta\"> said on %2$s at %3$s</span>"
 msgstr ""
 
-#: modules/editorial-comments/editorial-comments.php:338
+#: modules/editorial-comments/editorial-comments.php:342
 msgid "Nonce check failed. Please ensure you're supposed to be adding editorial comments."
 msgstr ""
 
-#: modules/editorial-comments/editorial-comments.php:353
+#: modules/editorial-comments/editorial-comments.php:354
 msgid "Sorry, you don't have the privileges to add editorial comments. Please talk to your Administrator."
 msgstr ""
 
-#: modules/editorial-comments/editorial-comments.php:360
+#: modules/editorial-comments/editorial-comments.php:366
+msgid "The comment you are replying to is invalid."
+msgstr ""
+
+#: modules/editorial-comments/editorial-comments.php:374
 msgid "Please enter a comment."
 msgstr ""
 
-#: modules/editorial-comments/editorial-comments.php:442
+#: modules/editorial-comments/editorial-comments.php:456
 msgid "There was a problem of some sort. Try again or contact your administrator."
 msgstr ""
 
-#: modules/editorial-comments/editorial-comments.php:454
+#: modules/editorial-comments/editorial-comments.php:468
 msgid "Enable for these post types:"
 msgstr ""
 
 #: modules/editorial-metadata/editorial-metadata.php:65
-#: modules/editorial-metadata/editorial-metadata.php:408
+#: modules/editorial-metadata/editorial-metadata.php:414
 msgid "Editorial Metadata"
 msgstr ""
 
@@ -1007,7 +1012,7 @@ msgid "<p>Keep track of important details about your content with editorial meta
 msgstr ""
 
 #: modules/editorial-metadata/editorial-metadata.php:92
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/editorial-metadata/\">Editorial Metadata Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/danielbachhuber/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/editorial-metadata/\">Editorial Metadata Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
 #: modules/editorial-metadata/editorial-metadata.php:157
@@ -1108,217 +1113,217 @@ msgstr ""
 msgid "New Editorial Metadata"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:434
+#: modules/editorial-metadata/editorial-metadata.php:440
 msgid "No editorial metadata available."
 msgstr ""
 
 #. translators: 1: The link to add editorial metadata fields
-#: modules/editorial-metadata/editorial-metadata.php:437
+#: modules/editorial-metadata/editorial-metadata.php:443
 #, php-format
 msgid " <a href=\"%s\">Add fields to get started</a>."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:439
+#: modules/editorial-metadata/editorial-metadata.php:445
 msgid " Encourage your site administrator to configure your editorial workflow by adding editorial metadata."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:479
+#: modules/editorial-metadata/editorial-metadata.php:486
 msgid "Select date"
 msgstr ""
 
-#. translators: %s is the google maps location.
-#: modules/editorial-metadata/editorial-metadata.php:492
+#. translators: %s: the location entered in the editorial metadata field.
+#: modules/editorial-metadata/editorial-metadata.php:508
 #, php-format
-msgid "View &#8220;%s&#8221; on Google Maps"
+msgid "View “%s” on Google Maps"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:511
+#: modules/editorial-metadata/editorial-metadata.php:531
 msgid "-- Select a user --"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:523
+#: modules/editorial-metadata/editorial-metadata.php:543
 msgid "This editorial metadata type is not yet supported."
 msgstr ""
 
 #. translators: 1: date, 2: time
-#: modules/editorial-metadata/editorial-metadata.php:964
-#: modules/notifications/notifications.php:1597
+#: modules/editorial-metadata/editorial-metadata.php:984
+#: modules/notifications/notifications.php:1632
 #, php-format
 msgid "%1$s at %2$s"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:978
-#: modules/editorial-metadata/editorial-metadata.php:1684
-#: modules/editorial-metadata/editorial-metadata.php:1774
-#: modules/editorial-metadata/editorial-metadata.php:1932
+#: modules/editorial-metadata/editorial-metadata.php:998
+#: modules/editorial-metadata/editorial-metadata.php:1705
+#: modules/editorial-metadata/editorial-metadata.php:1795
+#: modules/editorial-metadata/editorial-metadata.php:1953
 msgid "Yes"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:980
-#: modules/editorial-metadata/editorial-metadata.php:1683
-#: modules/editorial-metadata/editorial-metadata.php:1773
-#: modules/editorial-metadata/editorial-metadata.php:1934
+#: modules/editorial-metadata/editorial-metadata.php:1000
+#: modules/editorial-metadata/editorial-metadata.php:1704
+#: modules/editorial-metadata/editorial-metadata.php:1794
+#: modules/editorial-metadata/editorial-metadata.php:1955
 msgid "No"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1176
+#: modules/editorial-metadata/editorial-metadata.php:1196
 msgid "Please enter a name for the editorial metadata."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1180
+#: modules/editorial-metadata/editorial-metadata.php:1200
 msgid "Please enter a slug for the editorial metadata."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1183
+#: modules/editorial-metadata/editorial-metadata.php:1203
 msgid "Name conflicts with existing term. Please choose another."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1187
-#: modules/editorial-metadata/editorial-metadata.php:1292
-#: modules/editorial-metadata/editorial-metadata.php:1438
+#: modules/editorial-metadata/editorial-metadata.php:1207
+#: modules/editorial-metadata/editorial-metadata.php:1311
+#: modules/editorial-metadata/editorial-metadata.php:1456
 #: modules/user-groups/user-groups.php:332
-#: modules/user-groups/user-groups.php:421
-#: modules/user-groups/user-groups.php:536
+#: modules/user-groups/user-groups.php:420
+#: modules/user-groups/user-groups.php:534
 msgid "Name already in use. Please choose another."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1191
+#: modules/editorial-metadata/editorial-metadata.php:1211
 msgid "Slug already in use. Please choose another."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1196
-#: modules/editorial-metadata/editorial-metadata.php:1302
-#: modules/editorial-metadata/editorial-metadata.php:1424
+#: modules/editorial-metadata/editorial-metadata.php:1216
+#: modules/editorial-metadata/editorial-metadata.php:1321
+#: modules/editorial-metadata/editorial-metadata.php:1442
 msgid "Name cannot exceed 200 characters. Please try a shorter name."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1201
+#: modules/editorial-metadata/editorial-metadata.php:1221
 msgid "Please select a valid metadata type."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1226
+#: modules/editorial-metadata/editorial-metadata.php:1245
 msgid "Error adding term."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1276
-#: modules/editorial-metadata/editorial-metadata.php:1412
+#: modules/editorial-metadata/editorial-metadata.php:1295
+#: modules/editorial-metadata/editorial-metadata.php:1430
 msgid "Please enter a name for the editorial metadata"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1281
-#: modules/editorial-metadata/editorial-metadata.php:1418
+#: modules/editorial-metadata/editorial-metadata.php:1300
+#: modules/editorial-metadata/editorial-metadata.php:1436
 msgid "Please enter a valid, non-numeric name for the editorial metadata."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1286
-#: modules/editorial-metadata/editorial-metadata.php:1431
+#: modules/editorial-metadata/editorial-metadata.php:1305
+#: modules/editorial-metadata/editorial-metadata.php:1449
 msgid "Metadata name conflicts with existing term. Please choose another."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1297
+#: modules/editorial-metadata/editorial-metadata.php:1316
 msgid "Name conflicts with slug for another term. Please choose something else."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1325
-#: modules/editorial-metadata/editorial-metadata.php:1372
+#: modules/editorial-metadata/editorial-metadata.php:1343
+#: modules/editorial-metadata/editorial-metadata.php:1390
 msgid "Error updating term."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1445
+#: modules/editorial-metadata/editorial-metadata.php:1463
 #: modules/user-groups/user-groups.php:336
-#: modules/user-groups/user-groups.php:426
-#: modules/user-groups/user-groups.php:542
+#: modules/user-groups/user-groups.php:425
+#: modules/user-groups/user-groups.php:540
 msgid "Name conflicts with slug for another term. Please choose again."
 msgstr ""
 
 #. Translators: 1: the name of the term that could not be found
-#: modules/editorial-metadata/editorial-metadata.php:1465
+#: modules/editorial-metadata/editorial-metadata.php:1483
 #, php-format
 msgid "Could not update the term: <strong>%s</strong>"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1529
+#: modules/editorial-metadata/editorial-metadata.php:1550
 msgid "Error deleting term."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1550
-#: modules/user-groups/user-groups.php:577
+#: modules/editorial-metadata/editorial-metadata.php:1571
+#: modules/user-groups/user-groups.php:575
 msgid "Add to these post types:"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1600
+#: modules/editorial-metadata/editorial-metadata.php:1621
 msgid "Are you sure you want to delete this term? Any metadata for this term will remain but will not be visible unless this term is re-added."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1655
-#: modules/editorial-metadata/editorial-metadata.php:1743
+#: modules/editorial-metadata/editorial-metadata.php:1676
+#: modules/editorial-metadata/editorial-metadata.php:1764
 msgid "The name is for labeling the metadata field."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1661
+#: modules/editorial-metadata/editorial-metadata.php:1682
 msgid "The slug cannot be changed once the term has been created."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1668
-#: modules/editorial-metadata/editorial-metadata.php:1753
+#: modules/editorial-metadata/editorial-metadata.php:1689
+#: modules/editorial-metadata/editorial-metadata.php:1774
 msgid "The description can be used to communicate with your team about what the metadata is for."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1672
-#: modules/editorial-metadata/editorial-metadata.php:1756
+#: modules/editorial-metadata/editorial-metadata.php:1693
+#: modules/editorial-metadata/editorial-metadata.php:1777
 msgid "Type"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1675
+#: modules/editorial-metadata/editorial-metadata.php:1696
 msgid "The metadata type cannot be changed once created."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1679
-#: modules/editorial-metadata/editorial-metadata.php:1770
-#: modules/editorial-metadata/editorial-metadata.php:1891
+#: modules/editorial-metadata/editorial-metadata.php:1700
+#: modules/editorial-metadata/editorial-metadata.php:1791
+#: modules/editorial-metadata/editorial-metadata.php:1912
 msgid "Viewable"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1692
-#: modules/editorial-metadata/editorial-metadata.php:1783
-#: modules/editorial-metadata/editorial-metadata.php:1971
+#: modules/editorial-metadata/editorial-metadata.php:1713
+#: modules/editorial-metadata/editorial-metadata.php:1804
+#: modules/editorial-metadata/editorial-metadata.php:1992
 msgid "When viewable, metadata can be seen on views other than the edit post view (e.g. calendar, manage posts, story budget, etc.)"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1698
-#: modules/editorial-metadata/editorial-metadata.php:2010
+#: modules/editorial-metadata/editorial-metadata.php:1719
+#: modules/editorial-metadata/editorial-metadata.php:2031
 msgid "Update Metadata Term"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1748
+#: modules/editorial-metadata/editorial-metadata.php:1769
 msgid "The \"slug\" is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1767
+#: modules/editorial-metadata/editorial-metadata.php:1788
 msgid "Indicate the type of editorial metadata."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1787
+#: modules/editorial-metadata/editorial-metadata.php:1808
 msgid "Add New Metadata Term"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1876
+#: modules/editorial-metadata/editorial-metadata.php:1897
 msgid "No editorial metadata found."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1889
+#: modules/editorial-metadata/editorial-metadata.php:1910
 msgid "Metadata Type"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1966
+#: modules/editorial-metadata/editorial-metadata.php:1987
 msgid "Hidden metadata can only be viewed on the edit post view."
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1969
+#: modules/editorial-metadata/editorial-metadata.php:1990
 msgid "Make Hidden"
 msgstr ""
 
-#: modules/editorial-metadata/editorial-metadata.php:1974
+#: modules/editorial-metadata/editorial-metadata.php:1995
 msgid "Make Viewable"
 msgstr ""
 
@@ -1340,7 +1345,7 @@ msgid "<p>Notifications ensure you keep up to date with progress your most impor
 msgstr ""
 
 #: modules/notifications/notifications.php:81
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/notifications/\">Notifications Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/notifications/\">Notifications Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
 #: modules/notifications/notifications.php:229
@@ -1384,7 +1389,7 @@ msgid "Select the users and user groups that should receive email notifications 
 msgstr ""
 
 #: modules/notifications/notifications.php:396
-#: modules/user-groups/user-groups.php:642
+#: modules/user-groups/user-groups.php:640
 msgid "Users"
 msgstr ""
 
@@ -1397,281 +1402,281 @@ msgstr ""
 msgid "Nonce check failed. Please ensure you can add users or user groups to a post."
 msgstr ""
 
-#: modules/notifications/notifications.php:720
+#: modules/notifications/notifications.php:727
 msgid "WordPress Scheduler"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:751
+#: modules/notifications/notifications.php:758
 #, php-format
 msgid "[%1$s] New %2$s Created: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:753
+#: modules/notifications/notifications.php:760
 #, php-format
 msgid "A new %1$s (#%2$s \"%3$s\") was created by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:756
+#: modules/notifications/notifications.php:763
 #, php-format
 msgid "[%1$s] %2$s Trashed: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:758
+#: modules/notifications/notifications.php:765
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was moved to the trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:761
+#: modules/notifications/notifications.php:768
 #, php-format
 msgid "[%1$s] %2$s Restored (from Trash): \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:763
+#: modules/notifications/notifications.php:770
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was restored from trash by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:766
+#: modules/notifications/notifications.php:773
 #, php-format
 msgid "[%1$s] %2$s Scheduled: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email 6. scheduled date
-#: modules/notifications/notifications.php:768
+#: modules/notifications/notifications.php:775
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was scheduled by %4$s %5$s.  It will be published on %6$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:771
+#: modules/notifications/notifications.php:778
 #, php-format
 msgid "[%1$s] %2$s Published: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:773
+#: modules/notifications/notifications.php:780
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was published by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:776
+#: modules/notifications/notifications.php:783
 #, php-format
 msgid "[%1$s] %2$s Unpublished: \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:778
+#: modules/notifications/notifications.php:785
 #, php-format
 msgid "%1$s #%2$s \"%3$s\" was unpublished by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: site name, 2: post type, 3. post title
-#: modules/notifications/notifications.php:781
+#: modules/notifications/notifications.php:788
 #, php-format
 msgid "[%1$s] %2$s Status Changed for \"%3$s\""
 msgstr ""
 
 #. translators: 1: post type, 2: post id, 3. post title, 4. user name, 5. user email
-#: modules/notifications/notifications.php:783
+#: modules/notifications/notifications.php:790
 #, php-format
 msgid "Status was changed for %1$s #%2$s \"%3$s\" by %4$s %5$s"
 msgstr ""
 
 #. translators: 1: date, 2: time, 3: timezone
-#: modules/notifications/notifications.php:787
+#: modules/notifications/notifications.php:794
 #, php-format
 msgid "This action was taken on %1$s at %2$s %3$s"
 msgstr ""
 
 #. translators: 1: old status, 2: new status
-#: modules/notifications/notifications.php:792
+#: modules/notifications/notifications.php:799
 #, php-format
 msgid "%1$s => %2$s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:798
+#: modules/notifications/notifications.php:805
 #, php-format
 msgid "== %s Details =="
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:800
+#: modules/notifications/notifications.php:807
 #, php-format
 msgid "Title: %s"
 msgstr ""
 
 #. translators: 1: author name, 2: author email
-#: modules/notifications/notifications.php:803
+#: modules/notifications/notifications.php:810
 #, php-format
 msgid "Author: %1$s (%2$s)"
 msgstr ""
 
-#: modules/notifications/notifications.php:825
-#: modules/notifications/notifications.php:921
+#: modules/notifications/notifications.php:832
+#: modules/notifications/notifications.php:928
 msgid "== Actions =="
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:827
-#: modules/notifications/notifications.php:925
+#: modules/notifications/notifications.php:834
+#: modules/notifications/notifications.php:932
 #, php-format
 msgid "Add editorial comment: %s"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:829
-#: modules/notifications/notifications.php:927
+#: modules/notifications/notifications.php:836
+#: modules/notifications/notifications.php:934
 #, php-format
 msgid "Edit: %s"
 msgstr ""
 
 #. translators: 1: view link
-#: modules/notifications/notifications.php:831
-#: modules/notifications/notifications.php:929
+#: modules/notifications/notifications.php:838
+#: modules/notifications/notifications.php:936
 #, php-format
 msgid "View: %s"
 msgstr ""
 
 #. translators: 1: user name, 2: post type, 3: post id, 4: edit link, 5: post title, 6: old status, 7: new status
-#: modules/notifications/notifications.php:839
+#: modules/notifications/notifications.php:846
 #, php-format
 msgid "*%1$s* changed the status of *%2$s #%3$s - <%4$s|%5$s>* from *%6$s* to *%7$s*"
 msgstr ""
 
 #. translators: 1: blog name, 2: post title
-#: modules/notifications/notifications.php:891
+#: modules/notifications/notifications.php:898
 #, php-format
 msgid "[%1$s] New Editorial Comment: \"%2$s\""
 msgstr ""
 
 #. translators: 1: post id, 2: post title, 3. post type
-#: modules/notifications/notifications.php:894
+#: modules/notifications/notifications.php:901
 #, php-format
 msgid "A new editorial comment was added to %3$s #%1$s \"%2$s\""
 msgstr ""
 
 #. translators: 1: comment author, 2: author email, 3: date, 4: time
-#: modules/notifications/notifications.php:896
+#: modules/notifications/notifications.php:903
 #, php-format
 msgid "%1$s (%2$s) said on %3$s at %4$s:"
 msgstr ""
 
 #. translators: 1: edit link
-#: modules/notifications/notifications.php:923
+#: modules/notifications/notifications.php:930
 #, php-format
 msgid "Reply: %s"
 msgstr ""
 
 #. translators: 1: post type
-#: modules/notifications/notifications.php:932
+#: modules/notifications/notifications.php:939
 #, php-format
 msgid "You can see all editorial comments on this %s here: "
 msgstr ""
 
 #. translators: 1: comment author, 2: post type, 3: post id, 4: edit link, 5: post title, 6: comment content
-#: modules/notifications/notifications.php:941
+#: modules/notifications/notifications.php:948
 #, php-format
 msgid "*%1$s* left a comment on *%2$s #%3$s - <%4$s|%5$s>*"
 msgstr ""
 
 #. translators: 1: post title
-#: modules/notifications/notifications.php:959
+#: modules/notifications/notifications.php:966
 #, php-format
 msgid "You are receiving this email because you are subscribed to \"%s\"."
 msgstr ""
 
 #. translators: 1: date
-#: modules/notifications/notifications.php:963
+#: modules/notifications/notifications.php:970
 #, php-format
 msgid "This email was sent %s."
 msgstr ""
 
-#: modules/notifications/notifications.php:1464
+#: modules/notifications/notifications.php:1499
 msgid "Post types for notifications:"
 msgstr ""
 
-#: modules/notifications/notifications.php:1465
+#: modules/notifications/notifications.php:1500
 msgid "Always notify blog admin"
 msgstr ""
 
-#: modules/notifications/notifications.php:1466
+#: modules/notifications/notifications.php:1501
 msgid "Send to Webhook"
 msgstr ""
 
-#: modules/notifications/notifications.php:1467
+#: modules/notifications/notifications.php:1502
 msgid "Webhook URL"
 msgstr ""
 
-#: modules/settings/settings.php:30
+#: modules/settings/settings.php:42
 msgid "Edit Flow redefines your WordPress publishing workflow."
 msgstr ""
 
-#: modules/settings/settings.php:31
+#: modules/settings/settings.php:43
 msgid "Enable any of the features below to take control of your workflow. Custom statuses, email notifications, editorial comments, and more help you and your team save time so everyone can focus on what matters most: the content."
 msgstr ""
 
-#: modules/settings/settings.php:70
+#: modules/settings/settings.php:82
 msgid "Features"
 msgstr ""
 
-#: modules/settings/settings.php:160
+#: modules/settings/settings.php:174
 msgid "Not a registered Edit Flow module"
 msgstr ""
 
 #. translators: 1: link to the settings page for Edit Flow
-#: modules/settings/settings.php:169
+#: modules/settings/settings.php:183
 #, php-format
 msgid "Module not enabled. Please enable it from the <a href=\"%1$s\">Edit Flow settings page</a>."
 msgstr ""
 
 #. translators: %s: module title
-#: modules/settings/settings.php:231
+#: modules/settings/settings.php:245
 #, php-format
 msgid "Edit Flow: %s"
 msgstr ""
 
-#: modules/settings/settings.php:235
+#: modules/settings/settings.php:249
 msgid "Edit Flow: Features"
 msgstr ""
 
-#: modules/settings/settings.php:291
+#: modules/settings/settings.php:305
 msgid "There are no Edit Flow modules registered"
 msgstr ""
 
-#: modules/settings/settings.php:330
+#: modules/settings/settings.php:344
 msgid "Enable"
 msgstr ""
 
-#: modules/settings/settings.php:335
+#: modules/settings/settings.php:349
 msgid "Disable"
 msgstr ""
 
-#: modules/settings/settings.php:377
+#: modules/settings/settings.php:389
 msgid "Posts"
 msgstr ""
 
-#: modules/settings/settings.php:378
+#: modules/settings/settings.php:390
 msgid "Pages"
 msgstr ""
 
 #. translators: 1: post type, 2: post type support
-#: modules/settings/settings.php:400
+#: modules/settings/settings.php:412
 #, php-format
 msgid "Disabled because add_post_type_support( '%1$s', '%2$s' ) is included in a loaded file."
 msgstr ""
 
 #: modules/story-budget/story-budget.php:103
 #: modules/story-budget/story-budget.php:196
-#: modules/story-budget/story-budget.php:487
+#: modules/story-budget/story-budget.php:497
 msgid "Story Budget"
 msgstr ""
 
@@ -1690,7 +1695,6 @@ msgid "Title"
 msgstr ""
 
 #: modules/story-budget/story-budget.php:242
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:70
 msgid "Status"
 msgstr ""
@@ -1703,68 +1707,68 @@ msgstr ""
 msgid "Last Modified"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:405
+#: modules/story-budget/story-budget.php:415
 msgid "Screen Layout"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:412
+#: modules/story-budget/story-budget.php:422
 msgid "Number of Columns: "
 msgstr ""
 
-#: modules/story-budget/story-budget.php:418
+#: modules/story-budget/story-budget.php:428
 msgid "Show post excerpts"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:421
+#: modules/story-budget/story-budget.php:431
 msgid "Hide empty categories"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:530
+#: modules/story-budget/story-budget.php:540
 msgid "Start date"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:535
+#: modules/story-budget/story-budget.php:545
 msgid "Number of days"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:538
+#: modules/story-budget/story-budget.php:548
 msgid "day"
 msgid_plural "days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/story-budget/story-budget.php:539
+#: modules/story-budget/story-budget.php:549
 msgid "Update"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:641
+#: modules/story-budget/story-budget.php:661
 msgid "Click to toggle"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:642
+#: modules/story-budget/story-budget.php:662
 msgid "Toggle panel"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:666
+#: modules/story-budget/story-budget.php:686
 msgid "There are no posts for this term in the range or filter specified."
 msgstr ""
 
 #. translators: %s: human-readable time difference.
-#: modules/story-budget/story-budget.php:736
+#: modules/story-budget/story-budget.php:756
 #, php-format
 msgid "%s ago"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:766
+#: modules/story-budget/story-budget.php:786
 msgid "There is no excerpt because this is a protected post."
 msgstr ""
 
-#: modules/story-budget/story-budget.php:784
+#: modules/story-budget/story-budget.php:804
 msgid "Move this item to the Trash"
 msgstr ""
 
 #. translators: %d is the number of posts trashed.
-#: modules/story-budget/story-budget.php:826
+#: modules/story-budget/story-budget.php:846
 #, php-format
 msgid "%d item moved to the trash."
 msgid_plural "%d items moved to the trash."
@@ -1772,52 +1776,51 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d is the number of posts restored from the trash.
-#: modules/story-budget/story-budget.php:834
+#: modules/story-budget/story-budget.php:854
 #, php-format
 msgid "%d item restored from the Trash."
 msgid_plural "%d items restored from the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/story-budget/story-budget.php:863
+#: modules/story-budget/story-budget.php:884
 msgid "Filter"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:865
-#: build/calendar-react.js:11
+#: modules/story-budget/story-budget.php:886
 #: modules/calendar/lib/react/calendar-filters/index.js:167
 msgid "Reset"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:982
+#: modules/story-budget/story-budget.php:1019
 msgid "Filter by status"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:984
+#: modules/story-budget/story-budget.php:1021
 msgid "View all statuses"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:989
+#: modules/story-budget/story-budget.php:1026
 msgid "Unpublished"
 msgstr ""
 
 #. translators: %s is the taxonomy name (e.g., "category", "tag").
-#: modules/story-budget/story-budget.php:1000
+#: modules/story-budget/story-budget.php:1037
 #, php-format
 msgid "Filter by %s"
 msgstr ""
 
 #. translators: %s is the taxonomy name (e.g., "categories", "tags").
-#: modules/story-budget/story-budget.php:1003
+#: modules/story-budget/story-budget.php:1040
 #, php-format
 msgid "View all %s"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:1017
+#: modules/story-budget/story-budget.php:1054
 msgid "Filter by author"
 msgstr ""
 
-#: modules/story-budget/story-budget.php:1019
+#: modules/story-budget/story-budget.php:1056
 msgid "View all users"
 msgstr ""
 
@@ -1838,7 +1841,7 @@ msgid "User group updated."
 msgstr ""
 
 #: modules/user-groups/user-groups.php:77
-#: modules/user-groups/user-groups.php:1026
+#: modules/user-groups/user-groups.php:1025
 msgid "User group doesn't exist."
 msgstr ""
 
@@ -1855,7 +1858,7 @@ msgid "<p>For those with many people involved in the publishing process, user gr
 msgstr ""
 
 #: modules/user-groups/user-groups.php:88
-msgid "<p><strong>For more information:</strong></p><p><a href=\"http://editflow.org/features/user-groups/\">User Groups Documentation</a></p><p><a href=\"http://wordpress.org/tags/edit-flow?forum_id=10\">Edit Flow Forum</a></p><p><a href=\"https://github.com/danielbachhuber/Edit-Flow\">Edit Flow on Github</a></p>"
+msgid "<p><strong>For more information:</strong></p><p><a href=\"https://editflow.org/features/user-groups/\">User Groups Documentation</a></p><p><a href=\"https://wordpress.org/support/plugin/edit-flow/\">Edit Flow Forum</a></p><p><a href=\"https://github.com/Automattic/Edit-Flow\">Edit Flow on GitHub</a></p>"
 msgstr ""
 
 #: modules/user-groups/user-groups.php:146
@@ -1891,224 +1894,198 @@ msgid "Providing feedback and direction."
 msgstr ""
 
 #: modules/user-groups/user-groups.php:328
-#: modules/user-groups/user-groups.php:416
-#: modules/user-groups/user-groups.php:525
+#: modules/user-groups/user-groups.php:415
+#: modules/user-groups/user-groups.php:523
 msgid "Please enter a name for the user group."
 msgstr ""
 
 #: modules/user-groups/user-groups.php:339
-#: modules/user-groups/user-groups.php:429
-#: modules/user-groups/user-groups.php:530
+#: modules/user-groups/user-groups.php:428
+#: modules/user-groups/user-groups.php:528
 msgid "User group name cannot exceed 40 characters. Please try a shorter name."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:355
+#: modules/user-groups/user-groups.php:354
 msgid "Error adding usergroup."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:449
+#: modules/user-groups/user-groups.php:447
 msgid "Error updating user group."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:487
+#: modules/user-groups/user-groups.php:485
 msgid "Error deleting user group."
 msgstr ""
 
 #. translators: %s is the name of the user group.
-#: modules/user-groups/user-groups.php:562
+#: modules/user-groups/user-groups.php:560
 #, php-format
 msgid "Could not update the user group: <strong>%s</strong>"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:661
-#: modules/user-groups/user-groups.php:708
+#: modules/user-groups/user-groups.php:659
+#: modules/user-groups/user-groups.php:706
 msgid "The name is used to identify the user group."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:666
-#: modules/user-groups/user-groups.php:714
+#: modules/user-groups/user-groups.php:664
+#: modules/user-groups/user-groups.php:711
 msgid "The description is primarily for administrative use, to give you some context on what the user group is to be used for."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:669
-#: modules/user-groups/user-groups.php:1414
+#: modules/user-groups/user-groups.php:667
+#: modules/user-groups/user-groups.php:1417
 msgid "Update User Group"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:682
+#: modules/user-groups/user-groups.php:680
 msgid "Are you sure you want to delete the user group?"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:718
+#: modules/user-groups/user-groups.php:715
 msgid "Add New User Group"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:750
+#: modules/user-groups/user-groups.php:747
 msgid "Usergroups"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:752
+#: modules/user-groups/user-groups.php:749
 msgid "Select the user groups that you would like to be a part of:"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:754
+#: modules/user-groups/user-groups.php:751
 msgid "Select the user groups that this user should be a part of:"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:864
+#: modules/user-groups/user-groups.php:863
 msgid "No user groups were found."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:864
+#: modules/user-groups/user-groups.php:863
 msgid "Add a new user group. Opens new window."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:864
+#: modules/user-groups/user-groups.php:863
 msgid "Add a User Group"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:980
+#: modules/user-groups/user-groups.php:979
 msgid "New user groups must have a name"
 msgstr ""
 
-#: modules/user-groups/user-groups.php:1071
+#: modules/user-groups/user-groups.php:1070
 msgid "Invalid users variable. Should be array."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:1268
+#: modules/user-groups/user-groups.php:1271
 msgid "No user groups found."
 msgstr ""
 
-#: modules/user-groups/user-groups.php:1283
+#: modules/user-groups/user-groups.php:1286
 msgid "Users in Group"
 msgstr ""
 
-#. translators: accessibility text
 #. translators: %d: number of weeks
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:80
 #, js-format
 msgid "Backwards %d weeks"
 msgstr ""
 
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:85
 msgid "«"
 msgstr ""
 
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:92
 msgid "Backwards 1 week"
 msgstr ""
 
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:95
 msgid "‹"
 msgstr ""
 
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:108
 msgid "Forward 1 week"
 msgstr ""
 
-#: build/calendar-react.js:3
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:111
 msgid "›"
 msgstr ""
 
 #. translators: %d: number of weeks
-#: build/calendar-react.js:4
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:120
 #, js-format
 msgid "Forward %d weeks"
 msgstr ""
 
-#: build/calendar-react.js:4
 #: modules/calendar/lib/react/calendar-date-change-buttons/index.js:125
 msgid "»"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar-filters/index.js:150
 msgid "Apply"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:71
 msgid "All statuses"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:80
 msgid "Open user menu"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:81
 msgid "Close user menu"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:82
 msgid "Clear user selection"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:83
 msgid "Select a user"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:91
 msgid "Category"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:92
 msgid "Open category menu"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:93
 msgid "Close category menu"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:94
 msgid "Clear category selection"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:95
 msgid "Select a category"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:110
 msgid "All types"
 msgstr ""
 
-#: build/calendar-react.js:11
 #: modules/calendar/lib/react/calendar.react.js:120
 msgid "Number of weeks"
 msgstr ""
 
-#: build/custom-status-block.js:1
 #: modules/custom-status/lib/custom-status-block.js:104
 msgid "Extended Post Status"
 msgstr ""
 
-#: build/custom-status-block.js:1
 #: modules/custom-status/lib/custom-status-block.js:105
 msgid "Extended Post Status Disabled."
 msgstr ""
 
-#: build/custom-status-block.js:1
 #: modules/custom-status/lib/custom-status-block.js:121
 msgid "Note: this will override all status settings above."
 msgstr ""
 
-#: build/custom-status-block.js:1
 #: modules/custom-status/lib/custom-status-block.js:122
 msgid "To select a custom status, please unpublish the content first."
 msgstr ""

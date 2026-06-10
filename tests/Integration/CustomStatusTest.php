@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use EF_Custom_Status;
 use WP_REST_Request;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
@@ -22,7 +21,15 @@ class CustomStatusTest extends TestCase {
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$admin_user_id = $factory->user->create( array( 'role' => 'administrator' ) );
 
-		self::$ef_custom_status = new EF_Custom_Status();
+		// Use the singleton the plugin bootstraps, rather than a second, separately
+		// constructed instance. A parallel instance never has its module options loaded
+		// (EditFlow::load_module_options() only runs for the registered singleton), so its
+		// custom-status filters silently bail and the slug-emptying behaviour is not applied.
+		// On WordPress 7.0 the resulting double registration also lets core mint a slug for
+		// custom-status posts. init() is idempotent for the singleton's hooks and re-runs the
+		// status registration now that install() has seeded the default terms.
+		global $edit_flow;
+		self::$ef_custom_status = $edit_flow->custom_status;
 		self::$ef_custom_status->install();
 		self::$ef_custom_status->init();
 	}
@@ -44,6 +51,32 @@ class CustomStatusTest extends TestCase {
 		$pagenow = 'index.php';
 
 		parent::tearDown();
+	}
+
+	/**
+	 * A custom status name must be escaped when rendered into the list table's
+	 * title attribute, so it cannot break out and inject markup.
+	 */
+	function test_list_table_column_escapes_status_name() {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		set_current_screen( 'edit-post' );
+
+		$table = new \EF_Custom_Status_List_Table();
+
+		$item = (object) array(
+			'term_id'  => 0,
+			'name'     => 'Bad" onmouseover=alert(1) x="',
+			'slug'     => 'bad-status',
+			'position' => 0,
+		);
+
+		$output = $table->column_default( $item, 'post' );
+
+		// The status name's double quote must be entity-encoded so it cannot close
+		// the title attribute and turn the rest of the value into tag attributes.
+		$this->assertStringContainsString( 'Bad&quot;', $output );
+		$this->assertStringNotContainsString( 'Bad" onmouseover', $output );
+		$this->assertStringContainsString( 'href="', $output );
 	}
 
 	/**
@@ -867,5 +900,224 @@ class CustomStatusTest extends TestCase {
 		$update_post = get_post( $update_data['id'] );
 
 		$this->assertEquals( $custom_post_name, $update_post->post_name );
+	}
+
+	/**
+	 * The status-migration allow-list must cover every core status and every registered
+	 * custom status, while rejecting anything that is not a real status. This is what the
+	 * migration handler validates the target against before reassigning posts.
+	 */
+	public function test_get_all_valid_statuses_includes_core_and_custom() {
+		$valid = self::$ef_custom_status->get_all_valid_statuses();
+
+		foreach ( array( 'publish', 'pending', 'draft', 'private', 'trash', 'future' ) as $core_status ) {
+			$this->assertContains( $core_status, $valid, "Core status '$core_status' should be a valid target." );
+		}
+
+		// 'pitch' is one of the default custom statuses installed in wpSetUpBeforeClass().
+		$this->assertContains( 'pitch', $valid, 'A registered custom status should be a valid target.' );
+
+		$this->assertNotContains( 'definitely-not-a-status', $valid, 'An unknown status must not be a valid target.' );
+	}
+
+	/**
+	 * The publish-timestamp workaround writes directly to the posts table, so it must not act
+	 * on a post.php request that lacks a valid edit nonce; otherwise a forged request could
+	 * flip another user's post to 'pending'. A properly nonced request still works.
+	 */
+	public function test_check_timestamp_on_publish_requires_valid_nonce() {
+		global $pagenow, $typenow, $wpdb;
+
+		wp_set_current_user( self::$admin_user_id );
+
+		$pagenow = 'post.php';
+		$typenow = 'post';
+
+		// Custom statuses must be active for this post type, or the workaround bails early.
+		if ( ! is_object( self::$ef_custom_status->module->options ) ) {
+			self::$ef_custom_status->module->options = new \stdClass();
+		}
+		self::$ef_custom_status->module->options->post_types = array(
+			'post' => 'on',
+			'page' => 'on',
+		);
+
+		$post_id = self::factory()->post->create( array(
+			'post_status' => 'draft',
+			'post_author' => self::$admin_user_id,
+		) );
+
+		// The workaround only fires when post_date_gmt is unset, so guarantee that state.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test setup.
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+
+		$_POST['publish'] = '1';
+		$_POST['post_ID'] = (string) $post_id;
+
+		// Without a nonce the handler must leave the post untouched.
+		unset( $_POST['_wpnonce'] );
+		self::$ef_custom_status->check_timestamp_on_publish();
+		$this->assertSame( 'draft', get_post_status( $post_id ), 'A request with no nonce must not change the status.' );
+
+		// With the correct post-edit nonce the workaround applies as before.
+		$_POST['_wpnonce'] = wp_create_nonce( 'update-post_' . $post_id );
+		self::$ef_custom_status->check_timestamp_on_publish();
+		$this->assertSame( 'pending', get_post_status( $post_id ), 'A correctly nonced request should apply the workaround.' );
+
+		$_POST = array();
+	}
+
+	/**
+	 * Capture the page template hierarchy candidates for the current main query.
+	 *
+	 * @return string[] The ordered list of candidate template file names.
+	 */
+	private function capture_page_template_candidates() {
+		$candidates = array();
+		$callback   = function ( $templates ) use ( &$candidates ) {
+			$candidates = $templates;
+			return $templates;
+		};
+		add_filter( 'page_template_hierarchy', $callback, 99 );
+		get_page_template();
+		remove_filter( 'page_template_hierarchy', $callback, 99 );
+
+		return $candidates;
+	}
+
+	/**
+	 * The fix_preview_template() method should be hooked to template_redirect.
+	 */
+	public function test_fix_preview_template_is_registered() {
+		$this->assertNotFalse(
+			has_action( 'template_redirect', array( self::$ef_custom_status, 'fix_preview_template' ) )
+		);
+	}
+
+	/**
+	 * When previewing a custom-status page, the slug-specific template should be a
+	 * candidate even though the stored post_name is empty.
+	 */
+	public function test_fix_preview_template_adds_slug_template_for_custom_status_page() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$id = self::factory()->post->create(
+			array(
+				'post_title'  => 'My Test Page',
+				'post_type'   => 'page',
+				'post_status' => 'pitch',
+				'post_author' => self::$admin_user_id,
+			)
+		);
+
+		// Edit Flow keeps the slug empty for custom statuses.
+		$this->assertEmpty( get_post( $id )->post_name );
+
+		$this->go_to( '/?page_id=' . $id . '&preview_id=' . $id );
+
+		// Without the fix, only page-{id}.php and page.php would be candidates.
+		$this->assertNotContains( 'page-my-test-page.php', $this->capture_page_template_candidates() );
+
+		self::$ef_custom_status->fix_preview_template();
+
+		$this->assertContains( 'page-my-test-page.php', $this->capture_page_template_candidates() );
+	}
+
+	/**
+	 * The fix should also help the "draft" custom status, where the empty slug is
+	 * actually WordPress core's own behaviour for draft/pending posts.
+	 */
+	public function test_fix_preview_template_adds_slug_template_for_draft_status_page() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$id = self::factory()->post->create(
+			array(
+				'post_title'  => 'My Test Page',
+				'post_type'   => 'page',
+				'post_status' => 'draft',
+				'post_author' => self::$admin_user_id,
+			)
+		);
+
+		$this->assertEmpty( get_post( $id )->post_name );
+
+		$this->go_to( '/?page_id=' . $id . '&preview_id=' . $id );
+		self::$ef_custom_status->fix_preview_template();
+
+		$this->assertContains( 'page-my-test-page.php', $this->capture_page_template_candidates() );
+	}
+
+	/**
+	 * The synthesised slug is in-memory only and must never be persisted.
+	 */
+	public function test_fix_preview_template_does_not_persist_slug() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$id = self::factory()->post->create(
+			array(
+				'post_title'  => 'My Test Page',
+				'post_type'   => 'page',
+				'post_status' => 'pitch',
+				'post_author' => self::$admin_user_id,
+			)
+		);
+
+		$this->go_to( '/?page_id=' . $id . '&preview_id=' . $id );
+		self::$ef_custom_status->fix_preview_template();
+
+		// The in-memory queried object carries the synthesised slug...
+		$this->assertSame( 'my-test-page', get_queried_object()->post_name );
+
+		// ...but nothing is written to the database.
+		clean_post_cache( $id );
+		$this->assertEmpty( get_post( $id )->post_name );
+	}
+
+	/**
+	 * A published page already has a real slug and must be left untouched.
+	 */
+	public function test_fix_preview_template_leaves_published_page_untouched() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$id = self::factory()->post->create(
+			array(
+				'post_title'  => 'My Test Page',
+				'post_name'   => 'a-real-slug',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_author' => self::$admin_user_id,
+			)
+		);
+
+		$this->go_to( '/?page_id=' . $id );
+		self::$ef_custom_status->fix_preview_template();
+
+		$this->assertSame( 'a-real-slug', get_queried_object()->post_name );
+	}
+
+	/**
+	 * The ef_preview_template_post_name filter can return '' to opt out.
+	 */
+	public function test_fix_preview_template_respects_opt_out_filter() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$id = self::factory()->post->create(
+			array(
+				'post_title'  => 'My Test Page',
+				'post_type'   => 'page',
+				'post_status' => 'pitch',
+				'post_author' => self::$admin_user_id,
+			)
+		);
+
+		$this->go_to( '/?page_id=' . $id . '&preview_id=' . $id );
+
+		add_filter( 'ef_preview_template_post_name', '__return_empty_string' );
+		self::$ef_custom_status->fix_preview_template();
+		remove_filter( 'ef_preview_template_post_name', '__return_empty_string' );
+
+		$this->assertEmpty( get_queried_object()->post_name );
+		$this->assertNotContains( 'page-my-test-page.php', $this->capture_page_template_candidates() );
 	}
 }

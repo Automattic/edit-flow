@@ -102,7 +102,7 @@ Keep the first line of your commit message brief. A quick explanation of your ch
 
 Not sure what to include your commit message? Take a look at the ["Description" section of the WordPress commit message documentation](https://make.wordpress.org/core/handbook/best-practices/commit-messages/#description). There is great advice for what should be included in when writing a clear, concise and relevant commit message.
 
-After you've commited, push to your fork and create a Pull Request on Github.
+After you've commited, push to your fork and create a Pull Request on GitHub.
 
 Extending Edit Flow
 ------
@@ -113,4 +113,4 @@ The [Edit Flow Support Forums](https://wordpress.org/support/plugin/edit-flow) o
 
 It's a great way to add functionality to existing Edit Flow installations without having to go through the process of patching Edit Flow core.
 
-(Props to Jetpack. These contributing guidelines were based on the [Contribute](https://jetpack.com/contribute/#contribute) section on the Jetpack website and the [Contributing](https://github.com/Automattic/jetpack/blob/master/.github/CONTRIBUTING.md) section in the [Jetpack Github repository](https://github.com/Automattic/jetpack/))
+(Props to Jetpack. These contributing guidelines were based on the [Contribute](https://jetpack.com/contribute/#contribute) section on the Jetpack website and the [Contributing](https://github.com/Automattic/jetpack/blob/master/.github/CONTRIBUTING.md) section in the [Jetpack GitHub repository](https://github.com/Automattic/jetpack/))

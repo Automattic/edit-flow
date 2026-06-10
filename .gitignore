@@ -11,5 +11,9 @@ dist/
 .phpunit.cache/
 artifacts/
 
+# Tool caches
+.phpcs-cache
+.eslintcache
+
 # Local wp-env overrides
 .wp-env.override.json

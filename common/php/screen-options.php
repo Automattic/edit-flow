@@ -173,6 +173,13 @@ if ( ! class_exists( 'wsScreenOptions10' ) ) :
 			// Basic security check.
 			check_ajax_referer( 'save_settings-' . $id, '_wpnonce-' . $id );
 
+			// Baseline capability gate (defence-in-depth). Edit Flow's Screen Options panels
+			// are editorial admin features; each registered save_callback should additionally
+			// enforce its own specific authorisation.
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				wp_die( '0' );
+			}
+
 			// Hand the request to the registered callback, if any
 			if ( ! isset( $this->registered_panels[ $id ] ) ) {
 				wp_die( '0' );

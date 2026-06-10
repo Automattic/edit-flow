@@ -1,6 +1,6 @@
 {
   "name": "edit-flow",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "description": "Edit Flow",
   "directories": {
     "test": "tests"
@@ -36,28 +36,28 @@
   "homepage": "https://github.com/Automattic/Edit-Flow#readme",
   "devDependencies": {
     "@automattic/eslint-plugin-wpvip": "^1.2.1",
-    "@babel/preset-react": "^7.28.5",
-    "@playwright/test": "^1.57.0",
+    "@babel/preset-react": "^7.29.7",
+    "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@wordpress/components": "^32.6.0",
-    "@wordpress/data": "^10.36.0",
-    "@wordpress/e2e-test-utils-playwright": "^1.44.0",
-    "@wordpress/env": "^11.4.0",
+    "@wordpress/components": "^33.1.0",
+    "@wordpress/data": "^10.47.0",
+    "@wordpress/e2e-test-utils-playwright": "~1.46.0",
+    "@wordpress/env": "^11.7.0",
     "@wordpress/i18n": "^6.9.0",
-    "@wordpress/jest-console": "^8.44.0",
-    "@wordpress/jest-preset-default": "^12.44.0",
-    "@wordpress/plugins": "^7.44.0",
-    "@wordpress/scripts": "^32.0.0",
-    "@wordpress/url": "^4.44.0",
+    "@wordpress/jest-console": "^8.47.0",
+    "@wordpress/jest-preset-default": "^12.47.0",
+    "@wordpress/plugins": "^7.46.0",
+    "@wordpress/scripts": "^32.3.0",
+    "@wordpress/url": "^4.47.0",
     "eslint": "^9.7.0",
     "prettier": "npm:wp-prettier@2.8.5",
-    "webpack-cli": "^7.0.2"
+    "webpack-cli": "^7.0.3"
   },
   "dependencies": {
     "classnames": "^2.5.1",
-    "downshift": "^9.3.2",
+    "downshift": "^9.3.6",
     "match-sorter": "^8.3.0",
     "prop-types": "^15.8.1"
   }

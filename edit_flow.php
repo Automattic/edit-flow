@@ -4,7 +4,7 @@
  * Plugin URI: http://editflow.org/
  * Description: Remixing the WordPress admin for better editorial workflow options.
  * Author: Daniel Bachhuber, Scott Bressler, Mohammad Jangda, Automattic, and others
- * Version: 0.10.4
+ * Version: 0.11.0
  * Requires at least: 6.4
  * Requires PHP: 7.4
  * License: GPLv2 or later
@@ -14,6 +14,8 @@
  *
  * @package EditFlow
  */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Print admin notice regarding having an old version of PHP.
@@ -34,7 +36,7 @@ if ( version_compare( phpversion(), '7.4', '<' ) ) {
 }
 
 // Define constants.
-define( 'EDIT_FLOW_VERSION', '0.10.4' );
+define( 'EDIT_FLOW_VERSION', '0.11.0' );
 define( 'EDIT_FLOW_ROOT', __DIR__ );
 define( 'EDIT_FLOW_FILE_PATH', EDIT_FLOW_ROOT . '/' . basename( __FILE__ ) );
 define( 'EDIT_FLOW_URL', plugins_url( '/', __FILE__ ) );
@@ -296,7 +298,7 @@ class edit_flow {
 			'messages'             => array(
 				'settings-updated'    => __( 'Settings updated.', 'edit-flow' ),
 				'form-error'          => __( 'Please correct your form errors below and try again.', 'edit-flow' ),
-				'nonce-failed'        => __( 'Cheatin&#8217; uh?', 'edit-flow' ),
+				'nonce-failed'        => __( 'Cheatin’ uh?', 'edit-flow' ),
 				'invalid-permissions' => __( 'You do not have necessary permissions to complete this action.', 'edit-flow' ),
 				'missing-post'        => __( 'Post does not exist', 'edit-flow' ),
 			),

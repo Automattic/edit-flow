@@ -83,7 +83,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 					'title'   => __( 'Overview', 'edit-flow' ),
 					'content' => __( '<p>Edit Flow’s custom statuses allow you to define the most important stages of your editorial workflow. Out of the box, WordPress only offers “Draft” and “Pending Review” as post states. With custom statuses, you can create your own post states like “In Progress”, “Pitch”, or “Waiting for Edit” and keep or delete the originals. You can also drag and drop statuses to set the best order for your workflow.</p><p>Custom statuses are fully integrated into the rest of Edit Flow and the WordPress admin. On the calendar and story budget, you can filter your view to see only posts of a specific post state. Furthermore, email notifications can be sent to a specific group of users when a post changes state.</p>', 'edit-flow' ),
 				],
-				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="http://editflow.org/features/custom-statuses/">Custom Status Documentation</a></p><p><a href="http://wordpress.org/tags/edit-flow?forum_id=10">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on Github</a></p>', 'edit-flow' ),
+				'settings_help_sidebar' => __( '<p><strong>For more information:</strong></p><p><a href="https://editflow.org/features/custom-statuses/">Custom Status Documentation</a></p><p><a href="https://wordpress.org/support/plugin/edit-flow/">Edit Flow Forum</a></p><p><a href="https://github.com/Automattic/Edit-Flow">Edit Flow on GitHub</a></p>', 'edit-flow' ),
 			];
 			$this->module = EditFlow()->register_module( 'custom_status', $args );
 		}
@@ -143,6 +143,7 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			add_filter( 'page_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
 			add_filter( 'post_type_link', [ $this, 'fix_preview_link_part_two' ], 10, 3 );
 			add_filter( 'preview_post_link', [ $this, 'fix_preview_link_part_three' ], 11, 2 );
+			add_action( 'template_redirect', [ $this, 'fix_preview_template' ] );
 			add_filter( 'get_sample_permalink', [ $this, 'fix_get_sample_permalink' ], 10, 5 );
 			add_filter( 'get_sample_permalink_html', [ $this, 'fix_get_sample_permalink_html' ], 10, 5 );
 			add_filter( 'post_row_actions', [ $this, 'fix_post_row_actions' ], 10, 2 );
@@ -805,6 +806,19 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		/**
+		 * Get every status slug a post may validly be assigned: the core statuses plus all
+		 * registered custom statuses. Used to validate migration/reassignment targets.
+		 *
+		 * @return string[] Valid status slugs.
+		 */
+		public function get_all_valid_statuses() {
+			$core_statuses = [ 'publish', 'pending', 'draft', 'private', 'trash', 'future' ];
+			$custom_slugs  = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+
+			return array_values( array_unique( array_merge( $core_statuses, $custom_slugs ) ) );
+		}
+
+		/**
 		 * Display our custom post statuses in post listings when needed.
 		 *
 		 * @param array   $post_states An array of post display states.
@@ -904,31 +918,30 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			 * - Name is required and can't conflict with an existing name or slug.
 			 * - Description is optional.
 			 */
-			$_REQUEST['form-errors'] = [];
+			EditFlow()->settings->form_errors = [];
 			// Check if name field was filled in.
 			if ( empty( $status_name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the status', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the status', 'edit-flow' );
 			}
 			// Check that the name isn't numeric.
 			if ( 0 != (int) $status_name ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
 			}
 			// Check that the status name doesn't exceed 20 chars.
 			if ( strlen( $status_name ) > 20 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist as another term.
 			if ( term_exists( $status_slug, self::taxonomy_key ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the name is not restricted.
 			if ( $this->is_restricted_status( strtolower( $status_slug ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
 			}
 
 			// If there were any form errors, kick out and return them.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -989,37 +1002,36 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			 * - 'name' is a required field and can't conflict with existing name or slug.
 			 * - 'description' is optional.
 			 */
-			$_REQUEST['form-errors'] = [];
+			EditFlow()->settings->form_errors = [];
 			// Check if name field was filled in.
 			if ( empty( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a name for the status', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a name for the status', 'edit-flow' );
 			}
 			// Check that the name isn't numeric.
 			if ( is_numeric( $name ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Please enter a valid, non-numeric name for the status.', 'edit-flow' );
 			}
 			// Check that the status name doesn't exceed 20 chars.
 			if ( strlen( $name ) > 20 ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name cannot exceed 20 characters. Please try a shorter name.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist as another term.
 			$term_exists = term_exists( sanitize_title( $name ), self::taxonomy_key );
 			if ( $term_exists && isset( $term_exists['term_id'] ) && $term_exists['term_id'] != $existing_status->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing term. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the status doesn't already exist.
 			$search_status = $this->get_custom_status_by( 'slug', sanitize_title( $name ) );
 			if ( $search_status && $search_status->term_id != $existing_status->term_id ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name conflicts with existing status. Please choose another.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name conflicts with existing status. Please choose another.', 'edit-flow' );
 			}
 			// Check to make sure the name is not restricted.
 			if ( $this->is_restricted_status( strtolower( sanitize_title( $name ) ) ) ) {
-				$_REQUEST['form-errors']['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
+				EditFlow()->settings->form_errors['name'] = __( 'Status name is restricted. Please choose another name.', 'edit-flow' );
 			}
 
 			// Kick out if there are any errors.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( count( $_REQUEST['form-errors'] ) ) {
+			if ( count( EditFlow()->settings->form_errors ) ) {
 				$_REQUEST['error'] = 'form-error';
 				return;
 			}
@@ -1169,6 +1181,11 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				wp_die( esc_html__( 'Source and target status cannot be the same.', 'edit-flow' ) );
 			}
 
+			// The target must be a real status, otherwise posts would be stranded in a status that does not exist.
+			if ( ! in_array( $to_status, $this->get_all_valid_statuses(), true ) ) {
+				wp_die( esc_html__( 'Please select a valid target status.', 'edit-flow' ) );
+			}
+
 			// Perform the migration.
 			$this->reassign_post_status( $from_status, $to_status );
 
@@ -1242,15 +1259,18 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
 			if ( ! isset( $_POST['custom_status_sortable_nonce'] ) || ! wp_verify_nonce( $_POST['custom_status_sortable_nonce'], 'custom-status-sortable' ) ) {
 				$this->print_ajax_response( 'error', esc_html( $this->module->messages['nonce-failed'] ) );
+				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$this->print_ajax_response( 'error', esc_html( $this->module->messages['invalid-permissions'] ) );
+				return;
 			}
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Array is sanitized when processing each item.
 			if ( ! isset( $_POST['status_positions'] ) || ! is_array( $_POST['status_positions'] ) ) {
 				$this->print_ajax_response( 'error', esc_html__( 'Terms not set.', 'edit-flow' ) );
+				return;
 			}
 
 			// Update each custom status with its new position.
@@ -1476,13 +1496,23 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				return;
 			}
 
-			// Handles the transition to 'publish' on edit.php.
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Core request data checked for bulk edit transition.
+			// Handles the transition to 'publish' on edit.php (bulk edit).
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- The bulk-edit nonce is verified below before any write.
 			if ( isset( $edit_flow ) && 'edit.php' === $pagenow && isset( $_REQUEST['bulk_edit'] ) ) {
+				// Verify the bulk-edit nonce before touching any posts.
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+				if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-posts' ) ) {
+					return;
+				}
+
 				// For every post_id, set the post_status as 'pending' only when there's no timestamp set for $post_date_gmt.
 				if ( isset( $_REQUEST['post'] ) && isset( $_REQUEST['_status'] ) && 'publish' == $_REQUEST['_status'] ) {
 					$post_ids = array_map( 'intval', (array) $_REQUEST['post'] );
 					foreach ( $post_ids as $post_id ) {
+						// Only act on posts the current user is allowed to edit.
+						if ( ! current_user_can( 'edit_post', $post_id ) ) {
+							continue;
+						}
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
 						$wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
 							'ID'            => $post_id,
@@ -1495,31 +1525,36 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			// phpcs:enable
 
 			// Handles the transition to 'publish' on post.php.
-			// phpcs:disable WordPress.Security.NonceVerification.Missing -- Core post edit transition check.
-			if ( isset( $edit_flow ) && 'post.php' == $pagenow && isset( $_POST['publish'] ) ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- The post-edit nonce is verified below before any write.
+			if ( isset( $edit_flow ) && 'post.php' == $pagenow && isset( $_POST['publish'] ) && isset( $_POST['post_ID'] ) ) {
+				$post_id = (int) $_POST['post_ID'];
+
+				// Verify the post-edit nonce and capability before touching the post.
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+				if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-post_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+					return;
+				}
+
 				// Set the post_status as 'pending' only when there's no timestamp set for $post_date_gmt.
-				if ( isset( $_POST['post_ID'] ) ) {
-					$post_id = (int) $_POST['post_ID'];
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
-					$ret = $wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
-						'ID'            => $post_id,
-						'post_date_gmt' => '0000-00-00 00:00:00',
-					] );
-					clean_post_cache( $post_id );
-					foreach ( [ 'aa', 'mm', 'jj', 'hh', 'mn' ] as $timeunit ) {
-						if ( isset( $_POST[ $timeunit ] ) && ! empty( $_POST[ 'hidden_' . $timeunit ] ) && $_POST[ 'hidden_' . $timeunit ] != $_POST[ $timeunit ] ) {
-							$edit_date = '1';
-							break;
-						}
-					}
-					if ( $ret && empty( $edit_date ) ) {
-						add_filter( 'pre_post_date', [ $this, 'helper_timestamp_hack' ] );
-						add_filter( 'pre_post_date_gmt', [ $this, 'helper_timestamp_hack' ] );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Core workaround for custom status timestamp.
+				$ret = $wpdb->update( $wpdb->posts, [ 'post_status' => 'pending' ], [
+					'ID'            => $post_id,
+					'post_date_gmt' => '0000-00-00 00:00:00',
+				] );
+				clean_post_cache( $post_id );
+				foreach ( [ 'aa', 'mm', 'jj', 'hh', 'mn' ] as $timeunit ) {
+					if ( isset( $_POST[ $timeunit ] ) && ! empty( $_POST[ 'hidden_' . $timeunit ] ) && $_POST[ 'hidden_' . $timeunit ] != $_POST[ $timeunit ] ) {
+						$edit_date = '1';
+						break;
 					}
 				}
+				if ( $ret && empty( $edit_date ) ) {
+					add_filter( 'pre_post_date', [ $this, 'helper_timestamp_hack' ] );
+					add_filter( 'pre_post_date_gmt', [ $this, 'helper_timestamp_hack' ] );
+				}
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		/**
 		 * PHP < 5.3.x doesn't support anonymous functions.
@@ -1895,6 +1930,76 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		}
 
 		/**
+		 * Another hack! hack! hack! until core better supports custom statuses.
+		 *
+		 * Posts and pages with a custom status are kept with an empty `post_name`
+		 * (see `maybe_keep_post_name_empty()` and `fix_unique_post_slug()`). WordPress's
+		 * template hierarchy resolves slug-specific templates — `page-{slug}.php` and
+		 * `single-{post-type}-{slug}.php` — from `$post->post_name`, so an empty slug
+		 * silently degrades template selection when the post is previewed: only the
+		 * generic `page.php` / `single.php` fallback can match. The same empty slug also
+		 * breaks template-based conditional logic such as ACF location rules.
+		 *
+		 * Here we synthesise a slug from the title on the queried object in memory only,
+		 * for the duration of the preview request. Nothing is persisted: the stored
+		 * `post_name` stays empty, so none of the slug-emptying behaviour changes.
+		 *
+		 * @since 0.11.0
+		 *
+		 * @see https://github.com/Automattic/Edit-Flow/issues/933
+		 */
+		public function fix_preview_template() {
+			// Only singular requests resolve a slug-specific template from post_name.
+			if ( ! is_singular() ) {
+				return;
+			}
+
+			$post = get_queried_object();
+
+			// Nothing to do unless we have a titled post whose slug is empty.
+			if ( ! $post instanceof WP_Post
+			|| ! empty( $post->post_name )
+			|| empty( $post->post_title ) ) {
+				return;
+			}
+
+			// Only act on the pre-publish custom statuses and post types we support.
+			$status_slugs = wp_list_pluck( $this->get_custom_statuses(), 'slug' );
+			if ( ! in_array( $post->post_status, $status_slugs, true )
+			|| ! in_array( $post->post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
+				return;
+			}
+
+			/**
+			 * Filters the slug synthesised in memory for template selection while
+			 * previewing a custom-status post. Return an empty string to leave the
+			 * slug empty and disable this behaviour for the post.
+			 *
+			 * @since 0.11.0
+			 *
+			 * @param string  $post_name Slug derived from the post title.
+			 * @param WP_Post $post      The post being previewed.
+			 */
+			$post_name = apply_filters( 'ef_preview_template_post_name', sanitize_title( $post->post_title ), $post );
+
+			if ( '' === $post_name ) {
+				return;
+			}
+
+			// Set it on the queried object (used by the template hierarchy) and keep the
+			// loop post and global in sync for template tags and conditional logic.
+			$post->post_name = $post_name;
+
+			global $wp_query;
+			if ( isset( $wp_query->post ) && $wp_query->post instanceof WP_Post && $wp_query->post->ID === $post->ID ) {
+				$wp_query->post->post_name = $post_name;
+			}
+			if ( isset( $GLOBALS['post'] ) && $GLOBALS['post'] instanceof WP_Post && $GLOBALS['post']->ID === $post->ID ) {
+				$GLOBALS['post']->post_name = $post_name;
+			}
+		}
+
+		/**
 		 * Fix get_sample_permalink. Previously the 'editable_slug' filter was leveraged
 		 * to correct the sample permalink a user could edit on post.php. Since 4.4.40
 		 * the `get_sample_permalink` filter was added which allows greater flexibility in
@@ -2226,7 +2331,13 @@ class EF_Custom_Status_List_Table extends WP_List_Table {
 				// phpcs:ignore Squiz.PHP.CommentedOutCode.Found, Squiz.Commenting.InlineComment.InvalidEndChar -- Intentionally commented out caching line for future implementation.
 				// wp_cache_set( "ef_custom_status_count_$column_name", $post_count );
 			}
-			$output = sprintf( '<a title="See all %1$ss saved as \'%2$s\'" href="%3$s">%4$s</a>', $column_name, $item->name, $edit_flow->helpers->filter_posts_link( $item->slug, $column_name ), $post_count );
+			$output = sprintf(
+				'<a title="See all %1$ss saved as \'%2$s\'" href="%3$s">%4$s</a>',
+				esc_attr( $column_name ),
+				esc_attr( $item->name ),
+				esc_url( $edit_flow->helpers->filter_posts_link( $item->slug, $column_name ) ),
+				esc_html( $post_count )
+			);
 			return $output;
 		}
 	}

@@ -103,6 +103,92 @@ class ModuleTest extends TestCase {
 		set_current_screen( 'front' );
 	}
 
+	/**
+	 * The current user's checkbox must carry the marker class verbatim.
+	 *
+	 * Regression guard for PR #980: the class (and checked) attributes are
+	 * built as complete HTML strings, so running them through esc_attr()
+	 * entity-encodes the quotes and produces broken markup such as
+	 * `class=&quot;post_following_list-current_user&quot;`, which silently
+	 * drops the class the notifiedMessage() JS relies on.
+	 */
+	function test_users_select_form_outputs_current_user_class_unescaped() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$html = $this->get_users_select_form_html( array( self::$admin_user_id ) );
+
+		$this->assertStringContainsString(
+			'class="post_following_list-current_user"',
+			$html,
+			'Current user checkbox is missing the marker class.'
+		);
+		$this->assertStringNotContainsString(
+			'&quot;',
+			$html,
+			'Attributes were entity-encoded, indicating esc_attr() corruption.'
+		);
+	}
+
+	/**
+	 * A selected user's checkbox should render a working checked attribute.
+	 */
+	function test_users_select_form_marks_selected_user_checked() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$html = $this->get_users_select_form_html( array( self::$admin_user_id ) );
+
+		$this->assertMatchesRegularExpression(
+			'/checked=([\'"])checked\1/',
+			$html,
+			'Selected user checkbox is not marked as checked.'
+		);
+	}
+
+	/**
+	 * A legitimate encoded description (a base64'd serialized array) must decode back to
+	 * the original array, so the allowed_classes hardening does not regress normal storage.
+	 */
+	function test_get_unencoded_description_round_trips_array() {
+		$data = array(
+			'description' => "O'Brien & co <stuff>",
+			'position'    => 3,
+			'viewable'    => false,
+		);
+
+		$encoded = self::$EditFlowModule->get_encoded_description( $data );
+		$decoded = self::$EditFlowModule->get_unencoded_description( $encoded );
+
+		$this->assertSame( $data, $decoded, 'A legitimate encoded array should round-trip unchanged.' );
+	}
+
+	/**
+	 * A crafted term description containing a serialized object must never be instantiated as
+	 * that class: unserialisation here forbids objects, so PHP object injection cannot fire.
+	 */
+	function test_get_unencoded_description_blocks_object_injection() {
+		// A serialized stdClass object (O:8:"stdClass":0:{}) standing in for any gadget payload.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Building a hostile payload for the test.
+		$payload = base64_encode( 'O:8:"stdClass":0:{}' );
+
+		$decoded = self::$EditFlowModule->get_unencoded_description( $payload );
+
+		// allowed_classes => false turns any object into an inert __PHP_Incomplete_Class, so it is
+		// never a real instance of the named class. Without the hardening this would be a stdClass.
+		$this->assertNotInstanceOf( \stdClass::class, $decoded, 'A serialized object must not be instantiated as its class.' );
+	}
+
+	/**
+	 * Capture the echoed output of users_select_form().
+	 *
+	 * @param array $selected User IDs to mark as selected.
+	 * @return string Rendered HTML.
+	 */
+	private function get_users_select_form_html( array $selected ): string {
+		ob_start();
+		self::$EditFlowModule->users_select_form( $selected );
+		return (string) ob_get_clean();
+	}
+
 	public static function wpTearDownAfterClass() {
 		self::delete_user( self::$admin_user_id );
 	}
