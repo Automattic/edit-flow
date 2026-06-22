@@ -43,7 +43,7 @@ class CalendarEscapingTest extends TestCase {
 	/**
 	 * Edit link href must be wrapped in esc_url().
 	 *
-	 * esc_url() encodes raw & as the numeric entity &#038;. We inject a URL with
+	 * The esc_url() function encodes raw & as the numeric entity &#038;. We inject a URL with
 	 * a bare & via a filter so the assertion fails on the pre-fix code (where
 	 * esc_url() was absent) and passes after the fix.
 	 *
@@ -95,7 +95,7 @@ class CalendarEscapingTest extends TestCase {
 	/**
 	 * Published-post view link href must be wrapped in esc_url().
 	 *
-	 * get_permalink() returns a plain URL with raw & separators. Without esc_url()
+	 * The get_permalink() function returns a plain URL with raw & separators. Without esc_url()
 	 * a permalink containing & produces invalid HTML. The post_link filter lets us
 	 * inject such a URL and verify it gets encoded as &#038;.
 	 *
