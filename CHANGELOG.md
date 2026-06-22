@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-* fix: escape calendar item action link hrefs with esc_url() and link text with esc_html__() by @thisismyurl
+* Escape calendar item action link hrefs with esc_url() and link text with esc_html__() (props @thisismyurl)
 
 ## [0.11.0] - 2026-06-10
 
