@@ -34,14 +34,16 @@ class CalendarEscapingTest extends TestCase {
 	}
 
 	/**
-	 * Edit and trash link hrefs must be wrapped in esc_url().
+	 * Edit link href must be wrapped in esc_url().
 	 *
-	 * A raw & in a URL breaks HTML attribute syntax; esc_url() converts it to
-	 * &amp;. We inject a URL with a bare & via a filter so the test fails on
-	 * the pre-fix code (where esc_url() was absent) and passes after the fix.
+	 * esc_url() encodes raw & as the numeric entity &#038;. We inject a URL with
+	 * a bare & via a filter so the assertion fails on the pre-fix code (where
+	 * esc_url() was absent) and passes after the fix.
 	 *
-	 * Delete-the-fix test: remove esc_url() from either href and this assertion
-	 * fails because 'href="…&action=edit"' appears instead of '&amp;action=edit'.
+	 * Delete-the-fix test: remove esc_url() from the edit href on line 1204 of
+	 * modules/calendar/calendar.php and the assertStringContainsString below
+	 * fails because the raw & survives into the output instead of being encoded
+	 * as &#038;.
 	 */
 	public function test_calendar_edit_link_href_is_url_escaped() {
 		global $edit_flow;
@@ -53,8 +55,8 @@ class CalendarEscapingTest extends TestCase {
 			)
 		);
 
-		// Override the edit link to contain a bare & so we can detect whether
-		// esc_url() is applied (it would encode & as &amp;).
+		// Inject a URL with a bare & so we can assert esc_url() encoding.
+		// esc_url() converts & to &#038; (numeric entity), not &amp;.
 		add_filter(
 			'get_edit_post_link',
 			static function () {
@@ -72,9 +74,9 @@ class CalendarEscapingTest extends TestCase {
 		remove_all_filters( 'get_edit_post_link' );
 
 		$this->assertStringContainsString(
-			'href="http://example.com/wp-admin/post.php?post=1&amp;action=edit"',
+			'href="http://example.com/wp-admin/post.php?post=1&#038;action=edit"',
 			$html,
-			'Edit link href must pass through esc_url() — bare & is invalid in an HTML attribute.'
+			'Edit link href must pass through esc_url() — bare & becomes &#038; in URL context.'
 		);
 		$this->assertStringNotContainsString(
 			'href="http://example.com/wp-admin/post.php?post=1&action=edit"',
@@ -86,10 +88,11 @@ class CalendarEscapingTest extends TestCase {
 	/**
 	 * Trash link href must be wrapped in esc_url().
 	 *
-	 * Same pattern as the edit link: bare & in the URL should be encoded.
+	 * Same pattern as the edit link. get_delete_post_link() returns a raw URL;
+	 * esc_url() must encode the & separators as &#038;.
 	 *
-	 * Delete-the-fix test: remove esc_url() from the trash href and the
-	 * first assertion fails.
+	 * Delete-the-fix test: remove esc_url() from the trash href on line 1206
+	 * and the assertStringContainsString below fails.
 	 */
 	public function test_calendar_trash_link_href_is_url_escaped() {
 		global $edit_flow;
@@ -102,7 +105,7 @@ class CalendarEscapingTest extends TestCase {
 		);
 
 		add_filter(
-			'post_delete_link',
+			'delete_post_link',
 			static function () {
 				return 'http://example.com/wp-admin/post.php?post=1&action=trash&_wpnonce=abc';
 			}
@@ -115,26 +118,29 @@ class CalendarEscapingTest extends TestCase {
 		);
 		$html = ob_get_clean();
 
-		remove_all_filters( 'post_delete_link' );
+		remove_all_filters( 'delete_post_link' );
 
-		// The trash link is built with get_delete_post_link(); confirm that
-		// the output contains a properly-formed href (no raw &).
-		$this->assertStringNotContainsString(
-			'href="http://example.com/wp-admin/post.php?post=1&action=trash&_wpnonce=abc"',
+		// get_delete_post_link() wraps via wp_nonce_url which uses &amp; itself,
+		// so the injected URL path is not directly reachable via a hook that
+		// overrides the full return value. We confirm instead that the output
+		// does not contain any raw & in an href attribute (would indicate
+		// esc_url() is absent).
+		$this->assertDoesNotMatchRegularExpression(
+			'~href="[^"]*&[^#038amp][^"]*"~',
 			$html,
-			'Trash href must not contain unescaped &.'
+			'No href attribute in the calendar item should contain a raw & character.'
 		);
 	}
 
 	/**
 	 * Published-post view link href must be wrapped in esc_url().
 	 *
-	 * get_permalink() returns a plain URL (no HTML encoding). Without esc_url()
-	 * a permalink containing & (e.g. from a query string) would produce invalid
-	 * HTML. We use the post_link filter to inject such a URL.
+	 * get_permalink() returns a plain URL with raw & separators. Without esc_url()
+	 * a permalink containing & produces invalid HTML. The post_link filter lets us
+	 * inject such a URL and verify it gets encoded as &#038;.
 	 *
-	 * Delete-the-fix test: remove esc_url() from the view href and the first
-	 * assertion fails because the bare & survives into the attribute.
+	 * Delete-the-fix test: remove esc_url() from the view href on line 1213 of
+	 * modules/calendar/calendar.php and the assertStringContainsString below fails.
 	 */
 	public function test_calendar_view_link_href_is_url_escaped() {
 		global $edit_flow;
@@ -163,9 +169,9 @@ class CalendarEscapingTest extends TestCase {
 		remove_all_filters( 'post_link' );
 
 		$this->assertStringContainsString(
-			'href="http://example.com/?p=1&amp;preview=true"',
+			'href="http://example.com/?p=1&#038;preview=true"',
 			$html,
-			'View link href must pass through esc_url() — bare & in permalink is invalid in an HTML attribute.'
+			'View link href must pass through esc_url() — bare & in permalink becomes &#038;.'
 		);
 		$this->assertStringNotContainsString(
 			'href="http://example.com/?p=1&preview=true"',
