@@ -1201,20 +1201,20 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				$item_actions     = array();
 			if ( $this->current_user_can_modify_post( $post ) ) {
 				// Edit this post.
-				$item_actions['edit'] = '<a href="' . get_edit_post_link( $post->ID, true ) . '" title="' . esc_attr( __( 'Edit this item', 'edit-flow' ) ) . '">' . __( 'Edit', 'edit-flow' ) . '</a>';
+				$item_actions['edit'] = '<a href="' . esc_url( get_edit_post_link( $post->ID, true ) ) . '" title="' . esc_attr__( 'Edit this item', 'edit-flow' ) . '">' . esc_html__( 'Edit', 'edit-flow' ) . '</a>';
 				// Trash this post.
-				$item_actions['trash'] = '<a href="' . get_delete_post_link( $post->ID ) . '" title="' . esc_attr__( 'Trash this item', 'edit-flow' ) . '">' . __( 'Trash', 'edit-flow' ) . '</a>';
+				$item_actions['trash'] = '<a href="' . esc_url( get_delete_post_link( $post->ID ) ) . '" title="' . esc_attr__( 'Trash this item', 'edit-flow' ) . '">' . esc_html__( 'Trash', 'edit-flow' ) . '</a>';
 				// Preview/view this post.
 				if ( ! in_array( $post->post_status, $this->published_statuses ) ) {
 					/* translators: %s: post title */
-					$item_actions['view'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" rel="permalink">' . __( 'Preview', 'edit-flow' ) . '</a>';
+					$item_actions['view'] = '<a href="' . esc_url( apply_filters( 'preview_post_link', add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ), $post ) ) . '" title="' . esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" rel="permalink">' . esc_html__( 'Preview', 'edit-flow' ) . '</a>';
 				} elseif ( 'trash' != $post->post_status ) {
 					/* translators: %s: post title */
-					$item_actions['view'] = '<a href="' . get_permalink( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" rel="permalink">' . __( 'View', 'edit-flow' ) . '</a>';
+					$item_actions['view'] = '<a href="' . esc_url( get_permalink( $post->ID ) ) . '" title="' . esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" rel="permalink">' . esc_html__( 'View', 'edit-flow' ) . '</a>';
 				}
 				// Save metadata.
 				/* translators: %s: post title */
-				$item_actions['save hidden'] = '<a href="#savemetadata" id="save-editorial-metadata" class="post-' . esc_attr( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'Save &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" >' . __( 'Save', 'edit-flow' ) . '</a>';
+				$item_actions['save hidden'] = '<a href="#savemetadata" id="save-editorial-metadata" class="post-' . esc_attr( $post->ID ) . '" title="' . esc_attr( sprintf( __( 'Save &#8220;%s&#8221;', 'edit-flow' ), $post->post_title ) ) . '" >' . esc_html__( 'Save', 'edit-flow' ) . '</a>';
 			}
 				// Allow other plugins to add actions.
 				$item_actions = apply_filters( 'ef_calendar_item_actions', $item_actions, $post->ID );
