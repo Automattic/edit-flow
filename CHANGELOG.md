@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - TBD
+
+### Security
+
+* fix: escape calendar item action link hrefs with esc_url() and link text with esc_html__() by @thisismyurl
+
 ## [0.11.0] - 2026-06-10
 
 This release completes the security-review remediation begun in 0.10.4. It resolves the remaining issues from a full audit of the plugin's authenticated code paths — the headline stored XSS in the editorial-metadata location field, two information-disclosure issues (the iCal feed and the Story Budget), and a long tail of defence-in-depth hardening across access control, input handling, deserialisation, output escaping, and client-side code. None are known to be exploited in the wild, but all users are encouraged to update.
