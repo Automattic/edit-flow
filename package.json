@@ -7,6 +7,7 @@
   },
   "overrides": {
     "@automattic/eslint-plugin-wpvip": {
+      "prettier": "npm:wp-prettier@3.0.3",
       "eslint-plugin-prettier": {
         "prettier": "npm:wp-prettier@3.0.3"
       }
@@ -52,7 +53,7 @@
     "@wordpress/scripts": "^32.3.0",
     "@wordpress/url": "^4.47.0",
     "eslint": "^9.7.0",
-    "prettier": "npm:wp-prettier@2.8.5",
+    "prettier": "npm:wp-prettier@3.0.3",
     "webpack-cli": "^7.0.3"
   },
   "dependencies": {
