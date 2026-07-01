@@ -54,7 +54,7 @@
     "@wordpress/url": "^4.48.1",
     "eslint": "^9.7.0",
     "prettier": "npm:wp-prettier@3.0.3",
-    "webpack-cli": "^7.0.3"
+    "webpack-cli": "^7.1.0"
   },
   "dependencies": {
     "classnames": "^2.5.1",
