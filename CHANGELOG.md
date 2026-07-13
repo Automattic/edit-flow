@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Security
 
 * Escape calendar item action link hrefs with esc_url() and link text with esc_html__() (props @thisismyurl)
+* Escape module short-description link hrefs in the Calendar and Story Budget registrations with esc_url() (props @thisismyurl)
 
 ## [0.11.0] - 2026-06-10
 

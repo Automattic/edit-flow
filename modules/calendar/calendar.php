@@ -107,7 +107,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$args         = array(
 				'title'                 => __( 'Calendar', 'edit-flow' ),
 				/* translators: %s: URL to the calendar page */
-				'short_description'     => sprintf( __( 'View upcoming content in a <a href="%s">customizable calendar</a>.', 'edit-flow' ), admin_url( 'index.php?page=calendar' ) ),
+				'short_description'     => sprintf( __( 'View upcoming content in a <a href="%s">customizable calendar</a>.', 'edit-flow' ), esc_url( admin_url( 'index.php?page=calendar' ) ) ),
 				'extended_description'  => __( 'Edit Flow’s calendar lets you see your posts over a customizable date range. Filter by status or click on the post title to see its details. Drag and drop posts between days to change their publication date.', 'edit-flow' ),
 				'module_url'            => $this->module_url,
 				'img_url'               => $this->module_url . 'lib/calendar_s128.png',
