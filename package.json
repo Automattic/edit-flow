@@ -37,7 +37,7 @@
   "homepage": "https://github.com/Automattic/Edit-Flow#readme",
   "devDependencies": {
     "@automattic/eslint-plugin-wpvip": "^1.3.0",
-    "@babel/preset-react": "^7.29.7",
+    "@babel/preset-react": "^8.0.1",
     "@playwright/test": "^1.61.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
