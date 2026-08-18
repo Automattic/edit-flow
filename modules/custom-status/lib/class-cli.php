@@ -146,6 +146,7 @@ class EF_Custom_Status_CLI extends WP_CLI_Command {
 		// Get posts with the source status.
 		$query_args = [
 			'post_status'    => $from_status,
+			// phpcs:ignore WordPressVIPMinimum.Performance.NoPaging.posts_per_page_posts_per_page -- One-off WP-CLI migration fetching IDs only; pagination is not applicable in this context.
 			'posts_per_page' => -1,
 			'fields'         => 'ids',
 		];

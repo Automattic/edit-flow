@@ -1,0 +1,42 @@
+name: Update WordPress.org assets and readme
+
+# Pushes the readme and the .wordpress-org assets (icons, banners, screenshots)
+# to the plugin's SVN trunk without cutting a new release. WordPress.org reads
+# "Tested up to", "Requires at least" and "Requires PHP" from trunk, so this is
+# how those compatibility headers are refreshed between releases. Run it manually
+# from the Actions tab after merging a readme or asset change to the default branch.
+on:
+  workflow_dispatch:
+
+# Workflow-level permissions set to none; jobs declare their own minimal permissions
+permissions: {}
+
+# Never interrupt an in-flight SVN commit
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update readme and assets on WordPress.org
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # Only needs to read the repository to copy the readme and assets
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Update readme and assets
+        uses: 10up/action-wordpress-plugin-asset-update@2480306f6f693672726d08b5917ea114cb2825f7 # v2.2.0
+        env:
+          SLUG: edit-flow
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          # This plugin's readme is Markdown (README.md), not the default readme.txt.
+          README_NAME: README.md
+          # Only sync the readme and assets; never re-sync the plugin code to trunk.
+          IGNORE_OTHER_FILES: true
