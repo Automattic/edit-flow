@@ -197,6 +197,63 @@ class EditorialMetadataTest extends TestCase {
 	}
 
 	/**
+	 * Editorial metadata must not leak to unauthorised REST readers.
+	 *
+	 * Registering show_in_rest lets Gutenberg save the fields, but it also exposes the values
+	 * on read to anyone who can read the post, and a published post is public. A
+	 * rest_prepare_{post_type} filter strips the fields for readers who cannot edit the post,
+	 * while editors still receive them so the block editor keeps working.
+	 */
+	function test_rest_read_hides_editorial_metadata_from_unauthorised_users() {
+		global $edit_flow;
+
+		$em = $edit_flow->editorial_metadata;
+
+		// Ensure the module reports a post type so REST meta and the read filter apply to it.
+		if ( ! isset( $em->module->options ) || ! is_object( $em->module->options ) ) {
+			$em->module->options = new \stdClass();
+		}
+		$em->module->options->post_types = array( 'post' => 'on' );
+
+		// Register the write-path meta (show_in_rest) and the read-path filter, as they run at init.
+		$register = new \ReflectionMethod( $em, 'register_metadata_for_rest_api' );
+		$register->setAccessible( true );
+		$register->invoke( $em );
+		$em->register_rest_api_filters();
+
+		$term     = $em->get_editorial_metadata_term_by( 'slug', 'assignment' ); // type: paragraph.
+		$meta_key = $em->get_postmeta_key( $term );
+		$secret   = 'Source is Jane Roe, mobile 07700 900123.';
+
+		$post_id = self::factory()->post->create(
+			array(
+				'post_status' => 'publish',
+				'post_author' => self::$admin_user_id,
+				'post_title'  => 'Public story',
+			)
+		);
+		update_post_meta( $post_id, $meta_key, $secret );
+
+		// Anonymous read must not expose the field.
+		wp_set_current_user( 0 );
+		$request  = new \WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', $post_id ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Published post should be readable.' );
+		$this->assertArrayNotHasKey( $meta_key, $data['meta'], 'Editorial metadata must not be exposed to anonymous readers.' );
+
+		// An editor must still receive the field so the block editor keeps working.
+		wp_set_current_user( self::$admin_user_id );
+		$request  = new \WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', $post_id ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( $meta_key, $data['meta'], 'Editors must still receive editorial metadata over REST.' );
+		$this->assertSame( $secret, $data['meta'][ $meta_key ], 'Editors must receive the stored editorial metadata value.' );
+	}
+
+	/**
 	 * Renaming a term to a name already used by ANOTHER term must report a conflict. This guards
 	 * the strict term_exists() comparison so it keeps detecting genuine name collisions.
 	 */
