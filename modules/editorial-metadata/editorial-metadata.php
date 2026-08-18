@@ -105,6 +105,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 			// Register post meta for REST API support (enables Gutenberg saving).
 			$this->register_metadata_for_rest_api();
 
+			// Hide editorial metadata from REST reads for users who cannot edit the post.
+			add_action( 'rest_api_init', array( $this, 'register_rest_api_filters' ) );
+
 			// Anything that needs to happen in the admin.
 			add_action( 'admin_init', array( $this, 'action_admin_init' ) );
 
@@ -401,6 +404,52 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 					);
 				}
 			}
+		}
+
+		/**
+		 * Register REST response filters that hide editorial metadata from unauthorised readers.
+		 *
+		 * The write-path registration sets show_in_rest so Gutenberg can save the fields, but
+		 * show_in_rest also exposes the values on read to anyone who can read the post, and a
+		 * published post is public. Editorial metadata is internal newsroom data, so a
+		 * rest_prepare_{post_type} filter strips it from responses for readers who cannot edit the
+		 * post. Registration is gated on the module's supported post types, mirroring the write path.
+		 */
+		public function register_rest_api_filters() {
+			$supported_post_types = $this->get_post_types_for_module( $this->module );
+			foreach ( $supported_post_types as $post_type ) {
+				add_filter( "rest_prepare_{$post_type}", array( $this, 'filter_rest_editorial_metadata' ), 10, 2 );
+			}
+		}
+
+		/**
+		 * Remove editorial metadata keys from a REST response for readers who cannot edit the post.
+		 *
+		 * The auth_callback registered with the meta only governs writes; core exposes show_in_rest
+		 * meta on read to anyone who can read the object. The capability check is per-post so the
+		 * collection endpoint, which returns many posts in one response, is covered too.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param WP_Post          $post     The post being prepared for the response.
+		 * @return WP_REST_Response The response with editorial metadata stripped where unauthorised.
+		 */
+		public function filter_rest_editorial_metadata( $response, $post ) {
+			if ( current_user_can( 'edit_post', $post->ID ) ) {
+				return $response;
+			}
+
+			$data = $response->get_data();
+			if ( empty( $data['meta'] ) || ! is_array( $data['meta'] ) ) {
+				return $response;
+			}
+
+			foreach ( $this->get_editorial_metadata_terms() as $term ) {
+				unset( $data['meta'][ $this->get_postmeta_key( $term ) ] );
+			}
+
+			$response->set_data( $data );
+
+			return $response;
 		}
 
 		/*****************************************************
