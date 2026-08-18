@@ -79,7 +79,7 @@ class CustomStatusAddHandlerTest extends TestCase {
 		$redirected = false;
 		add_filter(
 			'wp_redirect',
-			// phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement -- Intentionally throws to unwind the handler before its exit; it never returns.
+			// phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement, WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.TerminatingInsteadOfReturn -- Intentionally throws to unwind the handler before its exit; it never returns.
 			function ( $location ) use ( &$redirected ) {
 				$redirected = true;
 				throw new \RuntimeException( 'wp_redirect intercepted' );
