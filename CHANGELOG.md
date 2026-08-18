@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-08-18
+
+A maintenance and compatibility release. It closes an information-disclosure issue in the Editorial Metadata module, corrects calendar date handling, declares compatibility with WordPress 7.1, and takes a batch of dependency updates including several security fixes. All users are encouraged to update.
+
+### Security
+
+* fix: stop editorial metadata leaking to unauthorised REST readers by @GaryJones in [#1036](https://github.com/Automattic/edit-flow/pull/1036)
+
+### Fixed
+
+* fix: keep post_date_gmt in sync when dragging posts on the calendar, and convert the quick-create timestamp to GMT when opted in by @GaryJones in [#1009](https://github.com/Automattic/edit-flow/pull/1009)
+
+### Documentation
+
+* docs: declare compatibility with WordPress 7.1 by @GaryJones in [#1039](https://github.com/Automattic/edit-flow/pull/1039)
+* docs: declare WordPress 7.0 compatibility and add a wp.org asset-update workflow by @GaryJones in [#1007](https://github.com/Automattic/edit-flow/pull/1007)
+
+### Maintenance
+
+* ci: silence two newly-flagged VIPCS sniffs on custom-status code by @GaryJones in [#1037](https://github.com/Automattic/edit-flow/pull/1037)
+* Routine dependency updates for npm packages and GitHub Actions, including security fixes for brace-expansion, axios, postcss, and shell-quote
+
 ## [0.11.0] - 2026-06-10
 
 This release completes the security-review remediation begun in 0.10.4. It resolves the remaining issues from a full audit of the plugin's authenticated code paths — the headline stored XSS in the editorial-metadata location field, two information-disclosure issues (the iCal feed and the Story Budget), and a long tail of defence-in-depth hardening across access control, input handling, deserialisation, output escaping, and client-side code. None are known to be exploited in the wild, but all users are encouraged to update.
@@ -491,6 +513,7 @@ This is a major update with significant bug fixes, new features, and modernised 
 
 * Ability to assign custom statuses to posts.
 
+[0.11.1]: https://github.com/Automattic/Edit-Flow/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Automattic/Edit-Flow/compare/0.10.4...0.11.0
 [0.10.4]: https://github.com/Automattic/Edit-Flow/compare/0.10.3...0.10.4
 [0.10.3]: https://github.com/Automattic/Edit-Flow/compare/0.10.2...0.10.3
