@@ -102,6 +102,8 @@ Keep the first line of your commit message brief. A quick explanation of your ch
 
 Not sure what to include your commit message? Take a look at the ["Description" section of the WordPress commit message documentation](https://make.wordpress.org/core/handbook/best-practices/commit-messages/#description). There is great advice for what should be included in when writing a clear, concise and relevant commit message.
 
+Your commits must be signed. The `develop` and `main` branches only accept commits with a verified signature, so a pull request containing an unsigned commit can't be merged until it's re-signed. See GitHub's guide to [signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) to set this up.
+
 After you've commited, push to your fork and create a Pull Request on GitHub.
 
 Extending Edit Flow
