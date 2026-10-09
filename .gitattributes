@@ -38,7 +38,6 @@ package-lock.json export-ignore
 # Documentation (not needed in plugin distribution)
 CHANGELOG.md export-ignore
 CONTRIBUTING.md export-ignore
-SECURITY.md export-ignore
 
 # Test configuration
 phpunit.xml.dist export-ignore

@@ -39,7 +39,6 @@ package-lock.json
 # Documentation (not needed in plugin distribution)
 CHANGELOG.md
 CONTRIBUTING.md
-SECURITY.md
 
 # Test configuration
 phpunit.xml.dist
