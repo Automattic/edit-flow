@@ -21,6 +21,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		global $edit_flow;
+		$edit_flow->user_groups->install();
+
 		require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
 	}
 
