@@ -25,7 +25,7 @@
 # Build tooling
 babel.config.js export-ignore
 eslint.config.js export-ignore
-jest.config.js export-ignore
+vitest.config.mjs export-ignore
 playwright.config.js export-ignore
 webpack.config.js export-ignore
 
