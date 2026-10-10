@@ -81,7 +81,7 @@ Ensure that the dev environment has already been started with `wp-env start`.
 3. Debug mode: `npm run test-e2e:debug`
 
 **JavaScript Tests:**
-1. Run Jest tests: `npm run test-jest`
+1. Run unit tests: `npm run test-js`
 
 Creating and submitting Patches
 ------

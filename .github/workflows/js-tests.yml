@@ -9,7 +9,7 @@ on:
       - '**.tsx'
       - 'package.json'
       - 'package-lock.json'
-      - 'jest.config.js'
+      - 'vitest.config.mjs'
       - '.github/workflows/js-tests.yml'
   pull_request:
     branches: [develop, main]
@@ -20,7 +20,7 @@ on:
       - '**.tsx'
       - 'package.json'
       - 'package-lock.json'
-      - 'jest.config.js'
+      - 'vitest.config.mjs'
       - '.github/workflows/js-tests.yml'
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   lint-and-test:
-    name: Lint and Jest Tests
+    name: Lint and JS Unit Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,19 +53,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Cache ESLint and Jest results
+      - name: Cache ESLint results
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: |
-            .eslintcache
-            node_modules/.cache/jest
-          key: js-cache-${{ runner.os }}-${{ hashFiles('package-lock.json', 'jest.config.js', '.eslintrc*', 'eslint.config.*') }}-${{ github.sha }}
+          path: .eslintcache
+          key: js-cache-${{ runner.os }}-${{ hashFiles('package-lock.json', '.eslintrc*', 'eslint.config.*') }}-${{ github.sha }}
           restore-keys: |
-            js-cache-${{ runner.os }}-${{ hashFiles('package-lock.json', 'jest.config.js', '.eslintrc*', 'eslint.config.*') }}-
+            js-cache-${{ runner.os }}-${{ hashFiles('package-lock.json', '.eslintrc*', 'eslint.config.*') }}-
             js-cache-${{ runner.os }}-
 
       - name: Run Lint JS
         run: npm run lint-js -- --cache
 
-      - name: Run Jest tests
-        run: npm run test-jest
+      - name: Run JS unit tests
+        run: npm run test-js
