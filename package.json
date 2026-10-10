@@ -50,7 +50,7 @@
     "@wordpress/jest-console": "^8.49.0",
     "@wordpress/jest-preset-default": "^12.49.0",
     "@wordpress/plugins": "^7.46.0",
-    "@wordpress/scripts": "^32.5.1",
+    "@wordpress/scripts": "^36.1.0",
     "@wordpress/url": "^4.49.0",
     "eslint": "^9.7.0",
     "prettier": "npm:wp-prettier@3.0.3",
