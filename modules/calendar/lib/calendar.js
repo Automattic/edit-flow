@@ -1,19 +1,20 @@
-const dispatch = wp.data.dispatch;
-
 /**
  * Safely dispatch an action to the edit-flow/calendar store.
  * Returns a no-op object if the store isn't registered yet.
+ *
+ * The store lives in the calendar React bundle, which has its own copy of
+ * @wordpress/data, so it is not in wp.data. The bundle exposes its actions instead.
  */
 function getCalendarDispatch() {
-	const calendarStore = dispatch( 'edit-flow/calendar' );
-	if ( calendarStore ) {
-		return calendarStore;
+	if ( window.EF_CALENDAR_STORE ) {
+		return window.EF_CALENDAR_STORE;
 	}
 	// Return no-op functions if store isn't available
 	return {
 		setCalendarIsLoading: () => {},
 		setPostSaved: () => {},
 		clearCalendarSnackbarMessage: () => {},
+		openQuickEdit: () => {},
 	};
 }
 
@@ -27,9 +28,10 @@ jQuery( document ).ready( function ( $ ) {
 
 	/**
 	 * Listen for click event and subsitute correct type of replacement
-	 * html given the input type
+	 * html given the input type. The quick edit modal is rendered outside
+	 * the calendar, so listen on the document.
 	 */
-	$( '.day-unit' ).on( 'click', '.editable-value', function ( event ) {
+	$( document ).on( 'click', '.ef-calendar-quick-edit .editable-value', function ( event ) {
 		// Reset anything that was currently being edited.
 		reset_editorial_metadata();
 		const t = this;
@@ -46,13 +48,13 @@ jQuery( document ).ready( function ( $ ) {
 		$editable_el
 			.removeClass( 'hidden' )
 			.addClass( 'editing' )
-			.closest( '.day-item' )
+			.closest( '.ef-calendar-quick-edit' )
 			.find( '.item-actions .save' )
 			.removeClass( 'hidden' );
 	} );
 
 	// Save the editorial metadata we've changed
-	$( '.day-unit' ).on( 'click', 'a#save-editorial-metadata', function () {
+	$( document ).on( 'click', '.ef-calendar-quick-edit a#save-editorial-metadata', function () {
 		const post_id = $( this ).attr( 'class' ).replace( 'post-', '' );
 		save_editorial_metadata( post_id );
 		return false;
@@ -70,11 +72,17 @@ jQuery( document ).ready( function ( $ ) {
 	 * @param post_id Id of post we're editing
 	 */
 	function save_editorial_metadata( post_id ) {
+		// Hierarchical taxonomies are edited with a checkbox tree.
+		const $checked_terms = $( '.editing' ).find( 'input[type="checkbox"]:checked' );
+		const is_term_checklist = $( '.editing' ).find( 'input[type="checkbox"]' ).length > 0;
+
 		const metadata_info = {
 			action: 'ef_calendar_update_metadata',
 			nonce: $( '#ef-calendar-modify' ).val(),
 			metadata_type: $( '.editing' ).attr( 'data-type' ),
-			metadata_value: $( '.editing' ).children().first().val(),
+			metadata_value: is_term_checklist
+				? $checked_terms.map( ( index, input ) => input.value ).get()
+				: $( '.editing' ).children().first().val(),
 			metadata_term: $( '.editing' ).attr( 'data-metadataterm' ),
 			post_id,
 		};
@@ -89,8 +97,17 @@ jQuery( document ).ready( function ( $ ) {
 			url: ajaxurl ? ajaxurl : wpListL10n.url,
 			data: metadata_info,
 			success( x ) {
+				// The server answers errors with a 200 status, so check the response too.
+				if ( ! x || 'success' !== x.status ) {
+					show_save_error();
+					return;
+				}
+
 				let val = $( '.editing' ).children().first();
-				if ( val.is( 'select' ) ) {
+				if ( is_term_checklist ) {
+					// The server sends back the saved term names.
+					val = x.message;
+				} else if ( val.is( 'select' ) ) {
 					val = val.find( 'option:selected' ).text();
 				} else {
 					val = val.val();
@@ -107,12 +124,14 @@ jQuery( document ).ready( function ( $ ) {
 
 				reset_editorial_metadata();
 			},
-			error( r ) {
-				$( '.editing' )
-					.next( '.spinner' )
-					.replaceWith( '<span class="edit-flow-error-message">Error saving metadata.</span>' );
-			},
+			error: show_save_error,
 		} );
+	}
+
+	function show_save_error() {
+		$( '.editing' )
+			.next( '.spinner' )
+			.replaceWith( '<span class="edit-flow-error-message">Error saving metadata.</span>' );
 	}
 
 	// Hide a message. Used by setTimeout()
@@ -131,51 +150,42 @@ jQuery( document ).ready( function ( $ ) {
 	} );
 
 	/**
+	 * Open the quick edit modal for a calendar item.
+	 * @param $item jQuery object for the .day-item
+	 */
+	function open_quick_edit( $item ) {
+		edit_flow_calendar_close_overlays();
+
+		getCalendarDispatch().openQuickEdit( {
+			id: parseInt( $item.attr( 'id' ).replace( 'post-', '' ), 10 ),
+			title: $item.find( '.item-headline' ).text(),
+		} );
+	}
+
+	// Let keyboard users open a calendar item too.
+	$( document ).on( 'keydown', '.day-item', function ( event ) {
+		if ( ( 'Enter' === event.key || ' ' === event.key ) && event.target === this ) {
+			event.preventDefault();
+			open_quick_edit( $( this ) );
+		}
+	} );
+
+	/**
 	 * Somewhat hackish way to close overlays automagically when you click outside an overlay
 	 */
 	$( document ).on( 'click', function ( event ) {
-		// Did we click on a list item? How do we figure that out?
-		// First let's see if we directly clicked on a .day-item
 		let target = $( event.target );
-		// Case where we've clicked on the list item directly
-		if ( target.hasClass( 'day-item' ) ) {
-			if ( target.hasClass( 'active' ) ) {
-				return;
-			} else if ( target.hasClass( 'post-insert-overlay' ) ) {
-				return;
-			}
 
-			edit_flow_calendar_close_overlays();
-
-			target
-				.addClass( 'active' )
-				.find( '.item-static' )
-				.removeClass( 'item-static' )
-				.addClass( 'item-overlay' );
-
+		// The quick edit modal handles its own clicks.
+		if ( target.closest( '.ef-calendar-quick-edit-modal' ).length ) {
 			return;
 		}
 
-		// Case where we've clicked in the list item
+		// Clicking a calendar item opens it in the quick edit modal.
 		target = target.closest( '.day-item' );
 		if ( target.length ) {
-			if ( target.hasClass( 'day-item' ) ) {
-				if ( target.hasClass( 'active' ) ) {
-					return;
-				} else if ( target.hasClass( 'post-insert-overlay' ) ) {
-					return;
-				}
-
-				edit_flow_calendar_close_overlays();
-
-				target
-					.addClass( 'active' )
-					.find( '.item-static' )
-					.removeClass( 'item-static' )
-					.addClass( 'item-overlay' );
-
-				return;
-			}
+			open_quick_edit( target );
+			return;
 		}
 
 		target = $( event.target ).closest( '#ui-datepicker-div' );
@@ -193,12 +203,6 @@ jQuery( document ).ready( function ( $ ) {
 
 	function edit_flow_calendar_close_overlays() {
 		reset_editorial_metadata();
-		$( '.day-item.active' )
-			.removeClass( 'active' )
-			.find( '.item-overlay' )
-			.removeClass( 'item-overlay' )
-			.addClass( 'item-static' );
-
 		$( '.post-insert-overlay' ).remove();
 	}
 
@@ -376,7 +380,7 @@ jQuery( document ).ready( function ( $ ) {
 
 							if ( redirect_to_draft ) {
 								// If user clicked on the 'edit post' link, let's send them to the new post
-								const edit_url = $new_post.find( '.item-actions .edit a' ).attr( 'href' );
+								const edit_url = $new_post.attr( 'data-edit-link' );
 								window.location = edit_url;
 							} else {
 								// Otherwise, inject the new post and bind the appropriate click event

@@ -183,6 +183,9 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			// Ajax insert post placeholder for a specific date.
 			add_action( 'wp_ajax_ef_insert_post', array( $this, 'handle_ajax_insert_post' ) );
 
+			// Load the quick edit details for a post.
+			add_action( 'wp_ajax_ef_calendar_get_quick_edit', array( $this, 'handle_ajax_get_quick_edit' ) );
+
 			// Update metadata.
 			add_action( 'wp_ajax_ef_calendar_update_metadata', array( $this, 'handle_ajax_update_metadata' ) );
 
@@ -1135,8 +1138,11 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			}
 			$post_classes = apply_filters( 'ef_calendar_table_td_li_classes', $post_classes, $post_date, $post->ID );
 
+			// Quick create uses this to open a new post in the editor.
+			$edit_link = $this->current_user_can_modify_post( $post ) ? get_edit_post_link( $post->ID, 'raw' ) : '';
+
 			?>
-		<li class="<?php echo esc_attr( implode( ' ', $post_classes ) ); ?>" id="post-<?php echo esc_attr( $post->ID ); ?>">
+		<li class="<?php echo esc_attr( implode( ' ', $post_classes ) ); ?>" id="post-<?php echo esc_attr( $post->ID ); ?>" tabindex="0"<?php echo $edit_link ? ' data-edit-link="' . esc_url( $edit_link ) . '"' : ''; ?>>
 			<div style="clear:right;"></div>
 			<div class="item-static">
 				<div class="item-default-visible">
@@ -1145,9 +1151,6 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 						<span class="item-headline post-title"><strong><?php echo esc_html( _draft_or_post_title( $post->ID ) ); ?></strong></span>
 					</div>
 					<?php do_action( 'ef_calendar_item_html', $post->ID ); ?>
-				</div>
-				<div class="item-inner">
-					<?php $this->get_inner_information( $this->get_post_information_fields( $post ), $post ); ?>
 				</div>
 			</div>
 		</li>
@@ -1182,7 +1185,8 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 								<?php $editable_class = $values['editable'] ? 'editable-value' : ''; ?>
 								<td class="value <?php echo esc_attr( $editable_class ); ?>"><?php echo esc_html( $values['value'] ); ?></td>
 								<?php if ( $values['editable'] ) : ?>
-									<td class="editable-html hidden" data-type="<?php echo esc_attr( $values['type'] ); ?>" data-metadataterm="<?php echo esc_attr( str_replace( 'editorial-metadata-', '', str_replace( 'tax_', '', $field ) ) ); ?>"><?php echo $this->get_editable_html( $values['type'], $values['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_editable_html() escapes each branch (esc_attr/esc_html) and otherwise returns only static markup or core-escaped wp_dropdown_users() output. ?></td>
+									<?php $metadata_term = preg_replace( '/^(?:tax_|editorial-metadata-)/', '', $field ); // Only the prefix, so names that contain "tax_" stay whole. ?>
+									<td class="editable-html hidden" data-type="<?php echo esc_attr( $values['type'] ); ?>" data-metadataterm="<?php echo esc_attr( $metadata_term ); ?>"><?php echo $this->get_editable_html( $values['type'], $values['value'], $post, $metadata_term ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_editable_html() escapes each branch (esc_attr/esc_html) and otherwise returns only static markup or core-escaped wp_dropdown_users()/wp_terms_checklist() output. ?></td>
 								<?php endif; ?>
 							<?php else : ?>
 								<td class="value"><?php echo esc_html( $values['value'] ); ?></td>
@@ -1247,11 +1251,13 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		/**
 		 * Get editable HTML for a metadata field type.
 		 *
-		 * @param string $type  The metadata field type.
-		 * @param string $value The current field value.
+		 * @param string       $type     The metadata field type.
+		 * @param string       $value    The current field value.
+		 * @param WP_Post|null $post     The post being edited. Needed for hierarchical taxonomies.
+		 * @param string       $taxonomy The taxonomy name. Needed for hierarchical taxonomies.
 		 * @return string|void The HTML input element.
 		 */
-		public function get_editable_html( $type, $value ) {
+		public function get_editable_html( $type, $value, $post = null, $taxonomy = '' ) {
 
 			switch ( $type ) {
 				case 'text':
@@ -1286,6 +1292,23 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					return wp_dropdown_users( array( 'echo' => false ) );
 				case 'taxonomy':
 					return '<input type="text" class="metadata-edit-' . esc_attr( $type ) . '" value="' . esc_attr( $value ) . '" />';
+				case 'taxonomy hierarchical':
+					if ( ! $post || ! $taxonomy ) {
+						return '';
+					}
+					if ( ! function_exists( 'wp_terms_checklist' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/template.php';
+					}
+					// A checkbox tree, so posts keep all of their terms instead of being reduced to one.
+					$checklist = wp_terms_checklist(
+						$post->ID,
+						array(
+							'taxonomy'      => $taxonomy,
+							'checked_ontop' => false,
+							'echo'          => false,
+						)
+					);
+					return '<ul class="categorychecklist">' . $checklist . '</ul>';
 			}
 		}
 
@@ -1364,23 +1387,18 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 					'value' => $value,
 				);
 
-				// Only allow non-hierarchical taxonomies to be edited in the calendar.
-				// Hierarchical taxonomies (like categories) cause performance issues and
-				// the single-select UI removes all but one category when saved.
-				if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-					$information_fields[ $key ]['type'] = 'taxonomy hierarchical';
+				// Hierarchical taxonomies (like categories) are edited with a checkbox tree in the
+				// quick edit modal, which is only loaded on demand, so it costs nothing on page load.
+				$information_fields[ $key ]['type'] = is_taxonomy_hierarchical( $taxonomy->name ) ? 'taxonomy hierarchical' : 'taxonomy';
+
+				if ( 'page' == $post->post_type ) {
+					$ed_cap = 'edit_page';
 				} else {
-					$information_fields[ $key ]['type'] = 'taxonomy';
+					$ed_cap = 'edit_post';
+				}
 
-					if ( 'page' == $post->post_type ) {
-						$ed_cap = 'edit_page';
-					} else {
-						$ed_cap = 'edit_post';
-					}
-
-					if ( current_user_can( $ed_cap, $post->ID ) ) {
-						$information_fields[ $key ]['editable'] = true;
-					}
+				if ( current_user_can( $ed_cap, $post->ID ) && current_user_can( $taxonomy->cap->assign_terms ) ) {
+					$information_fields[ $key ]['editable'] = true;
 				}
 			}
 
@@ -1812,6 +1830,39 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 		}
 
 		/**
+		 * Return the quick edit details for a calendar post via AJAX.
+		 *
+		 * The details are loaded when a post is opened, instead of being rendered
+		 * for every post on the calendar when the page loads.
+		 *
+		 * @since 0.12.0
+		 */
+		public function handle_ajax_get_quick_edit() {
+
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce value passed directly to wp_verify_nonce().
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'ef-calendar-modify' ) ) {
+				$this->print_ajax_response( 'error', $this->module->messages['nonce-failed'] );
+			}
+
+			$post = isset( $_POST['post_id'] ) ? get_post( (int) $_POST['post_id'] ) : null;
+			if ( ! $post || ! in_array( $post->post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
+				$this->print_ajax_response( 'error', $this->module->messages['missing-post'] );
+			}
+
+			// Match what the calendar shows: no trashed or auto-draft posts, and private
+			// posts only for users who can read them. The status may not be registered,
+			// as the Custom Statuses module can remove draft and pending.
+			$status_object = get_post_status_object( $post->post_status );
+			if ( $status_object && ( $status_object->internal || ( $status_object->private && ! current_user_can( 'read_post', $post->ID ) ) ) ) {
+				$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
+			}
+
+			ob_start();
+			$this->get_inner_information( $this->get_post_information_fields( $post ), $post );
+			$this->print_ajax_response( 'success', ob_get_clean() );
+		}
+
+		/**
 		 * Update the metadata from the calendar via AJAX.
 		 *
 		 * @since 0.8
@@ -1859,11 +1910,10 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 
 			$metadata_types = array();
 
-			if ( ! $this->module_enabled( 'editorial_metadata' ) ) {
-				$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
+			// Taxonomy edits do not need the Editorial Metadata module, so only its own types depend on it.
+			if ( $this->module_enabled( 'editorial_metadata' ) ) {
+				$metadata_types = array_keys( EditFlow()->editorial_metadata->get_supported_metadata_types() );
 			}
-
-			$metadata_types = array_keys( EditFlow()->editorial_metadata->get_supported_metadata_types() );
 
 			// Update an editorial metadata field.
 			$metadata_term = isset( $_POST['metadata_term'] ) ? sanitize_text_field( wp_unslash( $_POST['metadata_term'] ) ) : '';
@@ -1890,17 +1940,23 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 				$response = 'success';
 			} else {
 				switch ( $metadata_type ) {
+					case 'taxonomy hierarchical':
 					case 'taxonomy':
 						// Validate that the term refers to a taxonomy registered for this post type.
 						if ( '' === $metadata_term || ! in_array( $metadata_term, get_object_taxonomies( $post->post_type ), true ) ) {
 							$this->print_ajax_response( 'error', $this->module->messages['update-error'] );
 						}
 
+						if ( ! current_user_can( get_taxonomy( $metadata_term )->cap->assign_terms ) ) {
+							$this->print_ajax_response( 'error', $this->module->messages['invalid-permissions'] );
+						}
+
 						// Resolve the submitted value(s) to EXISTING term IDs only. This endpoint
 						// must not create new terms: passing free-text names to wp_set_post_terms()
 						// would let any user who can edit a single post create arbitrary taxonomy
 						// terms, which normally requires the taxonomy's term-management capability.
-						$incoming_terms = is_array( $incoming_metadata_value ) ? $incoming_metadata_value : array( $incoming_metadata_value );
+						// A text value holds a comma separated list, the same way it is displayed.
+						$incoming_terms = is_array( $incoming_metadata_value ) ? $incoming_metadata_value : explode( ',', $incoming_metadata_value );
 						$term_ids       = array();
 						foreach ( $incoming_terms as $incoming_term ) {
 							$incoming_term = sanitize_text_field( $incoming_term );
@@ -1923,7 +1979,17 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 							}
 						}
 
-						$response = wp_set_post_terms( $post->ID, $term_ids, $metadata_term, false );
+						// wp_set_post_categories() falls back to the default category when none are left, like the editor does.
+						if ( 'category' === $metadata_term ) {
+							$response = wp_set_post_categories( $post->ID, $term_ids, false );
+						} else {
+							$response = wp_set_post_terms( $post->ID, $term_ids, $metadata_term, false );
+						}
+
+						// Send back the saved term names, which can differ from the input (like the default category).
+						if ( ! is_wp_error( $response ) ) {
+							$incoming_metadata_value = implode( ', ', wp_get_post_terms( $post->ID, $metadata_term, array( 'fields' => 'names' ) ) );
+						}
 						break;
 					default:
 						$response = new WP_Error( 'invalid-type', __( 'Invalid metadata type', 'edit-flow' ) );

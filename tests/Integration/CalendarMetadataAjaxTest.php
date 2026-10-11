@@ -168,6 +168,141 @@ class CalendarMetadataAjaxTest extends AjaxTestCase {
 	}
 
 	/**
+	 * Test: every checked term of a hierarchical taxonomy is assigned, not just one.
+	 */
+	public function test_update_metadata_hierarchical_taxonomy_assigns_all_checked_terms(): void {
+		$post_id  = $this->factory->post->create( array( 'post_status' => 'draft' ) );
+		$term_ids = $this->factory->term->create_many( 2, array( 'taxonomy' => 'category' ) );
+
+		$_POST['nonce']          = wp_create_nonce( 'ef-calendar-modify' );
+		$_POST['post_id']        = $post_id;
+		$_POST['metadata_type']  = 'taxonomy hierarchical';
+		$_POST['metadata_term']  = 'category';
+		$_POST['metadata_value'] = array_map( 'strval', $term_ids );
+
+		$response_body = $this->capture_ajax_response( 'ef_calendar_update_metadata' );
+
+		$assigned = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
+		$this->assertEqualsCanonicalizing( $term_ids, $assigned );
+		$this->assertStringContainsString( '"status":"success"', $response_body );
+	}
+
+	/**
+	 * Test: unchecking every category falls back to the default category, like the editor.
+	 */
+	public function test_update_metadata_no_categories_falls_back_to_default(): void {
+		$term_id = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_status'   => 'draft',
+				'post_category' => array( $term_id ),
+			)
+		);
+
+		// No metadata_value is sent when no checkbox is checked.
+		$_POST['nonce']         = wp_create_nonce( 'ef-calendar-modify' );
+		$_POST['post_id']       = $post_id;
+		$_POST['metadata_type'] = 'taxonomy hierarchical';
+		$_POST['metadata_term'] = 'category';
+
+		$response_body = $this->capture_ajax_response( 'ef_calendar_update_metadata' );
+
+		$assigned = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
+		$this->assertSame( array( (int) get_option( 'default_category' ) ), $assigned );
+		$this->assertStringContainsString( '"status":"success"', $response_body );
+		// The saved names are sent back, so the modal shows the default category instead of nothing.
+		$this->assertStringContainsString( '"message":"' . get_cat_name( (int) get_option( 'default_category' ) ) . '"', $response_body );
+	}
+
+	/**
+	 * Test: a comma separated list of existing tags assigns each tag.
+	 */
+	public function test_update_metadata_taxonomy_accepts_comma_separated_terms(): void {
+		$post_id = $this->factory->post->create( array( 'post_status' => 'draft' ) );
+		$alpha   = $this->factory->term->create( array(
+			'taxonomy' => 'post_tag',
+			'name'     => 'Alpha',
+		) );
+		$beta    = $this->factory->term->create( array(
+			'taxonomy' => 'post_tag',
+			'name'     => 'Beta',
+		) );
+
+		$_POST['nonce']          = wp_create_nonce( 'ef-calendar-modify' );
+		$_POST['post_id']        = $post_id;
+		$_POST['metadata_type']  = 'taxonomy';
+		$_POST['metadata_term']  = 'post_tag';
+		$_POST['metadata_value'] = 'Alpha, Beta';
+
+		$response_body = $this->capture_ajax_response( 'ef_calendar_update_metadata' );
+
+		$assigned = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
+		$this->assertEqualsCanonicalizing( array( $alpha, $beta ), $assigned );
+		$this->assertStringContainsString( '"status":"success"', $response_body );
+	}
+
+	/**
+	 * Test: terms are not assigned when the user lacks the taxonomy's assign_terms capability.
+	 */
+	public function test_update_metadata_taxonomy_requires_assign_terms_capability(): void {
+		register_taxonomy(
+			'ef_locked_tax',
+			'post',
+			array(
+				'public'       => true,
+				'capabilities' => array( 'assign_terms' => 'manage_options' ),
+			)
+		);
+
+		$author_id = $this->factory->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $author_id );
+
+		$post_id = $this->factory->post->create(
+			array(
+				'post_status' => 'draft',
+				'post_author' => $author_id,
+			)
+		);
+		$this->factory->term->create( array(
+			'taxonomy' => 'ef_locked_tax',
+			'name'     => 'Locked Term',
+		) );
+
+		$_POST['nonce']          = wp_create_nonce( 'ef-calendar-modify' );
+		$_POST['post_id']        = $post_id;
+		$_POST['metadata_type']  = 'taxonomy';
+		$_POST['metadata_term']  = 'ef_locked_tax';
+		$_POST['metadata_value'] = 'Locked Term';
+
+		$response_body = $this->capture_ajax_response( 'ef_calendar_update_metadata' );
+
+		$this->assertEmpty( wp_get_post_terms( $post_id, 'ef_locked_tax', array( 'fields' => 'ids' ) ) );
+		$this->assertStringContainsString( '"status":"error"', $response_body );
+	}
+
+	/**
+	 * Test: taxonomy edits still work when the Editorial Metadata module is turned off.
+	 */
+	public function test_update_metadata_taxonomy_works_without_editorial_metadata_module(): void {
+		global $edit_flow;
+		$edit_flow->editorial_metadata->module->options->enabled = 'off';
+
+		$post_id = $this->factory->post->create( array( 'post_status' => 'draft' ) );
+		$term_id = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
+
+		$_POST['nonce']          = wp_create_nonce( 'ef-calendar-modify' );
+		$_POST['post_id']        = $post_id;
+		$_POST['metadata_type']  = 'taxonomy hierarchical';
+		$_POST['metadata_term']  = 'category';
+		$_POST['metadata_value'] = array( (string) $term_id );
+
+		$response_body = $this->capture_ajax_response( 'ef_calendar_update_metadata' );
+
+		$this->assertSame( array( $term_id ), wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) ) );
+		$this->assertStringContainsString( '"status":"success"', $response_body );
+	}
+
+	/**
 	 * Capture the JSON body emitted by a print_ajax_response call.
 	 *
 	 * @param string $action AJAX action name.

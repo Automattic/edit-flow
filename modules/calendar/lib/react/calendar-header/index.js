@@ -4,7 +4,7 @@
  * External dependencies
  */
 import { Snackbar, Animate } from '@wordpress/components';
-import { withSelect, registerStore } from '@wordpress/data';
+import { dispatch, withSelect, registerStore } from '@wordpress/data';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -19,6 +19,7 @@ import './style.react.scss';
 const DEFAULT_STORE_STATE = {
 	calendarSnackbarMessage: null,
 	calendarIsLoading: false,
+	quickEditPost: null,
 };
 
 registerStore( 'edit-flow/calendar', {
@@ -39,6 +40,16 @@ registerStore( 'edit-flow/calendar', {
 				return {
 					...state,
 					calendarIsLoading: action.isLoading,
+				};
+			case 'OPEN_QUICK_EDIT':
+				return {
+					...state,
+					quickEditPost: action.post,
+				};
+			case 'CLOSE_QUICK_EDIT':
+				return {
+					...state,
+					quickEditPost: null,
 				};
 		}
 
@@ -64,6 +75,22 @@ registerStore( 'edit-flow/calendar', {
 				isLoading,
 			};
 		},
+
+		/**
+		 * @param {Object} post Post to open, as { id, title }.
+		 */
+		openQuickEdit( post ) {
+			return {
+				type: 'OPEN_QUICK_EDIT',
+				post,
+			};
+		},
+
+		closeQuickEdit() {
+			return {
+				type: 'CLOSE_QUICK_EDIT',
+			};
+		},
 	},
 	selectors: {
 		getCalendarSnackbarMessage( state ) {
@@ -73,8 +100,16 @@ registerStore( 'edit-flow/calendar', {
 		getCalendarIsLoading( state ) {
 			return state.calendarIsLoading;
 		},
+
+		getQuickEditPost( state ) {
+			return state.quickEditPost;
+		},
 	},
 } );
+
+// This bundle has its own copy of @wordpress/data, so the store is not in the global
+// wp.data registry. Hand its actions to calendar.js, which runs outside the bundle.
+window.EF_CALENDAR_STORE = dispatch( 'edit-flow/calendar' );
 
 const CalendarHeader = ( {
 	snackbarMessage,

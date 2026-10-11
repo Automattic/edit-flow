@@ -550,4 +550,43 @@ class CalendarModuleTest extends TestCase {
 		$this->assertContains( $post1_id, $returned_ids, 'Scheduled Post 1 should be in the results' );
 		$this->assertContains( $post2_id, $returned_ids, 'Scheduled Post 2 should be in the results' );
 	}
+
+	/**
+	 * Test that calendar items no longer render the post details, which load in the quick edit modal.
+	 */
+	public function test_generate_post_li_html_leaves_details_to_quick_edit() {
+		global $edit_flow;
+
+		$post_id = self::factory()->post->create(
+			[
+				'post_status' => 'publish',
+				'post_author' => self::$admin_user_id,
+			]
+		);
+
+		$html = $edit_flow->calendar->generate_post_li_html( get_post( $post_id ), '2025-01-15' );
+
+		$this->assertStringNotContainsString( 'item-information', $html );
+		$this->assertStringContainsString( 'tabindex="0"', $html );
+		$this->assertStringContainsString( 'data-edit-link="' . esc_url( get_edit_post_link( $post_id, 'raw' ) ) . '"', $html );
+	}
+
+	/**
+	 * Test that calendar items have no edit link for users who cannot modify the post.
+	 */
+	public function test_generate_post_li_html_has_no_edit_link_for_read_only_user() {
+		global $edit_flow;
+
+		$post_id = self::factory()->post->create(
+			[
+				'post_status' => 'publish',
+				'post_author' => self::$admin_user_id,
+			]
+		);
+
+		wp_set_current_user( self::$contributor_user_id );
+		$html = $edit_flow->calendar->generate_post_li_html( get_post( $post_id ), '2025-01-15' );
+
+		$this->assertStringNotContainsString( 'data-edit-link', $html );
+	}
 }

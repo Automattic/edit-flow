@@ -1,0 +1,95 @@
+.ef-calendar-quick-edit {
+	.item-information {
+		width: 100%;
+		border-collapse: collapse;
+
+		.item-field th,
+		.item-field td {
+			padding: 6px 0;
+			vertical-align: top;
+		}
+
+		.label {
+			width: 30%;
+			padding-right: 12px;
+			text-align: left;
+			font-weight: 600;
+		}
+
+		.editable-value {
+			cursor: pointer;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		input[type="text"],
+		input[type="datetime-local"],
+		textarea,
+		select {
+			width: 100%;
+		}
+
+		.categorychecklist {
+			max-height: 200px;
+			margin: 0;
+			overflow: auto;
+
+			.children {
+				margin: 4px 0 0 18px;
+			}
+
+			li {
+				margin: 0 0 4px;
+			}
+		}
+
+		.spinner-calendar {
+			float: none;
+			margin: 0;
+		}
+
+		em.none {
+			color: #757575;
+		}
+	}
+
+	.item-actions {
+		margin-top: 16px;
+		padding-top: 12px;
+		border-top: 1px solid #dcdcde;
+		color: #a7aaad;
+		line-height: 1.8;
+
+		a {
+			text-decoration: none;
+		}
+
+		span.trash a {
+			color: #b32d2e;
+		}
+
+		span.save {
+			display: block;
+			margin-top: 8px;
+
+			&.hidden {
+				display: none;
+			}
+
+			a {
+				display: inline-block;
+				padding: 4px 12px;
+				border-radius: 3px;
+				background: #2271b1;
+				color: #fff;
+				font-weight: 500;
+
+				&:hover {
+					background: #135e96;
+				}
+			}
+		}
+	}
+}
