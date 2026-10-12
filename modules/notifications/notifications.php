@@ -275,9 +275,11 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 	<script type='text/Javascript'>
 	jQuery(document).ready(function($) {
 		/**
-		 * Action to Follow / Unfollow posts on the manage posts screen
+		 * Action to Follow / Unfollow posts on the manage posts screen.
+		 * Listen on the document so links in the calendar quick edit modal,
+		 * which is added later, work too.
 		 */
-		$('.wp-list-table, #ef-calendar-view, #ef-story-budget-wrap').on( 'click', '.ef_follow_link a', function(e){
+		$(document).on( 'click', '.wp-list-table .ef_follow_link a, #ef-story-budget-wrap .ef_follow_link a, .ef-calendar-quick-edit .ef_follow_link a', function(e){
 
 			e.preventDefault();
 

@@ -249,129 +249,12 @@ table#ef-calendar-view .day-unit ul li.sortable.ui-sortable-helper {
 	background-color: #F7F7F7;
 }
 
-table#ef-calendar-view .day-unit ul li .item-static .item-inner {
-	display: none;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information {
-	margin-top: 5px;
-	border-top: 1px solid #CCC;
-	padding-top: 3px;
-	width: 100%;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field {
-	margin-top: 5px;
-	margin-bottom: 5px;
-	clear:left;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field .label {
-	vertical-align: top;
-	max-width: 70px;
-	text-align: right;
-	font-weight: bold;
-	word-wrap: normal;
-	padding-right: 5px;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field .value {
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field .editable-value {
-	cursor: pointer;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field .editable-value:hover {
-	text-decoration: underline;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field .spinner-calendar {
-	margin: 0px;
-	float: none;
-}
-
-table#ef-calendar-view .day-unit ul li .item-information .item-field em.none {
-	color: #999999;
-}
-
 table#ef-calendar-view .day-unit ul li.is-published .item-headline {
 	color: #777;
 }
 
 table#ef-calendar-view .day-unit ul li.item-overlay-active {
 	position:relative;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay {
-	min-width: 250px;
-	max-width: 350px;
-	background-color: #FFF;
-	padding: 5px;
-	position: absolute;
-	z-index: 999;
-	top: -5px;
-	left: -5px;
-	border: 1px solid #CCC;
-	-moz-box-shadow:5px 5px 5px #888;
-	-webkit-box-shadow:5px 5px 5px #888;
-	box-shadow:5px 5px 5px #888;
-}
-
-table#ef-calendar-view .day-unit.last-day ul li .item-overlay {
-	right: -5px;
-	left: auto;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-inner {
-	display: block;
-	min-width: 170px;
-	max-width: 270px;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-inner {
-	cursor: default;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions {
-	padding: 6px 3px 0;
-	border-top: 1px solid #c3c4c7;
-	margin-top: 8px;
-	color: #a7aaad;
-	font-size: 13px;
-	line-height: 1.8;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions a {
-	text-decoration: none;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.trash a {
-	color: #b32d2e;
-}
-
-/* Style the Save button as a primary action */
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save {
-	display: block;
-	margin-top: 8px;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save.hidden {
-	display: none;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save a {
-	display: inline-block;
-	background: #2271b1;
-	color: #fff;
-	padding: 4px 12px;
-	border-radius: 3px;
-	font-weight: 500;
-	text-decoration: none;
-}
-
-table#ef-calendar-view .day-unit ul li .item-overlay .item-actions span.save a:hover {
-	background: #135e96;
 }
 
 #ef-calendar-view .day-unit .show-more {

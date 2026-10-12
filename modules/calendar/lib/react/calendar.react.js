@@ -11,6 +11,7 @@ import { createRoot } from 'react-dom/client';
  * Internal dependencies
  */
 import { CalendarHeader } from './calendar-header';
+import { CalendarQuickEdit } from './calendar-quick-edit';
 import './style.react.scss';
 
 // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
@@ -125,11 +126,14 @@ filters.push( {
 const root = createRoot( document.getElementById( 'ef-calendar-navigation-mount' ) );
 
 root.render(
-	<CalendarHeader
-		numberOfWeeks={ EF_CALENDAR.FILTERS.num_weeks }
-		beginningOfWeek={ EF_CALENDAR.BEGINNING_OF_WEEK }
-		pageUrl={ EF_CALENDAR.PAGE_URL }
-		filters={ filters }
-		filterValues={ EF_CALENDAR.FILTERS }
-	/>
+	<>
+		<CalendarHeader
+			numberOfWeeks={ EF_CALENDAR.FILTERS.num_weeks }
+			beginningOfWeek={ EF_CALENDAR.BEGINNING_OF_WEEK }
+			pageUrl={ EF_CALENDAR.PAGE_URL }
+			filters={ filters }
+			filterValues={ EF_CALENDAR.FILTERS }
+		/>
+		<CalendarQuickEdit />
+	</>
 );
