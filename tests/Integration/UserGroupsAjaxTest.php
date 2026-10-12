@@ -19,9 +19,15 @@ use WPAjaxDieStopException;
 class UserGroupsAjaxTest extends AjaxTestCase {
 
 	protected function setUp(): void {
+		global $edit_flow;
+
 		parent::setUp();
 
 		require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
+
+		// Grant administrators edit_usergroups before any test user is created,
+		// rather than relying on state left behind by earlier test classes.
+		$edit_flow->user_groups->install();
 	}
 
 	/**
