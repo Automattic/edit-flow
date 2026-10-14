@@ -1460,7 +1460,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			}
 
 			$beginning_date = $this->get_beginning_of_week( $this->start_date, 'Y-m-d', $this->current_week );
-			$ending_date    = date( 'Y-m-d', strtotime( $beginning_date ) + WEEK_IN_SECONDS );
+			$ending_date    = $this->get_ending_of_week( $beginning_date );
 
 			$args['date_query'] = array(
 				'after'     => $beginning_date,
