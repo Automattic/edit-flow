@@ -550,4 +550,45 @@ class CalendarModuleTest extends TestCase {
 		$this->assertContains( $post1_id, $returned_ids, 'Scheduled Post 1 should be in the results' );
 		$this->assertContains( $post2_id, $returned_ids, 'Scheduled Post 2 should be in the results' );
 	}
+
+	/**
+	 * Test that each week's query covers seven days, so consecutive weeks don't overlap.
+	 *
+	 * An inclusive 'before' of the next week's first day made WP_Date_Query include
+	 * that whole day, so the .ics feed emitted posts on a week's first day twice.
+	 */
+	public function test_consecutive_weeks_do_not_overlap() {
+		global $edit_flow;
+
+		update_option( 'start_of_week', 1 ); // Monday
+
+		$last_day_post_id = self::factory()->post->create(
+			array(
+				'post_status' => 'draft',
+				'post_date'   => '2025-01-19 23:30:00', // Sunday, end of week 1.
+			)
+		);
+
+		$first_day_post_id = self::factory()->post->create(
+			array(
+				'post_status' => 'draft',
+				'post_date'   => '2025-01-20 00:00:00', // Monday, start of week 2.
+			)
+		);
+
+		$edit_flow->calendar->start_date = '2025-01-13';
+
+		$edit_flow->calendar->current_week = 1;
+		$week_one                          = $edit_flow->calendar->get_calendar_posts_for_week( array( 'post_status' => 'draft' ) );
+
+		$edit_flow->calendar->current_week = 2;
+		$week_two                          = $edit_flow->calendar->get_calendar_posts_for_week( array( 'post_status' => 'draft' ) );
+
+		$edit_flow->calendar->current_week = 1;
+
+		$this->assertSame( array( '2025-01-19' ), array_keys( $week_one ) );
+		$this->assertSame( $last_day_post_id, $week_one['2025-01-19'][0]->ID );
+		$this->assertSame( array( '2025-01-20' ), array_keys( $week_two ) );
+		$this->assertSame( $first_day_post_id, $week_two['2025-01-20'][0]->ID );
+	}
 }
