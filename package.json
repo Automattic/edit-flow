@@ -40,7 +40,7 @@
     "@babel/preset-react": "^7.29.7",
     "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
     "@wordpress/components": "^33.1.0",
     "@wordpress/data": "^10.57.0",
