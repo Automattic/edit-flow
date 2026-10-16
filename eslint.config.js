@@ -13,8 +13,8 @@ module.exports = [
 	{
 		languageOptions: {
 			parserOptions: {
-				babelOptions: {
-					presets: [ '@babel/preset-react' ],
+				ecmaFeatures: {
+					jsx: true,
 				},
 			},
 		},
@@ -23,7 +23,7 @@ module.exports = [
 				version: 'detect',
 			},
 			// WordPress packages are loaded at runtime, not installed as npm dependencies
-			'import/core-modules': [ '@wordpress/i18n', '@wordpress/url', '@wordpress/data', '@wordpress/components', '@wordpress/compose', '@wordpress/plugins', '@wordpress/editor', 'moment', 'react', 'react-dom' ],
+			'import-x/core-modules': [ '@wordpress/i18n', '@wordpress/url', '@wordpress/data', '@wordpress/components', '@wordpress/compose', '@wordpress/plugins', '@wordpress/editor', 'moment', 'react', 'react-dom' ],
 		},
 		rules: {
 			// WordPress packages (react, react-dom, etc.) are available at runtime via wp-scripts
