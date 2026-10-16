@@ -101,8 +101,11 @@ if ( ! class_exists( 'EF_Notifications' ) ) {
 			add_action( 'ef_user_subscribe_actions', [ $this, 'display_subscriber_warning_badges' ], 10, 2 );
 
 			// Saving post actions.
-			// self::save_post_subscriptions() is hooked into transition_post_status so we can ensure usergroup data
-			// is properly saved before sending notifs.
+			// self::save_post_subscriptions() is hooked into transition_post_status, not save_post, on purpose.
+			// Core fires transition_post_status before save_post, and notification_status_change() works out
+			// its recipients when it runs. Saving at priority 0 means users and usergroups added in the same
+			// save get the status change email. Moving only the save to save_post would leave them out.
+			// See https://github.com/Automattic/edit-flow/issues/886.
 			add_action( 'transition_post_status', [ $this, 'save_post_subscriptions' ], 0, 3 );
 			add_action( 'transition_post_status', [ $this, 'notification_status_change' ], 10, 3 );
 			add_action( 'ef_post_insert_editorial_comment', [ $this, 'notification_comment' ] );
