@@ -142,6 +142,43 @@ class NotificationsTest extends TestCase {
 	}
 
 	/**
+	 * Followers submitted with a status change must be saved before the status change email
+	 * is sent, so they receive it. Core fires transition_post_status before save_post, which
+	 * is why the subscriptions are saved on transition_post_status at priority 0.
+	 */
+	public function test_followers_added_on_status_change_receive_the_notification() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$follower_id = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$post_id     = self::factory()->post->create(
+			array(
+				'post_author' => self::$admin_user_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$_POST['ef-save_followers']      = '1';
+		$_POST['ef_notifications_nonce'] = wp_create_nonce( 'save_user_usergroups' );
+		$_POST['ef-selected-users']      = array( (string) $follower_id );
+
+		reset_phpmailer_instance();
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'pending',
+			)
+		);
+
+		$recipients = array();
+		foreach ( tests_retrieve_phpmailer_instance()->mock_sent as $sent ) {
+			$recipients[] = $sent['to'][0][0];
+		}
+
+		$this->assertContains( get_userdata( $follower_id )->user_email, $recipients, 'A follower added in the same save should get the status change email.' );
+	}
+
+	/**
 	 * A failed webhook request must not abort the request it runs within (post transitions
 	 * and comment insertion are not always AJAX), so send_to_webhook returns instead of dying.
 	 */
