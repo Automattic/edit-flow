@@ -37,10 +37,29 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 		/**
 		 * Taxonomy name used to store all our custom statuses.
 		 *
+		 * Was 'post_status' before 0.11.2. That name made get_term() fire the core
+		 * 'get_post_status' filter with a WP_Term, which broke other plugins.
+		 *
+		 * @see https://github.com/Automattic/edit-flow/issues/905
+		 *
 		 * @var string
 		 */
 		// phpcs:ignore Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase
-		const taxonomy_key = 'post_status';
+		const taxonomy_key = 'ef_post_status';
+
+		/**
+		 * Old taxonomy name, kept so existing statuses can be moved to the new one.
+		 *
+		 * @var string
+		 */
+		const LEGACY_TAXONOMY_KEY = 'post_status';
+
+		/**
+		 * Option set once the statuses have been moved to the new taxonomy name.
+		 *
+		 * @var string
+		 */
+		const TAXONOMY_MIGRATED_OPTION = 'edit_flow_custom_status_taxonomy_migrated';
 
 		/**
 		 * Register the module with Edit Flow but don't do anything else.
@@ -98,6 +117,9 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 			if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				require_once __DIR__ . '/lib/class-cli.php';
 			}
+
+			// Move statuses saved under the old taxonomy name before we load them.
+			$this->maybe_migrate_taxonomy();
 
 			// Register custom statuses as a taxonomy.
 			$this->register_custom_statuses();
@@ -247,6 +269,44 @@ if ( ! class_exists( 'EF_Custom_Status' ) ) {
 				// Custom status descriptions become base64_encoded, instead of maybe json_encoded.
 				$this->upgrade_074_term_descriptions( self::taxonomy_key );
 			}
+		}
+
+		/**
+		 * Move statuses from the old 'post_status' taxonomy to the new taxonomy name.
+		 *
+		 * Runs on every init until it has run once, instead of in upgrade(), so
+		 * front-end requests see the statuses before anyone loads an admin page.
+		 *
+		 * @since 0.11.2
+		 */
+		public function maybe_migrate_taxonomy() {
+			global $wpdb;
+
+			if ( get_option( self::TAXONOMY_MIGRATED_OPTION ) ) {
+				return;
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", self::LEGACY_TAXONOMY_KEY ) );
+
+			// On a DB error, try again on the next request rather than mark it done.
+			if ( $wpdb->last_error ) {
+				return;
+			}
+
+			if ( ! empty( $term_ids ) ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$updated = $wpdb->update( $wpdb->term_taxonomy, [ 'taxonomy' => self::taxonomy_key ], [ 'taxonomy' => self::LEGACY_TAXONOMY_KEY ] );
+
+				if ( false === $updated ) {
+					return;
+				}
+
+				clean_term_cache( array_map( 'intval', $term_ids ), self::taxonomy_key );
+				$this->custom_statuses_cache = [];
+			}
+
+			update_option( self::TAXONOMY_MIGRATED_OPTION, true );
 		}
 
 		/**
