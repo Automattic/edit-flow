@@ -23,6 +23,9 @@ class UserGroupsAjaxTest extends AjaxTestCase {
 
 		parent::setUp();
 
+		global $edit_flow;
+		$edit_flow->user_groups->install();
+
 		require_once ABSPATH . 'wp-admin/includes/ajax-actions.php';
 
 		// Grant administrators edit_usergroups before any test user is created,
