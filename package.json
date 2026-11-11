@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "classnames": "^2.5.1",
-    "downshift": "^9.4.0",
+    "downshift": "^9.4.1",
     "match-sorter": "^8.3.0",
     "prop-types": "^15.8.1"
   }
