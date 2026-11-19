@@ -21,6 +21,13 @@ abstract class AjaxTestCase extends TestCase {
 	protected $_last_response = '';
 
 	/**
+	 * Error reporting level to restore after each test.
+	 *
+	 * @var int
+	 */
+	protected $_error_level;
+
+	/**
 	 * Taken from testcase-ajax.php setUpBeforeClass function
 	 */
 	public static function setUpBeforeClass(): void {

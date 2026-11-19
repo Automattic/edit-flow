@@ -346,7 +346,7 @@ if ( ! class_exists( 'EF_Editorial_Comments' ) ) {
 			wp_get_current_user();
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$parent = absint( $_POST['parent'] );
+			$parent = isset( $_POST['parent'] ) ? absint( $_POST['parent'] ) : 0;
 
 			// Only allow the comment if user can edit post.
 			// @TODO: Consider allowing contributors to add comments as well.

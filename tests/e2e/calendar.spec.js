@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-const { test, expect } = require('./utils');
+const { test, expect, getEditorPostId } = require('./utils');
 
 test.describe('Calendar', () => {
 	test('calendar page loads and displays current month', async ({ admin, page }) => {
@@ -50,11 +50,12 @@ test.describe('Calendar', () => {
 		await expect(weeksSelect).toHaveValue('6'); // Default value
 	});
 
-	test('draft post appears on calendar', async ({ admin, editor, page, requestUtils }) => {
+	test('draft post appears on calendar', async ({ admin, editor, page, createdPostIds }) => {
 		const postTitle = `Draft Post ${Date.now()}`;
 
 		// Create a draft post
 		await admin.createNewPost({ title: postTitle });
+		createdPostIds.push(await getEditorPostId(page));
 		await editor.canvas.locator('role=textbox[name="Add title"i]').waitFor();
 		await editor.saveDraft();
 
@@ -65,8 +66,5 @@ test.describe('Calendar', () => {
 		// Verify the draft post appears on the calendar
 		const postOnCalendar = page.locator(`.item-headline.post-title strong:has-text("${postTitle}")`);
 		await expect(postOnCalendar).toBeVisible({ timeout: 10000 });
-
-		// Cleanup
-		await requestUtils.deleteAllPosts();
 	});
 });

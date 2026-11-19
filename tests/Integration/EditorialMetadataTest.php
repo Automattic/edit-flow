@@ -178,7 +178,10 @@ class EditorialMetadataTest extends TestCase {
 
 		// Invoke the production registration routine (private; runs at init in normal use).
 		$register = new \ReflectionMethod( $em, 'register_metadata_for_rest_api' );
-		$register->setAccessible( true );
+		// Needed before PHP 8.1; deprecated from PHP 8.5.
+		if ( PHP_VERSION_ID < 80100 ) {
+			$register->setAccessible( true );
+		}
 		$register->invoke( $em );
 
 		$registered = get_registered_meta_keys( 'post', 'post' );
@@ -217,7 +220,10 @@ class EditorialMetadataTest extends TestCase {
 
 		// Register the write-path meta (show_in_rest) and the read-path filter, as they run at init.
 		$register = new \ReflectionMethod( $em, 'register_metadata_for_rest_api' );
-		$register->setAccessible( true );
+		// Needed before PHP 8.1; deprecated from PHP 8.5.
+		if ( PHP_VERSION_ID < 80100 ) {
+			$register->setAccessible( true );
+		}
 		$register->invoke( $em );
 		$em->register_rest_api_filters();
 

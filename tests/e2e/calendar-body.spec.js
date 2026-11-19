@@ -4,23 +4,23 @@
 const { test, expect } = require('./utils');
 
 test.describe('Calendar Body', () => {
-	test('published posts appear on calendar with published status', async ({ admin, page, requestUtils }) => {
+	test('published posts appear on calendar with published status', async ({ admin, page, requestUtils, createdPostIds }) => {
+		const postTitle = `Published Post ${Date.now()}`;
+
 		// Create a published post via REST API (more reliable than UI)
-		await requestUtils.createPost({
-			title: 'Published Post',
+		const post = await requestUtils.createPost({
+			title: postTitle,
 			status: 'publish',
 		});
+		createdPostIds.push(post.id);
 
 		// Navigate to calendar
 		await admin.visitAdminPage('index.php', 'page=calendar');
 		await page.locator('.ef-calendar-header').waitFor();
 
 		// Verify the published post appears
-		const publishedPost = page.locator('.day-item').filter({ hasText: 'Published Post' }).first();
+		const publishedPost = page.locator('.day-item').filter({ hasText: postTitle }).first();
 		await expect(publishedPost).toBeVisible();
-
-		// Cleanup
-		await requestUtils.deleteAllPosts();
 	});
 
 	test('calendar has draggable functionality enabled', async ({ admin, page }) => {
@@ -40,26 +40,26 @@ test.describe('Calendar Body', () => {
 		expect(hasSortable).toBe(true);
 	});
 
-	test('scheduled posts appear on calendar', async ({ admin, page, requestUtils }) => {
+	test('scheduled posts appear on calendar', async ({ admin, page, requestUtils, createdPostIds }) => {
+		const postTitle = `Scheduled Post ${Date.now()}`;
+
 		// Create a future-dated post via REST API
 		const futureDate = new Date();
 		futureDate.setDate(futureDate.getDate() + 2);
 
-		await requestUtils.createPost({
-			title: 'Scheduled Post',
+		const post = await requestUtils.createPost({
+			title: postTitle,
 			status: 'future',
 			date: futureDate.toISOString(),
 		});
+		createdPostIds.push(post.id);
 
 		// Navigate to calendar
 		await admin.visitAdminPage('index.php', 'page=calendar');
 		await page.locator('.ef-calendar-header').waitFor();
 
 		// Verify the scheduled post appears
-		const scheduledPost = page.locator('.day-item').filter({ hasText: 'Scheduled Post' }).first();
+		const scheduledPost = page.locator('.day-item').filter({ hasText: postTitle }).first();
 		await expect(scheduledPost).toBeVisible();
-
-		// Cleanup
-		await requestUtils.deleteAllPosts();
 	});
 });

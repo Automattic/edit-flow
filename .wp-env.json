@@ -3,7 +3,8 @@
     "."
   ],
   "core": "WordPress/WordPress#master",
-  "phpVersion": "8.2",
+  "phpVersion": "8.5",
+  "testsEnvironment": false,
   "config": {
     "WP_DEBUG": true,
     "WP_DEBUG_LOG": true,
@@ -11,11 +12,5 @@
   },
   "lifecycleScripts": {
     "afterStart": "wp-env run cli wp plugin install query-monitor --activate"
-  },
-  "env": {
-    "tests": {
-      "phpVersion": "8.4",
-      "core": "WordPress/WordPress#master"
-    }
   }
 }

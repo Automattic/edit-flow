@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-const { test, expect } = require('./utils');
+const { test, expect, getEditorPostId } = require('./utils');
 
 /**
  * Helper function to expand meta boxes in the block editor
@@ -48,8 +48,9 @@ async function expandMetabox(page, metabox) {
 }
 
 test.describe('Notification Badges', () => {
-	test('post author has Post Author badge and disabled checkbox', async ({ admin, editor, page }) => {
+	test('post author has Post Author badge and disabled checkbox', async ({ admin, editor, page, createdPostIds }) => {
 		await admin.createNewPost({ title: 'Notification Badge Test' });
+		createdPostIds.push(await getEditorPostId(page));
 
 		// Dismiss the welcome guide if it appears
 		const welcomeGuide = page.locator('.edit-post-welcome-guide, [aria-label="Welcome to the block editor"]');
@@ -110,8 +111,9 @@ test.describe('Notification Badges', () => {
 		// The PHP unit tests cover the auto-subscribed badge logic.
 	});
 
-	test('non-author users do not have Post Author badge', async ({ admin, editor, page }) => {
+	test('non-author users do not have Post Author badge', async ({ admin, editor, page, createdPostIds }) => {
 		await admin.createNewPost({ title: 'Non-Author Badge Test' });
+		createdPostIds.push(await getEditorPostId(page));
 
 		// Dismiss the welcome guide if it appears
 		const welcomeGuide = page.locator('.edit-post-welcome-guide, [aria-label="Welcome to the block editor"]');
