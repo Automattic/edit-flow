@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use EF_Notifications;
 use WP_Error;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
@@ -36,7 +35,9 @@ class NotificationsTest extends TestCase {
 
 		self::$admin_user_id = $factory->user->create( array( 'role' => 'administrator' ) );
 
-		self::$ef_notifications = new EF_Notifications();
+		// Use the plugin's singleton: constructing another instance re-registers the
+		// module and wipes the options the singleton's hooks rely on, for every test after this one.
+		self::$ef_notifications = $edit_flow->notifications;
 		self::$ef_notifications->install();
 		self::$ef_notifications->init();
 	}
@@ -84,7 +85,9 @@ class NotificationsTest extends TestCase {
 		 * Prevent the registration of custom status to check if notification module will still
 		 * work when custom status module is disabled and custom statuses are not registered
 		 */
-		$typenow = 'post';
+		$original_typenow    = $typenow;
+		$original_post_types = $edit_flow->custom_status->module->options->post_types;
+		$typenow             = 'post';
 
 		$edit_flow->custom_status->module->options->post_types = array( 'page' );
 		/**
@@ -103,7 +106,13 @@ class NotificationsTest extends TestCase {
 			'post_date_gmt' => '2016-04-29 12:00:00',
 		);
 
-		wp_insert_post( $post );
+		try {
+			wp_insert_post( $post );
+		} finally {
+			// Restore, or custom statuses stay disabled for posts in every test after this one.
+			$typenow = $original_typenow;
+			$edit_flow->custom_status->module->options->post_types = $original_post_types;
+		}
 
 		$mailer = tests_retrieve_phpmailer_instance();
 

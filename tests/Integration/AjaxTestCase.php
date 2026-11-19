@@ -93,7 +93,7 @@ abstract class AjaxTestCase extends TestCase {
 	 */
 	protected function _handleAjax( $action ) {
 		// Start output buffering
-		ini_set( 'implicit_flush', false );
+		ini_set( 'implicit_flush', '0' );
 		ob_start();
 
 		// Build the request

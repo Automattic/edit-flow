@@ -10,7 +10,6 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use EF_Custom_Status;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**
@@ -28,7 +27,10 @@ class CustomStatusPublishDateTest extends TestCase {
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$admin_user_id = $factory->user->create( array( 'role' => 'administrator' ) );
 
-		self::$ef_custom_status = new EF_Custom_Status();
+		// Use the plugin's singleton: constructing another instance re-registers the
+		// module and wipes the options the singleton's hooks rely on, for every test after this one.
+		global $edit_flow;
+		self::$ef_custom_status = $edit_flow->custom_status;
 		self::$ef_custom_status->install();
 		self::$ef_custom_status->init();
 	}

@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\EditFlow\Tests\Integration;
 
-use EF_Settings;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 class SettingsTest extends TestCase {
@@ -17,11 +16,22 @@ class SettingsTest extends TestCase {
 	protected static $ef_settings;
 
 	public static function wpSetUpBeforeClass( $factory ) {
-		self::$ef_settings = new EF_Settings();
+		global $edit_flow;
+
+		// Use the plugin's singleton: constructing another instance re-registers the
+		// module and wipes the options the singleton's hooks rely on, for every test after this one.
+		self::$ef_settings = $edit_flow->settings;
 	}
 
 	public static function wpTearDownAfterClass() {
 		self::$ef_settings = null;
+	}
+
+	protected function setUp(): void {
+		parent::setUp();
+
+		// The singleton is shared, so clear any errors an earlier test class left behind.
+		self::$ef_settings->form_errors = array();
 	}
 
 	protected function tearDown(): void {
