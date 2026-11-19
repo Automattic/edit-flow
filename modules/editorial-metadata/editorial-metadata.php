@@ -41,6 +41,11 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 		const metadata_postmeta_key = '_ef_editorial_meta';
 
 		/**
+		 * The $_GET key used to filter the Manage Posts view by an editorial metadata field.
+		 */
+		const FILTER_QUERY_VAR = 'ef_metadata';
+
+		/**
 		 * Module name.
 		 *
 		 * @var string
@@ -132,6 +137,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'action_manage_posts_custom_column' ), 10, 2 );
 			}
 
+			// Let the Manage Posts view be filtered by an editorial metadata field.
+			add_action( 'restrict_manage_posts', array( $this, 'action_restrict_manage_posts' ) );
+
 			// Add Editorial Metadata to the calendar if the calendar is activated.
 			if ( $this->module_enabled( 'calendar' ) ) {
 				add_filter( 'ef_calendar_item_information_fields', array( $this, 'filter_calendar_item_fields' ), 10, 2 );
@@ -220,6 +228,9 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 
 			// Parse the query when we're ordering by an editorial metadata term.
 			add_action( 'parse_query', array( $this, 'action_parse_query' ) );
+
+			// Limit the Manage Posts view to posts that have an editorial metadata field set.
+			add_action( 'pre_get_posts', array( $this, 'filter_posts_by_metadata' ) );
 		}
 
 		/**
@@ -886,6 +897,99 @@ if ( ! class_exists( 'EF_Editorial_Metadata' ) ) {
 				set_query_var( 'meta_key', $meta_key );
 				set_query_var( 'orderby', 'meta_value_num' );
 			}
+		}
+
+		/**
+		 * Get the editorial metadata fields the current user can filter posts by.
+		 *
+		 * Hidden fields are meant to stay on the edit post view, so only admins can filter by them.
+		 *
+		 * @since 0.12.0
+		 *
+		 * @return array Editorial metadata term objects.
+		 */
+		private function get_filterable_metadata_terms() {
+			$args = current_user_can( 'manage_options' ) ? array() : array( 'viewable' => true );
+			return $this->get_editorial_metadata_terms( $args );
+		}
+
+		/**
+		 * Add a dropdown to the Manage Posts view to filter posts by an editorial metadata field.
+		 *
+		 * @since 0.12.0
+		 *
+		 * @param string $post_type The post type being listed.
+		 */
+		public function action_restrict_manage_posts( $post_type ) {
+			if ( ! in_array( $post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
+				return;
+			}
+
+			$terms = $this->get_filterable_metadata_terms();
+			if ( empty( $terms ) ) {
+				return;
+			}
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list filter.
+			$current = isset( $_GET[ self::FILTER_QUERY_VAR ] ) ? sanitize_title( wp_unslash( $_GET[ self::FILTER_QUERY_VAR ] ) ) : '';
+
+			echo '<label class="screen-reader-text" for="ef-metadata-filter">' . esc_html__( 'Filter by editorial metadata', 'edit-flow' ) . '</label>';
+			echo '<select name="' . esc_attr( self::FILTER_QUERY_VAR ) . '" id="ef-metadata-filter">';
+			echo '<option value="">' . esc_html__( 'All editorial metadata', 'edit-flow' ) . '</option>';
+			foreach ( $terms as $term ) {
+				echo '<option value="' . esc_attr( $term->slug ) . '"' . selected( $current, $term->slug, false ) . '>' . esc_html( $term->name ) . '</option>';
+			}
+			echo '</select>';
+		}
+
+		/**
+		 * Limit the Manage Posts view to posts that have the chosen editorial metadata field set.
+		 *
+		 * @since 0.12.0
+		 *
+		 * @param WP_Query $query The query object.
+		 */
+		public function filter_posts_by_metadata( $query ) {
+			global $pagenow;
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only list filter.
+			if ( ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() || empty( $_GET[ self::FILTER_QUERY_VAR ] ) ) {
+				return;
+			}
+
+			// Slugs come from sanitize_title() and can hold percent-encoded characters, which sanitize_key() would strip.
+			$term_slug = sanitize_title( wp_unslash( $_GET[ self::FILTER_QUERY_VAR ] ) );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			$post_type = $query->get( 'post_type' ) ? $query->get( 'post_type' ) : 'post';
+			if ( ! in_array( $post_type, $this->get_post_types_for_module( $this->module ), true ) ) {
+				return;
+			}
+
+			$terms = wp_filter_object_list( $this->get_filterable_metadata_terms(), array( 'slug' => $term_slug ) );
+			if ( empty( $terms ) ) {
+				return;
+			}
+
+			$meta_query = $query->get( 'meta_query' );
+			if ( ! is_array( $meta_query ) ) {
+				$meta_query = array();
+			}
+
+			// Match the metabox save, which deletes the value when empty() is true.
+			$clause = array(
+				'key'     => $this->get_postmeta_key( array_shift( $terms ) ),
+				'value'   => array( '', '0' ),
+				'compare' => 'NOT IN',
+			);
+
+			// Nest any existing meta query so an OR relation in it can't widen the results.
+			$meta_query = empty( $meta_query ) ? array( $clause ) : array(
+				'relation' => 'AND',
+				$meta_query,
+				$clause,
+			);
+			$query->set( 'meta_query', $meta_query );
 		}
 
 		/**
@@ -2042,6 +2146,19 @@ class EF_Editorial_Metadata_List_Table extends WP_List_Table {
 				'action'  => 'make-viewable',
 				'term-id' => $item->term_id,
 			) ) ) . '">' . __( 'Make Viewable', 'edit-flow' ) . '</a>';
+		}
+		// Link to the posts that have this field set, one link per supported post type.
+		foreach ( $edit_flow->editorial_metadata->get_post_types_for_module( $edit_flow->editorial_metadata->module ) as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+			if ( ! $post_type_object ) {
+				continue;
+			}
+			$view_link = add_query_arg( array(
+				'post_type'                             => $post_type,
+				EF_Editorial_Metadata::FILTER_QUERY_VAR => $item->slug,
+			), admin_url( 'edit.php' ) );
+			/* translators: %s: post type plural name, e.g. Posts */
+			$actions[ 'view view-' . $post_type ] = '<a href="' . esc_url( $view_link ) . '">' . esc_html( sprintf( __( 'View %s', 'edit-flow' ), $post_type_object->labels->name ) ) . '</a>';
 		}
 		$actions['delete delete-status'] = "<a href='$item_delete_link'>" . __( 'Delete', 'edit-flow' ) . '</a>';
 

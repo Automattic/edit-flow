@@ -327,4 +327,200 @@ class EditorialMetadataTest extends TestCase {
 		$this->assertTrue( $redirected, 'A self-rename should pass validation and reach the redirect.' );
 		$this->assertArrayNotHasKey( 'name', $edit_flow->settings->form_errors, 'A self-rename must not report a name conflict.' );
 	}
+
+	/**
+	 * Create a checkbox field and four posts: one checked, one with '', one with '0' and one with no value.
+	 *
+	 * @param bool   $viewable Whether the field is viewable.
+	 * @param string $name     Field name.
+	 * @return array Field slug and post IDs keyed by 'set', 'empty', 'zero' and 'missing'.
+	 */
+	private function create_filter_fixtures( $viewable, $name = 'Filter EM' ) {
+		global $edit_flow;
+
+		$term_ids = $edit_flow->editorial_metadata->insert_editorial_metadata_term( array(
+			'name'     => $name,
+			'type'     => 'checkbox',
+			'viewable' => $viewable,
+		) );
+		$term     = $edit_flow->editorial_metadata->get_editorial_metadata_term_by( 'id', $term_ids['term_id'] );
+		$key      = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+		$values   = array(
+			'set'     => '1',
+			'empty'   => '',
+			'zero'    => '0',
+			'missing' => null,
+		);
+
+		$posts = array();
+		foreach ( $values as $state => $value ) {
+			$posts[ $state ] = self::factory()->post->create();
+			if ( null !== $value ) {
+				add_post_meta( $posts[ $state ], $key, $value );
+			}
+		}
+
+		return array( $term->slug, $posts );
+	}
+
+	/**
+	 * Run a callback as if on the Manage Posts screen with the editorial metadata filter set.
+	 *
+	 * @param string   $term_slug Field slug as PHP decodes it from the URL.
+	 * @param callable $callback  Code to run on the screen.
+	 * @return mixed What the callback returns.
+	 */
+	private function on_manage_posts_screen( $term_slug, $callback ) {
+		global $pagenow;
+
+		$_GET[ EF_Editorial_Metadata::FILTER_QUERY_VAR ] = $term_slug;
+
+		$old_pagenow = $pagenow;
+		$pagenow     = 'edit.php';
+		set_current_screen( 'edit-post' );
+
+		try {
+			return $callback();
+		} finally {
+			$pagenow = $old_pagenow;
+			set_current_screen( 'front' );
+		}
+	}
+
+	/**
+	 * Run the Manage Posts main query with the editorial metadata filter set.
+	 *
+	 * @param string $term_slug  Field slug as PHP decodes it from the URL.
+	 * @param array  $extra_args Extra query args.
+	 * @return int[] Post IDs found.
+	 */
+	private function run_manage_posts_query( $term_slug, $extra_args = array() ) {
+		global $edit_flow;
+
+		$edit_flow->editorial_metadata->action_admin_init();
+
+		return $this->on_manage_posts_screen( $term_slug, function () use ( $extra_args ) {
+			$GLOBALS['wp_the_query'] = new \WP_Query();
+			$GLOBALS['wp_query']     = $GLOBALS['wp_the_query'];
+			$ids                     = $GLOBALS['wp_query']->query( array_merge( array(
+				'post_type'      => 'post',
+				'fields'         => 'ids',
+				'posts_per_page' => 10,
+			), $extra_args ) );
+
+			return array_map( 'intval', $ids );
+		} );
+	}
+
+	/**
+	 * Filtering by a field returns only posts where it has a non-empty value.
+	 */
+	public function test_filter_posts_by_metadata_returns_only_posts_with_a_value() {
+		wp_set_current_user( self::$admin_user_id );
+		list( $slug, $posts ) = $this->create_filter_fixtures( true );
+
+		$ids = $this->run_manage_posts_query( $slug );
+
+		$this->assertSame( array( $posts['set'] ), $ids );
+	}
+
+	/**
+	 * Fields with a non-ASCII name get a percent-encoded slug, which must still match.
+	 */
+	public function test_filter_posts_by_metadata_with_non_ascii_slug() {
+		wp_set_current_user( self::$admin_user_id );
+		list( $slug, $posts ) = $this->create_filter_fixtures( true, '写真' );
+
+		$ids = $this->run_manage_posts_query( urldecode( $slug ) );
+
+		$this->assertSame( array( $posts['set'] ), $ids );
+	}
+
+	/**
+	 * An existing meta query with an OR relation must not widen the filtered results.
+	 */
+	public function test_filter_posts_by_metadata_with_existing_or_meta_query() {
+		wp_set_current_user( self::$admin_user_id );
+		list( $slug, $posts ) = $this->create_filter_fixtures( true );
+		add_post_meta( $posts['missing'], 'ef_other_meta', 'yes' );
+
+		$ids = $this->run_manage_posts_query( $slug, array(
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Test fixture.
+				'relation' => 'OR',
+				array(
+					'key'     => 'ef_other_meta',
+					'compare' => 'EXISTS',
+				),
+				array(
+					'key'     => 'ef_unused_meta',
+					'compare' => 'EXISTS',
+				),
+			),
+		) );
+
+		$this->assertSame( array(), $ids );
+	}
+
+	/**
+	 * An unknown field slug leaves the list unfiltered.
+	 */
+	public function test_filter_posts_by_metadata_ignores_unknown_field() {
+		wp_set_current_user( self::$admin_user_id );
+		list( , $posts ) = $this->create_filter_fixtures( true );
+
+		$ids = $this->run_manage_posts_query( 'no-such-field' );
+
+		$this->assertContains( $posts['missing'], $ids );
+	}
+
+	/**
+	 * Hidden fields can be filtered by admins only.
+	 */
+	public function test_filter_posts_by_hidden_metadata_is_admin_only() {
+		$editor_id            = self::factory()->user->create( array( 'role' => 'editor' ) );
+		list( $slug, $posts ) = $this->create_filter_fixtures( false );
+
+		wp_set_current_user( $editor_id );
+		$this->assertContains( $posts['missing'], $this->run_manage_posts_query( $slug ), 'Editors should not filter by a hidden field.' );
+
+		wp_set_current_user( self::$admin_user_id );
+		$this->assertSame( array( $posts['set'] ), $this->run_manage_posts_query( $slug ), 'Admins should filter by a hidden field.' );
+	}
+
+	/**
+	 * Post types the module is not enabled for are not filtered.
+	 */
+	public function test_filter_posts_by_metadata_skips_unsupported_post_types() {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+		list( $slug ) = $this->create_filter_fixtures( true );
+
+		$meta_query = $this->on_manage_posts_screen( $slug, function () use ( $edit_flow ) {
+			$GLOBALS['wp_the_query'] = new \WP_Query();
+			$GLOBALS['wp_the_query']->set( 'post_type', 'attachment' );
+			$edit_flow->editorial_metadata->filter_posts_by_metadata( $GLOBALS['wp_the_query'] );
+			return $GLOBALS['wp_the_query']->get( 'meta_query' );
+		} );
+
+		$this->assertSame( '', $meta_query );
+	}
+
+	/**
+	 * Secondary queries on the Manage Posts screen are not filtered.
+	 */
+	public function test_filter_posts_by_metadata_skips_secondary_queries() {
+		global $edit_flow;
+
+		wp_set_current_user( self::$admin_user_id );
+		list( $slug ) = $this->create_filter_fixtures( true );
+
+		$meta_query = $this->on_manage_posts_screen( $slug, function () use ( $edit_flow ) {
+			$query = new \WP_Query();
+			$edit_flow->editorial_metadata->filter_posts_by_metadata( $query );
+			return $query->get( 'meta_query' );
+		} );
+
+		$this->assertSame( '', $meta_query );
+	}
 }
