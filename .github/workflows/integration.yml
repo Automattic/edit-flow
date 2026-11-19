@@ -43,7 +43,7 @@ jobs:
           - php: '7.4'
             wp: '6.4'
           # Check latest WP with the latest PHP.
-          - php: 'latest'
+          - php: '8.5'
             wp: 'master'
 
     steps:
@@ -70,6 +70,8 @@ jobs:
         run: wp-env start
         env:
           WP_ENV_CORE: WordPress/WordPress#${{ matrix.wp }}
+          # Without this, the tests run on the PHP version in .wp-env.json, whatever the matrix says.
+          WP_ENV_PHP_VERSION: ${{ matrix.php }}
 
       - name: Run PHPUnit tests (single site)
         run: composer test:integration
