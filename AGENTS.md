@@ -32,10 +32,13 @@ edit-flow/
 │   ├── settings/           # Plugin settings
 │   ├── story-budget/       # Story budget overview
 │   └── user-groups/        # User group management
-├── tests/                  # Integration tests
-├── build/                  # Built assets
-├── dist/                   # Distribution assets
-├── .github/workflows/      # CI: deploy, e2e-tests, integration, js-tests, php-lint
+├── languages/              # Translation template (edit-flow.pot)
+├── tests/
+│   ├── Integration/        # PHP integration tests (wp-env)
+│   ├── e2e/                # Playwright E2E tests
+│   └── js/                 # JS unit tests (Vitest)
+├── build/                  # Built JS/CSS assets (generated, not committed)
+├── .github/workflows/      # CI: deploy, e2e-tests, integration, js-tests, lockfile-registry, php-lint, wordpress-org-assets
 └── .phpcs.xml.dist         # PHPCS configuration
 ```
 
@@ -60,11 +63,13 @@ composer test:integration  # Run integration tests (requires wp-env)
 composer test:integration-ms  # Run multisite integration tests
 composer coverage          # Run tests with HTML coverage report
 
+npm run test-js            # Run JS unit tests (Vitest)
 npm run test-e2e           # Run Playwright E2E tests
-npm run build              # Build JS/CSS assets
+npm run lint-js            # Lint JS (ESLint)
+npm run build              # Build JS/CSS assets into build/
 ```
 
-**Note:** This plugin has integration tests and E2E tests, but no separate PHP unit test suite.
+**Note:** This plugin has PHP integration tests, JS unit tests and E2E tests, but no separate PHP unit test suite.
 
 ## Conventions
 
@@ -72,7 +77,7 @@ See `CONTRIBUTING.md` for setup, checks and the contribution workflow. Key point
 
 - **Commits**: Every commit must be signed; `develop` and `main` reject unsigned commits. Use a [Conventional Commits](https://www.conventionalcommits.org/) prefix (`fix:`, `feat:`, `test:`, `docs:`, `ci:`, `chore:` and so on) with an imperative subject of about 50 characters, and a body that explains why the change was needed rather than what changed. One concern per commit.
 - **PRs**: Open against `develop`. The title describes the outcome in sentence case, without a conventional commit prefix. The description explains the problem first, then how the PR solves it. PRs land as merge commits (squash and rebase merging are disabled), so every commit message reaches `develop` as written.
-- **Testing**: Integration tests for PHP, Playwright E2E tests for UI interactions. There is no separate PHP unit test suite, so new PHP tests should be integration tests.
+- **Testing**: Integration tests for PHP, Vitest unit tests for isolated JS logic, Playwright E2E tests for UI interactions. There is no separate PHP unit test suite, so new PHP tests should be integration tests.
 - **Code style**: WordPress coding standards via PHPCS. Tabs for indentation.
 - **i18n**: All user-facing strings must use the `edit-flow` text domain.
 
@@ -96,4 +101,4 @@ See `CONTRIBUTING.md` for setup, checks and the contribution workflow. Key point
 - Custom post statuses interact with WordPress core's status system in complex ways. Test custom status changes with Gutenberg and the Classic Editor — they behave differently.
 - The editorial calendar uses JavaScript date handling. Be careful with timezone issues — WordPress stores dates in UTC but displays them in the site's configured timezone.
 - Do not add new modules without considering the settings UI, activation/deactivation flow, and module dependencies.
-- Asset builds (`npm run build`) must be run before committing changes to JS/CSS source files. Built assets in `build/` and `dist/` should be committed.
+- Built assets in `build/` are not committed. Run `npm run build` (or `npm run start` to watch) to generate them locally; the deploy workflow builds them for each release.
