@@ -2081,7 +2081,7 @@ if ( ! class_exists( 'EF_Calendar' ) ) {
 			$final_statuses = [];
 
 			foreach ( $post_stati as $status ) {
-				if ( ! empty( $custom_status_slug_keys[ $status->name ] ) ) {
+				if ( isset( $custom_status_slug_keys[ $status->name ] ) ) {
 					$final_statuses[] = $status;
 				}
 			}
