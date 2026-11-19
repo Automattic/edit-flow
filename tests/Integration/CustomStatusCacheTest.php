@@ -307,7 +307,10 @@ class CustomStatusCacheTest extends TestCase {
 		// Use reflection to reset the private cache property.
 		$reflection = new \ReflectionClass( $module );
 		$property   = $reflection->getProperty( 'custom_statuses_cache' );
-		$property->setAccessible( true );
+		// Needed before PHP 8.1; deprecated from PHP 8.5.
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
 		$property->setValue( $module, [] );
 	}
 }
