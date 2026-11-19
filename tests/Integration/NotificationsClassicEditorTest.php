@@ -33,6 +33,12 @@ class NotificationsClassicEditorTest extends TestCase {
 	 * @param \WP_UnitTest_Factory $factory Test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
+		global $edit_flow;
+
+		// Grant the subscription capability, rather than relying on an earlier test
+		// having fired admin_init, which is where the module's install() normally runs.
+		$edit_flow->notifications->install();
+
 		self::$editor_user_id = $factory->user->create( array( 'role' => 'editor' ) );
 	}
 
