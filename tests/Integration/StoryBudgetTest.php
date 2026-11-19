@@ -16,7 +16,14 @@ class StoryBudgetTest extends TestCase {
 	protected static $admin_user_id;
 
 	public static function wpSetUpBeforeClass( $factory ) {
+		global $edit_flow;
+
 		self::$admin_user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+
+		// Seed the default custom statuses, rather than relying on an earlier test class
+		// having left them in the module's in-memory cache.
+		$edit_flow->custom_status->install();
+		$edit_flow->custom_status->init();
 	}
 
 	public static function wpTearDownAfterClass() {
