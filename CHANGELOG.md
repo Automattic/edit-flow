@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - TBD
+
+### Security
+
+* Escape calendar item action link hrefs with esc_url() and link text with esc_html__() (props @thisismyurl)
+* Escape module short-description link hrefs in the Calendar and Story Budget registrations with esc_url() (props @thisismyurl)
+
 ## [0.11.1] - 2026-08-18
 
 A maintenance and compatibility release. It closes an information-disclosure issue in the Editorial Metadata module, corrects calendar date handling, declares compatibility with WordPress 7.1, and takes a batch of dependency updates including several security fixes. All users are encouraged to update.
