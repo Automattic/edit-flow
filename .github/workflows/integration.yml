@@ -46,7 +46,7 @@ jobs:
           - php: '8.5'
             wp: '7.1'
           # The next WP version, with the latest PHP.
-          - php: '8.5'
+          - php: '8.6'
             wp: 'master'
 
     steps:
