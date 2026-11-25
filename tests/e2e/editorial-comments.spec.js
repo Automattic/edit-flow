@@ -1,11 +1,12 @@
 /**
  * WordPress dependencies
  */
-const { test, expect } = require('./utils');
+const { test, expect, getEditorPostId } = require('./utils');
 
 test.describe('Editorial Comments', () => {
-	test('expects a user can create an editorial comment on a post', async ({ admin, editor, page }) => {
+	test('expects a user can create an editorial comment on a post', async ({ admin, editor, page, createdPostIds }) => {
 		await admin.createNewPost({ title: 'Title' });
+		createdPostIds.push(await getEditorPostId(page));
 
 		// Dismiss the welcome guide if it appears
 		const welcomeGuide = page.locator('.edit-post-welcome-guide, [aria-label="Welcome to the block editor"]');

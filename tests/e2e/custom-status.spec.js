@@ -1,14 +1,15 @@
 /**
  * WordPress dependencies
  */
-const { test, expect } = require('./utils');
+const { test, expect, getEditorPostId } = require('./utils');
 
 test.describe('Custom Status', () => {
-	test('can apply custom status to a post', async ({ admin, editor, page }) => {
+	test('can apply custom status to a post', async ({ admin, editor, page, createdPostIds }) => {
 		const postTitle = `Status Test Post ${Date.now()}`;
 
 		// Create a new post
 		await admin.createNewPost({ title: postTitle });
+		createdPostIds.push(await getEditorPostId(page));
 		await editor.canvas.locator('role=textbox[name="Add title"i]').waitFor();
 
 		// Open document settings to access custom status
