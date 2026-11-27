@@ -50,6 +50,29 @@ class CalendarTest extends TestCase {
 	}
 
 	/**
+	 * With custom statuses turned off, the calendar falls back to core's statuses.
+	 * Draft comes first in that list, and must not be dropped.
+	 */
+	public function test_calendar_post_stati_include_core_statuses_when_custom_statuses_disabled() {
+		global $edit_flow;
+
+		$options          = $edit_flow->custom_status->module->options;
+		$original_enabled = $options->enabled;
+		$options->enabled = 'off';
+
+		try {
+			$statuses = wp_list_pluck( $edit_flow->calendar->get_calendar_post_stati(), 'name' );
+		} finally {
+			$options->enabled = $original_enabled;
+		}
+
+		$this->assertContains( 'draft', $statuses );
+		$this->assertContains( 'pending', $statuses );
+		$this->assertContains( 'future', $statuses );
+		$this->assertContains( 'publish', $statuses );
+	}
+
+	/**
 	 * Test that calendar can show registered status
 	 */
 	public function test_calendar_custom_statuses_registered() {
