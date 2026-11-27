@@ -41,7 +41,7 @@
     "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^8.0.0",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.10",
+    "@testing-library/user-event": "^14.6.13",
     "@wordpress/components": "^33.1.0",
     "@wordpress/data": "^11.2.0",
     "@wordpress/e2e-test-utils-playwright": "^3.0.0",
